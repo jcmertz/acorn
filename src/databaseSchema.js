@@ -4,7 +4,7 @@ const bandSchema = new mongoose.Schema({
     instagram: String,
     genre: String,
 });
-const eventSchema = new mongoose.Schema({
+const showSchema = new mongoose.Schema({
     showDate: Date,
     requestDate: Date,
     bands: [bandSchema],

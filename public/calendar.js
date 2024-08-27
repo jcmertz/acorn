@@ -1,8 +1,18 @@
+// const { data } = require("jquery");
+
+console.log(data);
+var events = [];
+for (const event in data){
+    console.log(data.event);
+    events.push({
+        title: data[event].contactBand.bandName,
+        start: data[event].showDate
+    })
+}
 document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
-        selectable:true,
         dateClick: function(info) {
             //alert('Clicked on: ' + info.dateStr);
             //alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
@@ -13,7 +23,8 @@ document.addEventListener('DOMContentLoaded', function() {
             var day = info.date.getDate();
             var year = info.date.getFullYear();
             window.location.href = '/newEvent/'+month+'/'+day+'/'+year;
-        }
+        },
+        events: events
     });
     calendar.render();
 });
