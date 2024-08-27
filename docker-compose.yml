@@ -1,0 +1,47 @@
+
+services:
+  # Define the service name
+  web:
+    # Define the image that we want to use
+    image: nginx:alpine
+    # Define the ports that we want to expose
+    ports:
+      - "8080:80"
+    # Define the volumes that we want to mount
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    # Define the networks that we want to use
+    networks:
+      - acornnet
+
+  # Define the service name
+  app:
+    # Define the image that we want to use
+    image: acorn:latest
+    # Define the volumes that we want to mount
+    volumes:
+      - ./app:/var/www/html
+    # Define the networks that we want to use
+    networks:
+      - acornnet
+
+  # The mongodb database service
+  db:
+    # Define the image that we want to use
+    image: mongo:latest
+    # Define the volumes that we want to mount
+    volumes:
+      - acornvol:/data/db
+    # Define the networks that we want to use
+    networks:
+      - acornnet
+
+# Define the networks that we want to use
+networks:
+  acornnet:
+    driver: bridge
+
+# Define the volumes that we want to use
+volumes:
+  acornvol:
+      driver: local
