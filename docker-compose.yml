@@ -24,9 +24,7 @@ services:
     networks:
       - acornnet
     # For hot deploy of code ... NOT FOR PRODUCTION!
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     develop:
       watch:
         - action: sync
