@@ -1,0 +1,27 @@
+{
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "fullcalendar": "^6.1.15",
+    "jquery": "^3.7.1",
+    "mongoose": "^8.5.4"
+  },
+  "name": "acorn",
+  "description": "Acorn is a piece of Open Source Venue Management Software being developed for The Fallen Log at Kitchen 17",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jcmertz/acorn.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jcmertz/acorn/issues"
+  },
+  "homepage": "https://github.com/jcmertz/acorn#readme"
+}
