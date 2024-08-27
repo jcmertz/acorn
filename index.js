@@ -6,7 +6,7 @@ const port = 2554;
 const fullcalendar = require('fullcalendar');
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://127.0.0.1:27017/test');
+mongoose.connect('mongodb://acorn-mongo:27017/test');
 
 const bandSchema = new mongoose.Schema({
   bandName: String,

@@ -1,7 +1,7 @@
 # Docker file for the project
 
 # Use the official image as a parent image
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 LABEL maintainer="The fun folks at the Fallen Log at Kitchen 17"
 
 # Set up the environment variables
