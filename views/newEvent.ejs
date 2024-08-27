@@ -3,6 +3,19 @@
 <head>
 </head>
 <body>
-    <p><%= month %>/<%= day %>/<%= year %>  </p>
+    <p>New Event Request For: <%= month %>/<%= day %>/<%= year %>  </p>
+    <form action="/addEvent">
+        <label for="bandName">First name:</label><br>
+        <input type="text" id="bandName" name="bandName"><br>
+        <input type="checkbox" id="isMatinee" name="isMatinee value="isMatinee>
+        <label for="vehicle1"> Check this box if you'd like a Matinee</label><br>
+        <input type="hidden" name="showDate" value="<%= month %>/<%= day %>/<%= year %>"/>
+        <input id="reqDate" type="hidden" name="reqDate"/>
+        <input type="submit">	
+    </form>
+    <script>
+        var date = new Date().toLocaleDateString();
+        document.getElementById("reqDate").setAttribute("value",date);
+    </script>
 </body>
 </html>
