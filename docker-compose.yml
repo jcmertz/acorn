@@ -20,8 +20,6 @@ services:
     container_name: acorn-app
     # Expose the port that the app is running on, for
     # easier debugging than going through nginx
-    ports:
-      - "2554:2554"
     # Define the networks that we want to use
     networks:
       - acornnet
