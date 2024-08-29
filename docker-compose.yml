@@ -2,6 +2,10 @@
 # For development, run the following command:
 #     docker compose watch
 # to start the application and watch for changes in the code.
+#
+# Don't forget to run:
+#     docker compose down
+# to stop the application.
 
 services:
   # Define the service name
