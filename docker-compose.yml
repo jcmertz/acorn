@@ -1,4 +1,8 @@
 
+# For development, run the following command:
+#     docker compose watch
+# to start the application and watch for changes in the code.
+
 services:
   # Define the service name
   web:
