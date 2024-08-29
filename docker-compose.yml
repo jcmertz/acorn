@@ -14,13 +14,8 @@ services:
      networks:
        - acornnet
   app:
-    # Define the image that we want to use
-    image: acorn:latest
-     # Define the name so we can reference it
+    # Define the name so we can reference it
     container_name: acorn-app
-    # Expose the port that the app is running on, for
-    # easier debugging than going through nginx
-    # Define the networks that we want to use
     networks:
       - acornnet
     # For hot deploy of code ... NOT FOR PRODUCTION!
@@ -29,7 +24,7 @@ services:
       watch:
         - action: sync
           path: .
-          target: .
+          target: /app
 
   # The mongodb database service
   db:
