@@ -1,0 +1,58 @@
+
+# For development, run the following command:
+#     docker compose watch
+# to start the application and watch for changes in the code.
+#
+# Don't forget to run:
+#     docker compose down
+# to stop the application.
+
+services:
+  # Define the service name
+  web:
+     # Define the image that we want to use
+     image: nginx:alpine
+     # Define the ports that we want to expose
+     ports:
+       - "80:80"
+     # Define the volumes that we want to mount
+     volumes:
+       - ./nginx.conf:/etc/nginx/nginx.conf
+     # Define the networks that we want to use
+     networks:
+       - acornnet
+  app:
+    # Define the name so we can reference it
+    container_name: acorn-app
+    networks:
+      - acornnet
+    # For hot deploy of code ... NOT FOR PRODUCTION!
+    build: .
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+
+  # The mongodb database service
+  db:
+    # Define the image that we want to use
+    image: mongo:latest
+    # Define the name so we can reference it
+    container_name: acorn-mongo
+    # Define the volumes that we want to mount
+    volumes:
+      - acornvol:/data/db
+    # Define the networks that we want to use
+    networks:
+      - acornnet
+
+# Define the networks that we want to use
+networks:
+  acornnet:
+    driver: bridge
+
+# Define the volumes that we want to use
+volumes:
+  acornvol:
+      driver: local
