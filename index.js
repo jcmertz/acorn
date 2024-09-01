@@ -37,8 +37,7 @@ app.use(express.static('public'));
 
 app.get('/', async (req, res) => {
   var data = await getEventList();
-  console.log("TEST");
-  console.log(data);
+  //console.log(data);
   res.render('index',{
     data:data
   });
@@ -57,9 +56,11 @@ app.get('/addEvent',async (req,res) => { //Handles the form submitted by a band
   const data = url.parse(req.url, true).query;
   const band = new Band({bandName:data.bandName})
   const show = new Show({showDate:data.showDate,requestDate:data.reqDate,contactBand:band})
+  show.showDate.setHours(14);
+  console.log("penguin");
+  console.log(showDate);
   await band.save();
   await show.save();
-  console.log(data);
   res.redirect("/");
 });
 
