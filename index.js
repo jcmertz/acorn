@@ -1,3 +1,5 @@
+
+require('dotenv').config()
 const { getEventListeners } = require('events');
 const express = require('express');
 const app = express();
@@ -6,7 +8,7 @@ const port = 2554;
 const fullcalendar = require('fullcalendar');
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://acorn-mongo:27017/test');
+mongoose.connect(process.env.DBHOST);
 
 const bandSchema = new mongoose.Schema({
   bandName: String,
