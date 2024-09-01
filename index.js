@@ -58,9 +58,7 @@ app.get('/addEvent',async (req,res) => { //Handles the form submitted by a band
   const data = url.parse(req.url, true).query;
   const band = new Band({bandName:data.bandName})
   const show = new Show({showDate:data.showDate,requestDate:data.reqDate,contactBand:band})
-  show.showDate.setHours(14);
-  console.log("penguin");
-  console.log(showDate);
+  show.showDate.setHours(15); // Set the time for the show. This is a hack and should be fixed.
   await band.save();
   await show.save();
   res.redirect("/");
