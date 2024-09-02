@@ -7,15 +7,19 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
 </head>
 <body>
-    <a href="/login"><h1> LOGIN </h1></a>
-    <a href="/logout"><h1> LOGOUT </h1></a>
-    <a href="/register"><h1> REGISTER </h1></a>
-    <div id='calendar'></div>
-    <script data-data="<%= JSON.stringify(data) %>">
-        // console.log(document.currentScript.dataset.data);
-        const data = JSON.parse(document.currentScript.dataset.data);
-        // console.log(data);
-    </script>
-    <script src="calendar.js"> </script>
-</body>
-</html>
+    <%if (!isLoggedIn) { %>
+        <a href="/login"><h1> LOGIN </h1></a>
+        <a href="/register"><h1> REGISTER </h1></a>
+        <% } %>
+        <%if (isLoggedIn) { %>
+            <a href="/logout"><h1> LOGOUT </h1></a>
+            <% } %>
+            <div id='calendar'></div>
+            <script data-data="<%= JSON.stringify(data) %>">
+                // console.log(document.currentScript.dataset.data);
+                const data = JSON.parse(document.currentScript.dataset.data);
+                // console.log(data);
+            </script>
+            <script src="calendar.js"> </script>
+        </body>
+        </html>

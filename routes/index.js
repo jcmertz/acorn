@@ -6,8 +6,10 @@ var router = express.Router();
 router.get('/', async (req, res) => {
     var data = await getEventList();
     //console.log(data);
+    //console.log(req.isAuthenticated());
     res.render('index',{
-      data:data
+      data:data,
+      isLoggedIn:req.isAuthenticated()
     });
   })
   

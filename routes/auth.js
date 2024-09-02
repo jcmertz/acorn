@@ -9,14 +9,18 @@ router.use(express.urlencoded({ extended: true }));
 
 passport.use(new LocalStrategy(async function verify(username, password, cb) {
     const userRecord = await db.User.findOne({user:username});
-    const storedPasswordBuffer = Buffer.from(userRecord.pass, 'hex');
-    crypto.pbkdf2(password, userRecord.salt, 310000, 32, 'sha256', function(err, hashedPassword) {
-        if (err) { return cb(err); }
-        if (!crypto.timingSafeEqual(storedPasswordBuffer, hashedPassword)) {
-            return cb(null, false, { message: 'Incorrect username or password.' });
-        }
-        return cb(null, userRecord.pass);
-    });
+    if(!(userRecord == null)){
+        const storedPasswordBuffer = Buffer.from(userRecord.pass, 'hex');
+        crypto.pbkdf2(password, userRecord.salt, 310000, 32, 'sha256', function(err, hashedPassword) {
+            if (err) { return cb(err); }
+            if (!crypto.timingSafeEqual(storedPasswordBuffer, hashedPassword)) {
+                return cb(null, false, { message: 'Incorrect username or password.' });
+            }
+            return cb(null, userRecord.pass);
+        });
+    }else{
+        return cb(null, false, { message: 'Incorrect username or password.' });
+    }
 }));
 
 passport.serializeUser(function(user, cb) {
@@ -48,11 +52,18 @@ router.get('/logout', function(req, res, next) {
 });
 
 router.get('/register', function(req, res, next) {
-    res.render('register');
+    res.render('register',{
+        invalidUsername:req.query.invalidUsername
+    });
 });
 
 router.post('/register', async function(req, res, next) {
     try {
+        const userRecord = await db.User.findOne({user:req.body.username});
+        if(!(userRecord == null)){
+            res.redirect('/register?invalidUsername=true');
+            return;
+        }
         const salt = crypto.randomBytes(16).toString('hex'); // Convert salt to hexadecimal
         crypto.pbkdf2(req.body.password, salt, 310000, 32, 'sha256', async function(err, hashedPassword) {
             if (err) { return next(err); }

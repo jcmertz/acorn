@@ -1,5 +1,6 @@
 <h1>Register</h1>
 <form action="/register" method="post">
+    
     <section>
         <label for="username">Username</label>
         <input id="username" name="username" type="text" autocomplete="username" required>
@@ -9,4 +10,9 @@
         <input id="new-password" name="password" type="password" autocomplete="new-password" required>
     </section>
     <button type="submit">Register</button>
-</form>
+    <%if (invalidUsername) { %>
+        <script>
+            alert("This Username is Already Taken");
+        </script>
+        <%}%>
+    </form>
