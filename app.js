@@ -48,12 +48,14 @@ var indexRouter = require('./routes/index');
 app.use('/', authRouter);
 app.use('/', indexRouter)
 
-app.get('/newEvent/:month/:day/:year', ensureLoggedIn, (req, res) => { //Pulls open a form for a band to fill out
+app.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => { //Pulls open a form for a band to fill out
+  var band = await getBandFromUsername(req.user.username);
+  var name = band.bandName
   res.render('newEvent',{
     month:req.params.month,
     day:req.params.day,
     year:req.params.year,
-    bandName:getBandFromUsername(req.user.username)
+    bandName:name
   }
 );
 });
@@ -78,7 +80,7 @@ app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
 
-async function getBandFromUsername(username){
-  var band = await db.Band.findOne({"loginInfo.user":username});
+function getBandFromUsername(username){
+  var band = db.Band.findOne({"loginInfo.user":username});
   return band;
 }
