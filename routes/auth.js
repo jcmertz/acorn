@@ -16,24 +16,12 @@ passport.use(new LocalStrategy(async function verify(username, password, cb) {
             if (!crypto.timingSafeEqual(storedPasswordBuffer, hashedPassword)) {
                 return cb(null, false, { message: 'Incorrect username or password.' });
             }
-            return cb(null, userRecord.pass);
+            return cb(null, userRecord);
         });
     }else{
         return cb(null, false, { message: 'Incorrect username or password.' });
     }
 }));
-
-passport.serializeUser(function(user, cb) {
-    process.nextTick(function() {
-        cb(null, { id: user.id, username: user.username });
-    });
-});
-
-passport.deserializeUser(function(user, cb) {
-    process.nextTick(function() {
-        return cb(null, user);
-    });
-});
 
 router.get('/login', function(req, res, next) {
     res.render('login');
@@ -80,7 +68,16 @@ router.post('/register', async function(req, res, next) {
                 id: user._id,
                 user: req.body.username
             };
-            
+            // Create band object and store in database:
+            const band = db.Band.create({
+                bandName:req.body.bandName,
+                contactEmail:req.body.contactEmail,
+                homeTown:req.body.homeTown,
+                genre:req.body.genre,
+                instagram:req.body.instagram,
+                loginInfo:user
+            });
+
             // Log the user in
             req.login(loginUser, function(err) {
                 if (err) { return next(err); }
@@ -91,5 +88,38 @@ router.post('/register', async function(req, res, next) {
         next(error);
     }
 });
+
+passport.serializeUser(function(user, cb) {
+    process.nextTick(function() {
+        cb(null, { id: user.id, username: user.user });
+    });
+});
+
+passport.deserializeUser(function(user, cb) {
+    process.nextTick(function() {
+        return cb(null, user);
+    });
+});
+
+
+// passport.serializeUser(function(user, cb) {
+//     console.log("Serializing User:", user.id);
+//     process.nextTick(function() {
+//         cb(null, user.id); // Store only user ID in session
+//     });
+// });
+
+// passport.deserializeUser(async function(id, cb) {
+//     console.log("Deserializing User ID:", id);
+//     try {
+//         const user = await db.User.findById(id.id); // Retrieve the full user object by ID
+//         if (!user) {
+//             return cb(null, false);
+//         }
+//         cb(null, user);
+//     } catch (err) {
+//         cb(err);
+//     }
+// });
 
 module.exports = router;

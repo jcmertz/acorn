@@ -52,7 +52,8 @@ app.get('/newEvent/:month/:day/:year', ensureLoggedIn, (req, res) => { //Pulls o
   res.render('newEvent',{
     month:req.params.month,
     day:req.params.day,
-    year:req.params.year
+    year:req.params.year,
+    bandName:getBandFromUsername(req.user.username)
   }
 );
 });
@@ -67,6 +68,17 @@ app.get('/addEvent',ensureLoggedIn, async (req,res) => { //Handles the form subm
   res.redirect("/");
 });
 
+app.get('/userDetails',ensureLoggedIn, async (req,res) => {
+  console.log(req.user);
+  getBandFromUsername(req.user.username);
+  res.redirect("/");
+});
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
+
+async function getBandFromUsername(username){
+  var band = await db.Band.findOne({"loginInfo.user":username});
+  return band;
+}

@@ -12,6 +12,8 @@ const bandSchema = new mongoose.Schema({
   contactEmail: String,
   instagram: String,
   genre: String,
+  homeTown: String,
+  loginInfo: userSchema
 });
 const showSchema = new mongoose.Schema({
   showDate: Date,
