@@ -47,12 +47,14 @@ router.get('/getRange', async function(req, res, next) {
             if(data[event].contactBand.bandName == name){
                 events.push({
                     title: data[event].contactBand.bandName,
-                    start: data[event].showDate
+                    start: data[event].showDate,
+                    color: bands.getColorFromStatus(data[event].showStatus)
                 });
                 continue;
             }
             if(data[event].showStatus == 0){
                 events.push({
+                    title: "Pending Requests Submitted",
                     start: data[event].showDate,
                     allDay : true,
                     display: 'background',
@@ -61,6 +63,7 @@ router.get('/getRange', async function(req, res, next) {
             )}
             else if(data[event].showStatus == 1){
                 events.push({
+                    title: "Hold",
                     start: data[event].showDate,
                     allDay : true,
                     display: 'background',
@@ -75,7 +78,7 @@ router.get('/getRange', async function(req, res, next) {
             })
         }
     }
-    console.log(events);
+    // console.log(events);
     res.send(events);
 });
 

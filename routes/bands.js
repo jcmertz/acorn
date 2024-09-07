@@ -57,7 +57,27 @@ function getBandFromUsername(username){
     return band;
 }
 
+function getColorFromStatus(showStatus){
+    switch(showStatus){
+        case -1:
+            return "#ff0000";
+            break;
+        case 0:
+            return "#ffff00";
+            break;
+        case 1:
+            return "#ffA500";
+            break;
+        case 2:
+            return "#00FF00";
+            break;
+        default:
+            return "gray";
+    };
+}
+
 module.exports = {
     router:router,
-    getBandFromUsername:getBandFromUsername
+    getBandFromUsername:getBandFromUsername,
+    getColorFromStatus:getColorFromStatus
 };
