@@ -8,6 +8,7 @@ const port = 2554;
 var db = require('./src/db'); //Require the mongoose database init
 
 const fullcalendar = require('fullcalendar');
+const util = require("./src/utilities.js");
 
 var passport = require('passport');
 var ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
@@ -41,16 +42,19 @@ app.use(session({
 }));
 app.use(passport.authenticate('session'));
 
+
 var authRouter = require('./routes/auth');
 var indexRouter = require('./routes/index');
 var bandRouter = require('./routes/bands');
 var calendarRouter = require('./routes/calendarData');
+var adminRouter = require('./routes/admin');
 
 
 app.use('/', authRouter);
 app.use('/', indexRouter);
 app.use('/', bandRouter.router);
 app.use('/events/', calendarRouter);
+app.use('/admin/', util.checkUserRole(['staff', 'admin']), adminRouter);
 
 
 app.listen(port, () => {

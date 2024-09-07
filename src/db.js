@@ -5,7 +5,8 @@ mongoose.connect(process.env.DBHOST);
 const userSchema = new mongoose.Schema({
     user: String,
     pass: String,
-    salt: String
+    salt: String,
+    role: String
 });
 const bandSchema = new mongoose.Schema({
   bandName: String,
