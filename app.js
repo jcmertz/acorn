@@ -49,7 +49,7 @@ var calendarRouter = require('./routes/calendarData');
 
 app.use('/', authRouter);
 app.use('/', indexRouter);
-app.use('/', bandRouter);
+app.use('/', bandRouter.router);
 app.use('/events/', calendarRouter);
 
 

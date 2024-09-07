@@ -7,23 +7,38 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
 </head>
 <body>
+    <a href="/"><h3> Home </h3></a>
     <h1><%= band.bandName %></h1>
     <p>Email: <%= band.contactEmail %></p>
     <p>Instagram: <a href="https://instagram.com/<%= band.instagram.substring(1)%>"><%= band.instagram %></p></a>
     <p>Genre: <%= band.genre %></p>
     <p>Hometown: <%= band.homeTown %></p>
 </body>
+<h2>Upcoming Shows</h2>
 <div id='upcomingShows'></div>
 
 <!-- End of MAIN HTML PAGE, CALENDAR SCRIPT BELOW -->
- 
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('upcomingShows');
         var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'list',
+            initialView: 'listYear',
             timeZone:'America/Chicago',
-            events: events
+            events: {
+                url: '/events/getRange',
+                extraParams: {
+                    band: '<%=band.bandName%>'
+                },
+                failure: function() {
+                    alert('there was an error while fetching events!');
+                }
+            },
+            headerToolbar: {
+                left:   '',
+                center: 'title',
+                right:  'prev,next'
+            }
         });
         calendar.render();
     });

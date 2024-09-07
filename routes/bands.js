@@ -18,15 +18,20 @@ router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => { 
         month:req.params.month,
         day:req.params.day,
         year:req.params.year,
-        bandName:name
+        bandName:name,
     }
 );
 });
 
 router.get('/addEvent',ensureLoggedIn, async (req,res) => { //Handles the form submitted by a band
     const data = url.parse(req.url, true).query;
-    const band = new db.Band({bandName:data.bandName})
-    const show = new db.Show({showDate:data.showDate,requestDate:data.reqDate,contactBand:band})
+    const band = new db.Band({bandName:data.bandName});
+    const show = new db.Show({
+        showDate:data.showDate,
+        requestDate:data.reqDate,
+        contactBand:band,
+        showStatus:0
+    });
     show.showDate.setHours(15); // Set the time for the show. This is a hack and should be fixed.
     await band.save();
     await show.save();
@@ -42,7 +47,7 @@ router.get('/userDetails',ensureLoggedIn, async (req,res) => {
 router.get('/profile',ensureLoggedIn,async (req,res) => {
     var band = await getBandFromUsername(req.user.username);
     res.render('bandProfile',{
-        band:band       
+        band:band
     })
     
 });
@@ -52,4 +57,7 @@ function getBandFromUsername(username){
     return band;
 }
 
-module.exports = router;
+module.exports = {
+    router:router,
+    getBandFromUsername:getBandFromUsername
+};

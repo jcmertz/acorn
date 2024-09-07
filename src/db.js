@@ -25,7 +25,13 @@ const showSchema = new mongoose.Schema({
   ticketsSold:Number,
   showStatus:Number
 });
-
+/*
+Show Status:
+-1 - Rejected or Cancelled
+0 - Submitted, not responded to
+1 - In Negotiation
+2 - Confirmed
+*/
 const Band = mongoose.model('Band',bandSchema);
 const Show = mongoose.model('Show',showSchema);
 const User = mongoose.model('User',userSchema);
