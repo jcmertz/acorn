@@ -13,7 +13,7 @@ const bandSchema = new mongoose.Schema({
   instagram: String,
   genre: String,
   homeTown: String,
-  loginInfo: userSchema
+  loginInfo: String
 });
 const showSchema = new mongoose.Schema({
   showDate: Date,

@@ -75,7 +75,7 @@ router.post('/register', async function(req, res, next) {
                 homeTown:req.body.homeTown,
                 genre:req.body.genre,
                 instagram:req.body.instagram,
-                loginInfo:user
+                loginInfo:user.user
             });
 
             // Log the user in
@@ -100,26 +100,5 @@ passport.deserializeUser(function(user, cb) {
         return cb(null, user);
     });
 });
-
-
-// passport.serializeUser(function(user, cb) {
-//     console.log("Serializing User:", user.id);
-//     process.nextTick(function() {
-//         cb(null, user.id); // Store only user ID in session
-//     });
-// });
-
-// passport.deserializeUser(async function(id, cb) {
-//     console.log("Deserializing User ID:", id);
-//     try {
-//         const user = await db.User.findById(id.id); // Retrieve the full user object by ID
-//         if (!user) {
-//             return cb(null, false);
-//         }
-//         cb(null, user);
-//     } catch (err) {
-//         cb(err);
-//     }
-// });
 
 module.exports = router;
