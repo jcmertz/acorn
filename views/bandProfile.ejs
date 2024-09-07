@@ -8,6 +8,34 @@
 </head>
 <body>
     <h1><%= band.bandName %></h1>
-    <% console.log(band); %>
+    <p>Email: <%= band.contactEmail %></p>
+    <p>Instagram: <a href="https://instagram.com/<%= band.instagram.substring(1)%>"><%= band.instagram %></p></a>
+    <p>Genre: <%= band.genre %></p>
+    <p>Hometown: <%= band.homeTown %></p>
 </body>
+<div id='upcomingShows'></div>
+
+<!-- End of MAIN HTML PAGE, CALENDAR SCRIPT BELOW -->
+ 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('upcomingShows');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'list',
+            timeZone:'America/Chicago',
+            events: events
+        });
+        calendar.render();
+    });
+</script>
+
 </html>
+
+<!-- /*
+bandName: String,
+contactEmail: String,
+instagram: String,
+genre: String,
+homeTown: String,
+loginInfo: userSchema
+*/ -->

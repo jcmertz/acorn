@@ -43,11 +43,15 @@ app.use(passport.authenticate('session'));
 
 var authRouter = require('./routes/auth');
 var indexRouter = require('./routes/index');
-var bandRouter = require('./routes/bands')
+var bandRouter = require('./routes/bands');
+var calendarRouter = require('./routes/calendarData');
+
 
 app.use('/', authRouter);
 app.use('/', indexRouter);
 app.use('/', bandRouter);
+app.use('/events/', calendarRouter);
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

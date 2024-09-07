@@ -11,7 +11,6 @@ var url = require("url");
 
 router.use(express.urlencoded({ extended: true }));
 
-
 router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => { //Pulls open a form for a band to fill out
     var band = await getBandFromUsername(req.user.username);
     var name = band.bandName
@@ -43,24 +42,10 @@ router.get('/userDetails',ensureLoggedIn, async (req,res) => {
 router.get('/profile',ensureLoggedIn,async (req,res) => {
     var band = await getBandFromUsername(req.user.username);
     res.render('bandProfile',{
-        band:band
-        // bandName:band.bandName,
-        // email:band.contactEmail,
-        // instagram:band.instagram,
-        // genre:band.genre,
-        // homeTown:band.homeTown,        
+        band:band       
     })
     
 });
-
-/*
-  bandName: String,
-  contactEmail: String,
-  instagram: String,
-  genre: String,
-  homeTown: String,
-  loginInfo: userSchema
-  */
 
 function getBandFromUsername(username){
     var band = db.Band.findOne({"loginInfo":username});

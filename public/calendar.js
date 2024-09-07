@@ -1,14 +1,3 @@
-// const { data } = require("jquery");
-
-console.log(data);
-var events = [];
-for (const event in data){
-    console.log(data.event);
-    events.push({
-        title: data[event].contactBand.bandName,
-        start: data[event].showDate,
-    })
-}
 document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -25,7 +14,12 @@ document.addEventListener('DOMContentLoaded', function() {
             var year = info.date.getUTCFullYear();
             window.location.href = '/newEvent/'+month+'/'+day+'/'+year;
         },
-        events: events
+        events: {
+            url: '/events/getRange',
+            failure: function() {
+              alert('there was an error while fetching events!');
+            }
+          }
     });
     calendar.render();
 });

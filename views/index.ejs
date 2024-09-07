@@ -15,10 +15,6 @@
             <a href="/logout"><h1> LOGOUT </h1></a>
             <% } %>
             <div id='calendar'></div>
-            <script data-data="<%= JSON.stringify(data) %>">
-                // console.log(document.currentScript.dataset.data);
-                const data = JSON.parse(document.currentScript.dataset.data);
-                // console.log(data);
             </script>
             <script src="calendar.js"> </script>
         </body>
