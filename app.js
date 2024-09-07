@@ -26,7 +26,6 @@ store.on('error', function(error) {
 });
 
 
-
 var url = require("url");
 
 app.set('views', __dirname + '/views');
@@ -44,29 +43,17 @@ app.use(passport.authenticate('session'));
 
 var authRouter = require('./routes/auth');
 var indexRouter = require('./routes/index');
+var bandRouter = require('./routes/bands');
+var calendarRouter = require('./routes/calendarData');
+
 
 app.use('/', authRouter);
-app.use('/', indexRouter)
+app.use('/', indexRouter);
+app.use('/', bandRouter.router);
+app.use('/events/', calendarRouter);
 
-app.get('/newEvent/:month/:day/:year', ensureLoggedIn, (req, res) => { //Pulls open a form for a band to fill out
-  res.render('newEvent',{
-    month:req.params.month,
-    day:req.params.day,
-    year:req.params.year
-  }
-);
-});
-
-app.get('/addEvent',ensureLoggedIn, async (req,res) => { //Handles the form submitted by a band
-  const data = url.parse(req.url, true).query;
-  const band = new db.Band({bandName:data.bandName})
-  const show = new db.Show({showDate:data.showDate,requestDate:data.reqDate,contactBand:band})
-  show.showDate.setHours(15); // Set the time for the show. This is a hack and should be fixed.
-  await band.save();
-  await show.save();
-  res.redirect("/");
-});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
+

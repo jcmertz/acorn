@@ -1,14 +1,3 @@
-// const { data } = require("jquery");
-
-console.log(data);
-var events = [];
-for (const event in data){
-    console.log(data.event);
-    events.push({
-        title: data[event].contactBand.bandName,
-        start: data[event].showDate,
-    })
-}
 document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -18,14 +7,29 @@ document.addEventListener('DOMContentLoaded', function() {
             //alert('Clicked on: ' + info.dateStr);
             //alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
             //alert('Current view: ' + info.view.type);
-            // change the day's background color just for fun
-            info.dayEl.style.backgroundColor = 'red';
-            var month = info.date.getUTCMonth()+1;
-            var day = info.date.getUTCDate();
-            var year = info.date.getUTCFullYear();
-            window.location.href = '/newEvent/'+month+'/'+day+'/'+year;
+            if (info.date.getDay()==0){ //Blockout Mondays
+                console.log("TEST");
+                return;
+            }
+            else{
+                var month = info.date.getUTCMonth()+1;
+                var day = info.date.getUTCDate();
+                var year = info.date.getUTCFullYear();
+                window.location.href = '/newEvent/'+month+'/'+day+'/'+year;
+            }
         },
-        events: events
+        events: {
+            url: '/events/getRange',
+            failure: function() {
+                alert('there was an error while fetching events!');
+            }
+        },
+        dayCellDidMount: function (arg) { //Color background of Mondays
+            if (arg.dow == 1) {
+                arg.el.bgColor="gray";
+            }
+        },
+        firstDay:1
     });
     calendar.render();
 });
