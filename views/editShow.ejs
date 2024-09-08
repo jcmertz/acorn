@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8' />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.14.0/jquery-ui.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+</head>
+<body>
+    <a href="/logout"><h3> LOGOUT </h3></a>
+    <a href="/admin/"><h3> BACK </h3></a>
+    <h1>Show Details</h1> 
+    <p>Band: <%= show.contactBand.bandName %> </p>
+    <p>Date: <%= show.showDate.toLocaleDateString() %>  </p>
+    <p>Date: <%= show.showStatus %>  </p>
+    
+    <form action="/admin/setShowStatus" method="get">
+        <input type="hidden" name="id" value="<%= show._id %>"/>
+        <select id=status name='showStatus' onchange='if(this.value != "<%= show.showStatus %>") { this.form.submit(); }'>
+            <option value='-1'>Rejected/Canceled</option>
+            <option value='0'>Submitted, Not Responded To</option>
+            <option value='1'>In Negotiation</option>
+            <option value='2'>Confirmed</option>
+        </select>
+    </form>
+    <script> 
+        $("#status").find('option[value="<%= show.showStatus %>"]').attr('selected','selected');
+    </script>
+</body>
+</html>
+
+<!-- 
+Show Status:
+-1 - Rejected or Cancelled
+0 - Submitted, not responded to
+1 - In Negotiation
+2 - Confirmed 
+-->

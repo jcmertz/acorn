@@ -113,7 +113,8 @@ router.get('/getRangeAdmin',util.checkUserRole(['staff', 'admin']), async functi
         events.push({
             title: data[event].contactBand.bandName,
             start: data[event].showDate,
-            color: bands.getColorFromStatus(data[event].showStatus)
+            color: bands.getColorFromStatus(data[event].showStatus),
+            url: "/admin/shows/"+data[event]._id
         });
     }
     // console.log(events);
