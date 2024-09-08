@@ -10,6 +10,8 @@ var db = require('./src/db'); //Require the mongoose database init
 const fullcalendar = require('fullcalendar');
 const util = require("./src/utilities.js");
 
+var crypto = require('crypto');
+
 var passport = require('passport');
 var ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 var ensureLoggedIn = ensureLogIn();
@@ -26,6 +28,26 @@ store.on('error', function(error) {
   console.log(error);
 });
 
+//Create new admin user if none exists
+async function defaultAdmin() {
+  const adminUsers = await db.User.find({role:"admin"});
+  if(adminUsers === 'undefined' || adminUsers.length == 0){
+    console.log("New Admin User Created:");
+    console.log("Username: " + process.env.defaultAdminUser);
+    console.log("Password: " + process.env.defaultAdminPassword);
+    
+    const salt = crypto.randomBytes(16).toString('hex'); // Convert salt to hexadecimal
+    crypto.pbkdf2(process.env.defaultAdminPassword, salt, 310000, 32, 'sha256', async function(err, hashedPassword) {
+      if (err) { return next(err); }
+      const user = await db.User.create({
+        user: process.env.defaultAdminUser,
+        pass: hashedPassword.toString('hex'), 
+        salt: salt,
+        role: "admin"
+      });
+    });
+  }
+}
 
 var url = require("url");
 
@@ -58,6 +80,9 @@ app.use('/admin/', util.checkUserRole(['staff', 'admin']), adminRouter);
 
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Example app listening on port ${port}`);
+  //Create new admin user if none exists
+  defaultAdmin();
 })
+
 

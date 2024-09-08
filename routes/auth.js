@@ -61,7 +61,7 @@ router.post('/register', async function(req, res, next) {
                 user: req.body.username,
                 pass: hashedPassword.toString('hex'), 
                 salt: salt,
-                role: user
+                role: "user"
             });
             
             // Create user object for login
