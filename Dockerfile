@@ -20,7 +20,10 @@ RUN apt-get install -y nodejs npm node-mongodb
 RUN npm install
 
 # Run the app when the container launches
-CMD ["node", "index.js"]
+CMD ["node", "app.js"]
+
+# For the database
+ENV DBHOST=mongodb://acorn-mongo
 
 # Expose the port the app runs on
 EXPOSE 2554
