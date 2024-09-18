@@ -42,6 +42,7 @@ async function defaultAdmin() {
       const user = await db.User.create({
         user: process.env.defaultAdminUser,
         pass: hashedPassword.toString('hex'), 
+
         salt: salt,
         role: "admin"
       });
@@ -49,12 +50,14 @@ async function defaultAdmin() {
   }
 }
 
+
 var url = require("url");
 
 app.set('views', __dirname + '/views');
 app.set('view engine', "ejs");
 
 app.use(express.static('public'));
+
 
 app.use(session({
   secret: 'keyboard cat',

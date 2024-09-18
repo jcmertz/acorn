@@ -10,6 +10,7 @@ const checkUserRole = (requiredRoles = []) => (req, res, next) => {
   }
 };
 
+
 module.exports = {
   checkUserRole
 };

@@ -45,7 +45,12 @@ router.get('/getRange', async function(req, res, next) {
     for (const event in data){
         if(req.isAuthenticated()){
             var band = await bands.getBandFromUsername(req.user.username);
-            var name = band.bandName;
+            if(band !== undefined){
+                var name = band.bandName;
+            }
+            else{
+                var name = "NO BAND NAME"
+            }
             if(data[event].contactBand.bandName == name){
                 events.push({
                     title: data[event].contactBand.bandName,
