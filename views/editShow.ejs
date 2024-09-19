@@ -15,11 +15,10 @@
       <h1>Show Details</h1> 
       <p>Band: <%= show.contactBand.bandName %> </p>
       <p>Date: <%= show.showDate.toLocaleDateString() %>  </p>
-      <p>Show Status: <%= show.showStatus %>  </p>
-      
+      <p>Show Status: </p>
       <form id="form" action="/admin/setShowStatus" method="get">
         <input type="hidden" name="id" value="<%= show._id %>"/>
-        <select id=status name='showStatus' onchange='if(this.value != "<%= show.showStatus %>") { this.form.submit(); }'>
+        <select id=status name='showStatus' <%if (!isAdmin) { %> class=disabled <% } %> onchange='if(this.value != "<%= show.showStatus %>") { this.form.submit(); }'>
           <option value='-1'>Rejected/Canceled</option>
           <option value='0'>Submitted, Not Responded To</option>
           <option value='1'>In Negotiation</option>

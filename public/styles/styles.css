@@ -10,3 +10,11 @@
   overflow-y:auto;
   height:50%;
 }
+
+.disabled{
+  pointer-events: none;
+  /* for Firefox */
+  -moz-appearance: none;
+  /* for Chrome */
+  -webkit-appearance: none;
+}

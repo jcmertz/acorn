@@ -76,9 +76,16 @@ router.get('/profile',ensureLoggedIn,async (req,res) => {
 
 router.get('/shows/:id', async (req, res) => {
     const show = await db.Show.findOne({_id:req.params.id}).populate('messages');
+    var isAdmin = false;
+    if(req.isAuthenticated()){
+      if(req.user.role == 'admin' || req.user.role == 'staff'){
+        isAdmin = true;
+      }
+    }
     res.render('editShow', {
         show:show,
-        user:req.user.username
+        user:req.user.username,
+        isAdmin:isAdmin
     });
 });
 
