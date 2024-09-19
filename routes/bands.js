@@ -38,7 +38,7 @@ router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => { 
 
 router.get('/addEvent',ensureLoggedIn, async (req,res) => { //Handles the form submitted by a band
     const data = url.parse(req.url, true).query;
-    const band = await db.Band.findOne({bandName:data.bandName});
+    const band = await db.Band.findOne({bandName:data.band0});
     if (band === null){
         console.log("redirecting");
         res.redirect("/");
