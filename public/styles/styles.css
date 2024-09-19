@@ -1,7 +1,12 @@
 .row {
-    display: flex;
-  }
-  
-  .column {
-    flex: 50%;
-  }
+  display: flex;
+}
+
+.column {
+  flex: 50%;
+}
+
+#messageDisplay{
+  overflow-y:auto;
+  height:50%;
+}
