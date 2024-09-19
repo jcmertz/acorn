@@ -74,6 +74,14 @@ router.get('/profile',ensureLoggedIn,async (req,res) => {
     
 });
 
+router.get('/shows/:id', async (req, res) => {
+    const show = await db.Show.findOne({_id:req.params.id}).populate('messages');
+    res.render('editShow', {
+        show:show,
+        user:req.user.username
+    });
+});
+
 function getBandFromUsername(username){
     var band = db.Band.findOne({"loginInfo":username});
     return band;

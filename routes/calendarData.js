@@ -55,7 +55,8 @@ router.get('/getRange', async function(req, res, next) {
                 events.push({
                     title: data[event].contactBand.bandName,
                     start: data[event].showDate,
-                    color: bands.getColorFromStatus(data[event].showStatus)
+                    color: bands.getColorFromStatus(data[event].showStatus),
+                    url: "/shows/"+data[event]._id
                 });
                 continue;
             }
