@@ -60,7 +60,8 @@ router.post('/register', async function(req, res, next) {
             const user = await db.User.create({
                 user: req.body.username,
                 pass: hashedPassword.toString('hex'), 
-                salt: salt
+                salt: salt,
+                role: "user"
             });
             
             // Create user object for login
@@ -91,7 +92,7 @@ router.post('/register', async function(req, res, next) {
 
 passport.serializeUser(function(user, cb) {
     process.nextTick(function() {
-        cb(null, { id: user.id, username: user.user });
+        cb(null, { id: user.id, username: user.user, role:user.role });
     });
 });
 
