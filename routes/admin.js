@@ -29,7 +29,7 @@ router.get('/setShowStatus', async (req, res) => {
 
     const show = await db.Show.findOneAndUpdate({_id:id},{showStatus:status});
     
-    res.redirect('back');
+    res.redirect(req.get("Referrer") || "/");
 
 });
 

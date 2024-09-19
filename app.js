@@ -5,6 +5,11 @@ const express = require('express');
 const app = express();
 const port = 2554;
 
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
+
 var db = require('./src/db'); //Require the mongoose database init
 
 const fullcalendar = require('fullcalendar');
@@ -42,7 +47,7 @@ async function defaultAdmin() {
       const user = await db.User.create({
         user: process.env.defaultAdminUser,
         pass: hashedPassword.toString('hex'), 
-
+        
         salt: salt,
         role: "admin"
       });
@@ -56,7 +61,6 @@ var url = require("url");
 app.set('views', __dirname + '/views');
 app.set('view engine', "ejs");
 
-app.use(express.static('public'));
 
 
 app.use(session({
@@ -67,7 +71,7 @@ app.use(session({
 }));
 app.use(passport.authenticate('session'));
 
-
+app.use(express.static('public'));
 var authRouter = require('./routes/auth');
 var indexRouter = require('./routes/index');
 var bandRouter = require('./routes/bands');
@@ -82,10 +86,19 @@ app.use('/events/', calendarRouter);
 app.use('/admin/', util.checkUserRole(['staff', 'admin']), adminRouter);
 
 
-app.listen(port, () => {
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+  socket.on('message', (msg) => {
+    console.log(msg);
+    io.emit('message:'+msg.id, msg.message);
+  });
+});
+
+server.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
   //Create new admin user if none exists
   defaultAdmin();
 })
-
-
