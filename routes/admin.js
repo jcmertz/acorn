@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/shows/:id', async (req, res) => {
-    const show = await db.Show.findOne({_id:req.params.id})
+    const show = await db.Show.findOne({_id:req.params.id}).populate('messages');
     res.render('editShow', {
         show:show
     });

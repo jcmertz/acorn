@@ -10,7 +10,19 @@ const checkUserRole = (requiredRoles = []) => (req, res, next) => {
   }
 };
 
+var db = require('../src/db'); //Require the mongoose database init
+
+async function logMessage(msg){
+  const show = await db.Show.findOne({_id:msg.id});
+  const newMessage = await db.Message.create({
+    user:msg.user,
+    msg:msg.message
+  });
+  show.messages.push(newMessage._id);
+  show.save();
+};
 
 module.exports = {
-  checkUserRole
+  checkUserRole,
+  logMessage
 };

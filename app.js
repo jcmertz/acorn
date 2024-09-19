@@ -92,8 +92,8 @@ io.on('connection', (socket) => {
     console.log('user disconnected');
   });
   socket.on('message', (msg) => {
-    console.log(msg);
-    io.emit('message:'+msg.id, msg.message);
+    util.logMessage(msg);
+    io.emit('message:'+msg.id, msg.user+": "+msg.message);
   });
 });
 
