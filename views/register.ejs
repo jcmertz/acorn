@@ -10,44 +10,56 @@
 </head>
 
 <body>
-    
-    <h1>Register</h1>
-    <form action="/register" method="post">
-        
-        <section>
-            <label for="username">Username</label>
-            <input id="username" name="username" type="text" autocomplete="username" required>
-        </section>
-        <section>
-            <label for="new-password">Password</label>
-            <input id="new-password" name="password" type="password" autocomplete="new-password" required>
-        </section>
-        <section>
-            <label for="bandName">Band Name</label>
-            <input id="bandName" name="bandName" type="text" required>
-        </section>
-        <section>
-            <label for="contactEmail">Contact Email</label>
-            <input id="contactEmail" name="contactEmail" type="email" required>
-        </section>
-        <section>
-            <label for="homeTown">Where is your band based?</label>
-            <input id="homeTown" name="homeTown" type="text">
-        </section>
-        <section>
-            <label for="genre">What genre do you identify with?</label>
-            <input id="genre" name="genre" type="text">
-        </section>
-        <section>
-            <label for="instagram">Instagram</label>
-            <input id="instagram" name="instagram" type="text" value="@">
-        </section>
-        <button type="submit">Register</button>
-        <%if (invalidUsername) { %>
-            <script>
-                alert("This Username is Already Taken");
-            </script>
-            <%}%>
+    <div class="container mt-5">
+        <a class="btn btn-primary" href="javascript:history.back()"><h3> BACK </h3></a>
+        <h1 class="mb-4 text-center">Register</h1>
+        <form action="/register" method="post">
+            
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input id="username" name="username" type="text" class="form-control" autocomplete="username" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="new-password" class="form-label">Password</label>
+                <input id="new-password" name="password" type="password" class="form-control" autocomplete="new-password" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="bandName" class="form-label">Band Name</label>
+                <input id="bandName" name="bandName" type="text" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="contactEmail" class="form-label">Contact Email</label>
+                <input id="contactEmail" name="contactEmail" type="email" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="homeTown" class="form-label">Where is your band based?</label>
+                <input id="homeTown" name="homeTown" type="text" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label for="genre" class="form-label">What genre do you identify with?</label>
+                <input id="genre" name="genre" type="text" class="form-control">
+            </div>
+
+            <label for="instagram" class="form-label">Instagram</label>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">@</span>
+                <input id="instagram" name="instagram" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Register</button>
+
+            <% if (invalidUsername) { %>
+            <div class="mt-3 alert alert-danger" role="alert">
+                This Username is Already Taken
+            </div>
+            <% } %>
+
         </form>
-        
-    </body>
+    </div>
+</body>
+</html>

@@ -9,51 +9,82 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>  
 </head>
 <body>
-    <%if (!isLoggedIn) { %>
+    <% if (!isLoggedIn) { %>
         <a class="btn btn-primary" href="/login"><h3> LOGIN </h3></a>
         <a class="btn btn-primary" href="/register"><h3> REGISTER </h3></a>
         <% } %>
-        <%if (isLoggedIn) { %>
+        <% if (isLoggedIn) { %>
             <a class="btn btn-primary" href="/logout"><h3> LOGOUT </h3></a>
             <a class="btn btn-primary" href="/profile"><h3> My Profile </h3></a>
             <% } %>
+            
+            <!-- FullCalendar container -->
             <div id='calendar'></div>
+            
+            <!-- Bootstrap Modal -->
+            <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="infoModalLabel">Welcome to Acorn!</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Welcome to Acorn, the show booking app for The Fallen Log at Kitchen 17!</p>
+                            <p>To use the app to book a show you will first have to register or log into an account. If you just want to browse the upcoming shows you are welcome to do that here without logging in.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <a class="btn btn-secondary" href="/login"> Login</a>
+                            <a class="btn btn-secondary" href="/register"> Register</a>
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" >Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     var calendarEl = document.getElementById('calendar');
                     var calendar = new FullCalendar.Calendar(calendarEl, {
                         initialView: 'dayGridMonth',
-                        timeZone:'America/Chicago',
+                        timeZone: 'America/Chicago',
                         dateClick: function(info) {
-                            if (info.date.getDay()==0){ //Blockout Mondays
-                                return;
-                            }
-                            else{
-                                var month = info.date.getUTCMonth()+1;
-                                var day = info.date.getUTCDate();
-                                var year = info.date.getUTCFullYear();
-                                window.location.href = '/newEvent/'+month+'/'+day+'/'+year;
-                            }
-                        },
-                        events: {
-                            <%if (isAdmin) { %>
-                                url: '/events/getRangeAdmin',
+                            <% if (!isLoggedIn) { %>
+                                // Trigger Bootstrap modal
+                                var myModal = new bootstrap.Modal(document.getElementById('infoModal'));
+                                myModal.show();
                                 <% } else { %>
-                                    url: '/events/getRange',
+                                    // Handle date click if user is logged in
+                                    if (info.date.getDay() == 0) { // Blockout Sundays
+                                        return;
+                                    } else {
+                                        var month = info.date.getUTCMonth() + 1;
+                                        var day = info.date.getUTCDate();
+                                        var year = info.date.getUTCFullYear();
+                                        window.location.href = '/newEvent/' + month + '/' + day + '/' + year;
+                                    }
                                     <% } %>
-                                    failure: function() {
-                                        alert('there was an error while fetching events!');
-                                    }
                                 },
-                                dayCellDidMount: function (arg) { //Color background of Mondays
-                                    if (arg.dow == 1) {
-                                        arg.el.bgColor="gray";
-                                    }
-                                },
-                                firstDay:1
-                            });
-                            calendar.render();
-                        });
-                    </script>
-                </body>
-                </html>
+                                events: {
+                                    <% if (isAdmin) { %>
+                                        url: '/events/getRangeAdmin',
+                                        <% } else { %>
+                                            url: '/events/getRange',
+                                            <% } %>
+                                            failure: function() {
+                                                alert('There was an error while fetching events!');
+                                            }
+                                        },
+                                        dayCellDidMount: function(arg) { // Color background of Mondays
+                                            if (arg.dow == 1) {
+                                                arg.el.bgColor = "gray";
+                                            }
+                                        },
+                                        firstDay: 1
+                                    });
+                                    calendar.render();
+                                });
+                            </script>
+                        </body>
+                        </html>
+                        
