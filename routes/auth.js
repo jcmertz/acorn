@@ -23,9 +23,6 @@ passport.use(new LocalStrategy(async function verify(username, password, cb) {
     }
 }));
 
-router.get('/login', function(req, res, next) {
-    res.render('login');
-});
 
 router.post('/login/password', passport.authenticate('local', {
     successRedirect: '/',
@@ -36,12 +33,6 @@ router.get('/logout', function(req, res, next) {
     req.logout(function(err) {
         if (err) { return next(err); }
         res.redirect('/');
-    });
-});
-
-router.get('/register', function(req, res, next) {
-    res.render('register',{
-        invalidUsername:req.query.invalidUsername
     });
 });
 

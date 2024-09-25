@@ -12,10 +12,15 @@ router.get('/', async (req, res) => {
       isAdmin = true;
     }
   }
-  res.render('index',{
+  client.render('index',{
     isLoggedIn:req.isAuthenticated(),
     isAdmin:isAdmin
   });
 })
 
 module.exports = router;
+
+
+// app.get('/', (req, res) => {
+//   return client.render(req, res, '/index')
+// })
