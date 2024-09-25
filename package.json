@@ -10,8 +10,11 @@
     "fullcalendar": "^6.1.15",
     "jquery": "^3.7.1",
     "mongoose": "^8.5.4",
+    "next": "^14.2.13",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "socket.io": "^4.7.5"
   },
   "name": "acorn",
