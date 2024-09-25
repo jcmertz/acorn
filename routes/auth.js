@@ -1,3 +1,4 @@
+
 var express = require('express');
 var router = express.Router();
 var passport = require('passport');
@@ -22,7 +23,6 @@ passport.use(new LocalStrategy(async function verify(username, password, cb) {
         return cb(null, false, { message: 'Incorrect username or password.' });
     }
 }));
-
 
 router.post('/login/password', passport.authenticate('local', {
     successRedirect: '/',
@@ -93,7 +93,6 @@ passport.deserializeUser(function(user, cb) {
     });
 });
 
-module.exports = router;
 // Route to get authentication status
 router.get('/status', (req, res) => {
     if (req.isAuthenticated()) {
