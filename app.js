@@ -72,7 +72,7 @@ client.prepare().then(() => {
 
   // Importing and using routes
   var authRouter = require('./routes/auth');
-  var indexRouter = require('./routes/index');
+  var indexRouter = require('./routes/index')(handle);
   var calendarRouter = require('./routes/calendarData');
 
   app.use('/', authRouter);

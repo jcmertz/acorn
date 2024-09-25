@@ -1,26 +1,11 @@
-var db = require('../src/db');
-var express = require('express');
 
-var router = express.Router();
+module.exports = (handle) => {
+  const express = require('express');
+  const router = express.Router();
 
-router.get('/', async (req, res) => {
-  //console.log(data);
-  //console.log(req.isAuthenticated());
-  var isAdmin = false;
-  if(req.isAuthenticated()){
-    if(req.user.role == 'admin' || req.user.role == 'staff'){
-      isAdmin = true;
-    }
-  }
-  client.render('index',{
-    isLoggedIn:req.isAuthenticated(),
-    isAdmin:isAdmin
+  router.get('/', (req, res) => {
+    return handle(req, res);
   });
-})
 
-module.exports = router;
-
-
-// app.get('/', (req, res) => {
-//   return client.render(req, res, '/index')
-// })
+  return router;
+};
