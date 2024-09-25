@@ -25,7 +25,7 @@ passport.use(new LocalStrategy(async function verify(username, password, cb) {
 }));
 
 router.post('/login/password', passport.authenticate('local', {
-    successRedirect: '/',
+    successRedirect: '/',  // Fixed redirect to root after login
     failureRedirect: '/login'
 }));
 
@@ -95,12 +95,15 @@ passport.deserializeUser(function(user, cb) {
 
 // Route to get authentication status
 router.get('/status', (req, res) => {
+    console.log("Auth status requested");
     if (req.isAuthenticated()) {
+        console.log("User is authenticated");
         res.json({ 
             isAuthenticated: true, 
             isAdmin: req.user && req.user.role === 'admin' 
         });
     } else {
+        console.log("User is not authenticated");
         res.json({ 
             isAuthenticated: false, 
             isAdmin: false 
