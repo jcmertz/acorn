@@ -93,7 +93,10 @@ io.on('connection', (socket) => {
   });
   socket.on('message', (msg) => {
     util.logMessage(msg);
-    io.emit('message:'+msg.id, msg.user+": "+msg.message);
+    io.emit('message:'+msg.id,{
+      user: msg.user,
+      message: msg.message
+    });
   });
 });
 

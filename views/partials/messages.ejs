@@ -1,43 +1,75 @@
-      <div id="messageDisplay">
-        <ul id="messages">
-            <% show.messages.map((msg)=>{ %>
-                <li>
-                    <%= msg.user+": "+msg.msg %>
-                </li>
-                <% }) %>
-            </ul>
-        </div>
-        <form id="messageForm">
-            <input type="text" id="messageBox"/>
-            <input type="submit" value="Send"/>
-        </form>
+<div id="messageDisplay" class="d-flex flex-column" style="height: 100%;">
+    <!-- Messages List -->
+    <ul id="messages" class="list-unstyled mb-4 overflow-auto" style="flex-grow: 1; max-height: 60vh; padding: 10px;">
+        <% show.messages.map((msg) => { %>
+            <li class="mb-2 d-flex <% if (msg.user === user) { %> justify-content-end <% } else { %> justify-content-start <% } %>">
+                <div class="card <% if (msg.user === user) { %> bg-primary text-white ms-auto <% } else { %> bg-light text-dark <% } %>">
+                    <div class="card-body">
+                        <strong><%= msg.user %>:</strong> <%= msg.msg %>
+                    </div>
+                </div>
+            </li>
+            <% }) %>
+        </ul>
     </div>
-    
+    <!-- Message Form -->
+    <form id="messageForm" class="d-flex p-2 border-top">
+        <input type="text" id="messageBox" class="form-control me-2" placeholder="Type a message..." required />
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+    <!-- Socket.IO Integration -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    
     <script>
         var socket = io();
-        
         var form = document.getElementById('messageForm');
         var input = document.getElementById('messageBox');
-        
+        var messagesList = document.getElementById('messages');
         
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            if (messageBox.value) {
+            if (input.value) {
                 var out = {
-                    message:messageBox.value,
-                    id:'<%= show._id %>',
-                    user:'<%= user %>'
+                    message: input.value,
+                    id: '<%= show._id %>',
+                    user: '<%= user %>'
                 };
-                socket.emit('message', out);
-                messageBox.value = '';
+                socket.emit('message', out);  // Send the message and user details to the server
+                input.value = '';  // Clear the input field
             }
         });
         
         socket.on('message:<%= show._id %>', function(msg) {
-            var item = document.createElement('li');
-            item.textContent = msg;
-            messages.appendChild(item);
+            if (!msg || !msg.user || !msg.message) {
+                console.error("Invalid message received", msg);
+                return;
+            }
             
+            // Create a new message element
+            var item = document.createElement('li');
+            item.classList.add('mb-2', 'd-flex');
+            
+            var card = document.createElement('div');
+            card.classList.add('card');
+            
+            var cardBody = document.createElement('div');
+            cardBody.classList.add('card-body');
+            cardBody.textContent = msg.user + ": " + msg.message;
+            
+            // Apply styles based on whether the message is from the current user or someone else
+            if (msg.user === '<%= user %>') {
+                item.classList.add('justify-content-end');
+                card.classList.add('bg-primary', 'text-white', 'ms-auto');
+            } else {
+                item.classList.add('justify-content-start');
+                card.classList.add('bg-light', 'text-dark');
+            }
+            
+            // Append the message
+            card.appendChild(cardBody);
+            item.appendChild(card);
+            messagesList.appendChild(item);
+            messagesList.scrollTop = messagesList.scrollHeight;  // Scroll to the bottom of the messages
         });
     </script>
+    
