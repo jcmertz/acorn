@@ -11,7 +11,14 @@ const port = 2554;
 client.prepare().then(() => {
   const app = express();
 
-  // Basic server setup, no custom routes for now
+  var authRouter = require('./routes/auth');
+  var calendarRouter = require('./routes/calendarData');
+
+  // Use the /auth and /events routes
+  app.use('/auth', authRouter);
+  app.use('/events', calendarRouter);
+
+  // Handle other routes
   app.all('*', (req, res) => {
     return handle(req, res);
   });
