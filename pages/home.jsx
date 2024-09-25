@@ -1,11 +1,12 @@
-import Link from 'next/link'
+
+import Link from 'next/link';
 
 function HomePage() {
   return (
     <div>
-      <h1>Welcome to our e-commerce website!</h1>
+      <h1>Welcome to our site!</h1>
     </div>
-  )
+  );
 }
 
-export default HomePage
+export default HomePage;

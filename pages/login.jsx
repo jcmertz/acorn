@@ -1,64 +1,43 @@
+
 import React, { useState } from 'react';
+import { useAuth } from '../src/AuthContext';  // Import the AuthContext
 
 const SignIn = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const { isAuthenticated } = useAuth();  // Access isAuthenticated from the context
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Handle form submission logic, for example, with fetch or axios
-    fetch('/login/password', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, password }),
-    })
-      .then((response) => {
-        // Handle response
-        if (response.ok) {
-          console.log('Login successful');
-          window.location = '/index';
-        } else {
-          console.error('Login failed');
-        }
+    if (!isAuthenticated) {
+      fetch('/login/password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
       })
-      .catch((error) => {
-        console.error('Error during login:', error);
-      });
+        .then((response) => {
+          if (response.ok) {
+            window.location = '/index';
+          } else {
+            alert('Login failed');
+          }
+        })
+        .catch((error) => {
+          console.error('Error during login:', error);
+        });
+    }
   };
 
   return (
     <div>
-      <h1>Sign in</h1>
+      <h1>Sign In</h1>
       <form onSubmit={handleSubmit}>
-        <section>
-          <label htmlFor="username">Username</label>
-          <input
-            id="username"
-            name="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            autoComplete="username"
-            required
-            autoFocus
-          />
-        </section>
-        <section>
-          <label htmlFor="current-password">Password</label>
-          <input
-            id="current-password"
-            name="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            required
-          />
-        </section>
-        <button type="submit">Sign in</button>
+        <label>Username: <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} /></label>
+        <label>Password: <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} /></label>
+        <button type="submit">Login</button>
       </form>
     </div>
   );

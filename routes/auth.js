@@ -94,3 +94,19 @@ passport.deserializeUser(function(user, cb) {
 });
 
 module.exports = router;
+// Route to get authentication status
+router.get('/status', (req, res) => {
+    if (req.isAuthenticated()) {
+        res.json({ 
+            isAuthenticated: true, 
+            isAdmin: req.user && req.user.role === 'admin' 
+        });
+    } else {
+        res.json({ 
+            isAuthenticated: false, 
+            isAdmin: false 
+        });
+    }
+});
+
+module.exports = router;
