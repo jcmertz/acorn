@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Ubuntu+Sans:ital,wght@0,100..800;1,100..800&display=swap');
+
 .row {
   display: flex;
 }
@@ -17,4 +19,22 @@
   -moz-appearance: none;
   /* for Chrome */
   -webkit-appearance: none;
+}
+
+h3 {
+  
+  font-family: "Orbitron", system-ui;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  
+}
+
+body {
+  font-family: "Ubuntu Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-variation-settings:
+  "wdth" 100;
 }

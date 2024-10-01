@@ -1,16 +1,18 @@
-<div id="messageDisplay" class="d-flex flex-column" style="height: 100%;">
-    <!-- Messages List -->
-    <ul id="messages" class="list-unstyled mb-4 overflow-auto" style="flex-grow: 1; max-height: 60vh; padding: 10px;">
-        <% show.messages.map((msg) => { %>
-            <li class="mb-2 d-flex <% if (msg.user === user) { %> justify-content-end <% } else { %> justify-content-start <% } %>">
-                <div class="card <% if (msg.user === user) { %> bg-primary text-white ms-auto <% } else { %> bg-light text-dark <% } %>">
-                    <div class="card-body">
-                        <strong><%= msg.user %>:</strong> <%= msg.msg %>
+<div id="messageWindow" class="overflow-auto" style="max-height: 100%;">
+    <div id="messageDisplay" class="d-flex flex-column" style="height: 100%;">
+        <!-- Messages List -->
+        <ul id="messages" class="list-unstyled mb-4 overflow-auto" style="flex-grow: 1; max-height: 60vh; padding: 10px;">
+            <% show.messages.map((msg) => { %>
+                <li class="mb-2 d-flex <% if (msg.user === user) { %> justify-content-end <% } else { %> justify-content-start <% } %>">
+                    <div class="card <% if (msg.user === user) { %> bg-primary text-white ms-auto <% } else { %> bg-light text-dark <% } %>">
+                        <div class="card-body">
+                            <strong><%= msg.user %>:</strong> <%= msg.msg %>
+                        </div>
                     </div>
-                </div>
-            </li>
-            <% }) %>
-        </ul>
+                </li>
+                <% }) %>
+            </ul>
+        </div>
     </div>
     <!-- Message Form -->
     <form id="messageForm" class="d-flex p-2 border-top">

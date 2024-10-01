@@ -11,9 +11,16 @@
 </head>
 <body class="p-2">
   
-  <div class="d-flex justify-content-between mb-4">
-    <a class="btn btn-primary" href="/logout"><h3>LOGOUT</h3></a>
-    <a class="btn btn-primary" href="javascript:history.back()"><h3>BACK</h3></a>
+  <div class="row mb-4">
+    <div class="col d-flex justify-content-start">
+      <a class="btn btn-primary" href="javascript:history.back()"><h4>BACK</h4></a>
+    </div>
+    <div class="col d-flex justify-content-center">
+      <a href="/"><img src="../../AcornAppLogo.svg" style="height: 100%;" class="mb-3"></a>
+    </div>
+    <div class="col d-flex justify-content-end">
+      <a class="btn btn-primary" href="/logout"><h4>LOGOUT</h4></a>
+    </div>
   </div>
   
   <div class="row">
@@ -40,23 +47,12 @@
     
     <!-- Right Column: Messaging Tool -->
     <div class="col-md-6">
-      <h2>Messages</h2>
-      <div id="messageWindow" class="overflow-auto" style="max-height: 400px;">
-        
-        <!-- Example message from the partials/messages -->
-        <!-- Repeat this block for each message -->
-        <!-- <div class="card mb-2">
-          <div class="card-body">
-            <p class="card-text">
-              <strong>Sender Name:</strong> This is the content of the message. Each message can be styled like this to look like a chat bubble.
-            </p>
-            <small class="text-muted">Timestamp: 2023-09-25 12:00</small>
-          </div>
-        </div> -->
-        <!-- End of message block -->
-        
-        <!-- Include your dynamic message partials -->
-        <%- include('partials/messages') %>
+      <div class="card">
+        <div class="card-body">
+          <h1 class="card-title">Messages</h1>
+          <!-- Include your dynamic message partials -->
+          <%- include('partials/messages') %>
+        </div>
       </div>
     </div>
   </div>

@@ -9,15 +9,21 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.14.0/jquery-ui.min.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    <link rel="stylesheet" href="../../styles/styles.css"/>
+    
 </head>
 
 <body class="d-flex align-items-center justify-content-center vh-100 bg-light">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-4">
+                <div class="mb-3" id="heading">
+                    <a href="/"><img src="../../AcornAppLogo.svg" style="width: 100%;" class="mb-3"></a>
+                    <p class="text-center fs-5">Booking for The Fallen Log at Kitchen 17</p>
+                </div>
                 <div class="card shadow-sm">
                     <div class="card-body p-4">
-                        <h1 class="text-center mb-4">Sign in to Acorn</h1>
+                        <h1 class="text-center mb-4">Sign In</h1>
                         <form action="/login/password" method="post">
                             <div class="mb-3">
                                 <label for="username" class="form-label">Username</label>
@@ -28,7 +34,8 @@
                                 <input id="current-password" name="password" type="password" class="form-control" autocomplete="current-password" required>
                             </div>
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+                                <button type="submit" class="btn btn-primary btn-block mb-1">Sign in</button>
+                                <a class="btn btn-secondary" href="/register"> Register</a>
                             </div>
                         </form>
                     </div>
