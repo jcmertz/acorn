@@ -77,6 +77,8 @@ var indexRouter = require('./routes/index');
 var bandRouter = require('./routes/bands');
 var calendarRouter = require('./routes/calendarData');
 var adminRouter = require('./routes/admin');
+var showsRouter = require('./routes/shows');
+
 
 
 app.use('/', authRouter);
@@ -84,6 +86,8 @@ app.use('/', indexRouter);
 app.use('/', bandRouter.router);
 app.use('/events/', calendarRouter);
 app.use('/admin/', util.checkUserRole(['staff', 'admin']), adminRouter);
+app.use('/shows/', showsRouter);
+
 
 
 io.on('connection', (socket) => {
@@ -105,7 +109,3 @@ server.listen(port, () => {
   //Create new admin user if none exists
   defaultAdmin();
 })
-
-// Shows route
-const showsRouter = require('./routes/shows');
-app.use('/shows', showsRouter);

@@ -1,22 +1,48 @@
 
 const express = require('express');
 const router = express.Router();
-const db = require('../src/db');  // Assuming 'db' contains the Mongoose models
+const db = require('../src/db');
+var bands = require('./bands.js');
+
+
+router.get('/edit/:id', async (req, res) => {
+    const show = await db.Show.findOne({_id:req.params.id}).populate('messages').populate('bands').populate('contactBand');
+    var isAdmin = false;
+    var name;
+    if(req.isAuthenticated()){
+        if(req.user.role == 'admin' || req.user.role == 'staff'){
+            isAdmin = true;
+        }else{
+            name = await bands.getBandFromUsername(req.user.username)
+        }
+    }
+    var knownBands = await bands.getKnownBandList(name);
+    res.render('editShow', {
+        show:show,
+        user:req.user.username,
+        isAdmin:isAdmin,
+        knownBandData:knownBands
+    });
+});
 
 // Route to update bands for a show
 router.post('/updateBands', async (req, res) => {
     try {
         const { showId, bands } = req.body;
-
+        
         // Find the show by its ID and update the bands array
         const show = await db.Show.findById(showId);
         if (!show) {
             return res.status(404).send('Show not found');
         }
-
-        show.bands = bands;
+        console.log(bands);
+        bandsOut=[];
+        for (band in bands){
+            bandsOut.push(band._id);
+        }
+        show.bands = bandsOut;
         await show.save();
-
+        
         res.redirect('/shows/edit/' + showId);  // Redirect back to the edit page
     } catch (err) {
         console.error(err);
@@ -28,21 +54,21 @@ router.post('/updateBands', async (req, res) => {
 router.post('/setPrimaryBand', async (req, res) => {
     try {
         const { showId, bandId } = req.body;
-
+        
         // Find the show and set the new primary contact band
         const show = await db.Show.findById(showId);
         if (!show) {
             return res.status(404).send('Show not found');
         }
-
+        
         const newPrimaryBand = await db.Band.findById(bandId);
         if (!newPrimaryBand) {
             return res.status(404).send('Band not found');
         }
-
+        
         show.contactBand = newPrimaryBand;
         await show.save();
-
+        
         res.redirect('/shows/edit/' + showId);  // Redirect back to the edit page
     } catch (err) {
         console.error(err);

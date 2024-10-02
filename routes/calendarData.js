@@ -60,7 +60,7 @@ router.get('/getRange', async function(req, res, next) {
             //         title: data[event].contactBand.bandName,
             //         start: data[event].showDate,
             //         color: bands.getColorFromStatus(data[event].showStatus),
-            //         url: "/shows/"+data[event]._id
+            //         url: "/shows/edit/"+data[event]._id
             //     });
             //     continue;
             // }
@@ -70,7 +70,7 @@ router.get('/getRange', async function(req, res, next) {
                     title: data[event].showName,
                     start: data[event].showDate,
                     color: bands.getColorFromStatus(data[event].showStatus),
-                    url: "/shows/"+data[event]._id
+                    url: "/shows/edit/"+data[event]._id
                 });
                 continue;
             }
@@ -134,7 +134,7 @@ router.get('/getRangeAdmin',util.checkUserRole(['staff', 'admin']), async functi
             title: data[event].showName,
             start: data[event].showDate,
             color: bands.getColorFromStatus(data[event].showStatus),
-            url: "/admin/shows/"+data[event]._id
+            url: "/shows/edit"+data[event]._id
         });
     }
     // console.log(events);

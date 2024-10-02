@@ -19,19 +19,13 @@ router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => { 
         return;
     }
     var name = band.bandName;
-    var knownBandList = await db.Band.find();
-    var knownBands = [];
-    for(const knownBand of knownBandList){
-        if(knownBand.bandName == name)
-            continue;
-        knownBands.push(knownBand.bandName);
-    }
+    var knownBands = await getKnownBandList(name);
     res.render('newEvent',{
         month:req.params.month,
         day:req.params.day,
         year:req.params.year,
         bandName:name,
-        knownBands:knownBands
+        knownBandData:knownBands
     }
 );
 });
@@ -116,21 +110,6 @@ router.post('/band/update', ensureLoggedIn, async (req, res) => {
     }
 });
 
-router.get('/shows/:id', async (req, res) => {
-    const show = await db.Show.findOne({_id:req.params.id}).populate('messages').populate('bands').populate('contactBand');
-    var isAdmin = false;
-    if(req.isAuthenticated()){
-        if(req.user.role == 'admin' || req.user.role == 'staff'){
-            isAdmin = true;
-        }
-    }
-    res.render('editShow', {
-        show:show,
-        user:req.user.username,
-        isAdmin:isAdmin
-    });
-});
-
 function getBandFromUsername(username){
     var band = db.Band.findOne({"loginInfo":username});
     return band;
@@ -155,8 +134,20 @@ function getColorFromStatus(showStatus){
     };
 }
 
+async function getKnownBandList(name){
+    var knownBandList = await db.Band.find();
+    var knownBands = [];
+    for(const knownBand of knownBandList){
+        if(knownBand.bandName == name)
+            continue;
+        knownBands.push(knownBand.bandName);
+    }
+    return knownBands;
+}
+
 module.exports = {
     router:router,
     getBandFromUsername:getBandFromUsername,
-    getColorFromStatus:getColorFromStatus
+    getColorFromStatus:getColorFromStatus,
+    getKnownBandList:getKnownBandList
 };

@@ -1,0 +1,205 @@
+ <!-- Modal for unrecognized band submission -->
+ <div class="modal fade" id="newBandModal" tabindex="-1" aria-labelledby="newBandModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newBandModalLabel">Band Not Registered</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>This band is not registered in the app yet. You can provide a contact email to invite them or add the band without an invite.</p>
+                <form id="newBandForm">
+                    <div class="mb-3">
+                        <label for="bandEmail" class="form-label">Band Contact Email</label>
+                        <input type="email" class="form-control" id="bandEmail" placeholder="Enter email" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-success" id="inviteButton">Invite Band</button>
+                        <button type="button" class="btn btn-secondary mt-2" id="noInviteButton">Add Band Without Invite</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let currentBandCount = 0;
+    
+    function updateForm() {
+        let bandCount = $('#bandCount').val();
+        currentBandCount = bandCount;
+        
+        // Create a div to hold the new band input, validation icon, and the remove button
+        let div = document.createElement("div");
+        div.classList.add("d-flex", "align-items-center", "my-2");
+        div.setAttribute("id", "div" + bandCount);
+        
+        let newBand = document.createElement("input");
+        newBand.setAttribute("type", "text");
+        newBand.setAttribute("id", "band" + bandCount);
+        newBand.setAttribute("name", "bands[" + bandCount+"][name]");
+        newBand.setAttribute("list", "knownBands");
+        newBand.setAttribute("autocomplete", "off");
+        newBand.classList.add("form-control", "me-2");
+        newBand.addEventListener("input", validateBand);
+        
+        let validationIcon = document.createElement("span");
+        validationIcon.setAttribute("id", "validationIcon" + bandCount);
+        validationIcon.classList.add("validation-box", "me-2"); // Placeholder for checkmark or exclamation icon
+        
+        let bandX = document.createElement("input");
+        bandX.setAttribute("type", "button");
+        bandX.setAttribute("value", "X");
+        bandX.setAttribute("id", "otherBandX" + bandCount);
+        bandX.setAttribute("onClick", "deleteBandField(" + bandCount + ")");
+        bandX.classList.add("btn", "btn-danger");
+        
+        div.appendChild(newBand);
+        div.appendChild(validationIcon);
+        div.appendChild(bandX);
+        
+        $('.addBand').before(div);
+        
+        bandCount++;
+        $('#bandCount').val(bandCount);
+        checkFormValidity();
+    }
+    
+    function validateBand(event) {
+        const input = event.target;
+        const datalist = document.getElementById('knownBands');
+        const validationIcon = input.nextElementSibling;
+        const enteredValue = input.value;
+        let bandExists = false;
+        
+        // Check if entered value exists in datalist
+        for (let option of datalist.options) {
+            if (option.value.toLowerCase() === enteredValue.toLowerCase()) {
+                bandExists = true;
+                break;
+            }
+        }
+        
+        // Update the validation icon based on band existence
+        if (bandExists) {
+            validationIcon.innerHTML = "✔"; // Green checkmark
+            validationIcon.classList.remove("warning");
+            validationIcon.classList.add("success");
+            validationIcon.style.cursor = "default";
+            checkFormValidity();  // Check form validity whenever a band is validated
+        } else if (enteredValue.trim() !== "") {
+            validationIcon.innerHTML = "⚠"; // Yellow exclamation mark
+            validationIcon.classList.remove("success");
+            validationIcon.classList.add("warning");
+            validationIcon.style.cursor = "pointer";
+            
+            validationIcon.onclick = function () {
+                currentBandCount = validationIcon.id.replace("validationIcon", ""); // Extract band count
+                document.getElementById('bandEmail').value = ''; // Reset email field
+                new bootstrap.Modal(document.getElementById('newBandModal')).show(); // Show modal
+            };
+            checkFormValidity();
+        } else {
+            validationIcon.innerHTML = ""; // Clear icon if input is empty
+            checkFormValidity();  // Check form validity whenever the input changes
+        }
+    }
+    
+    // Handle the "Invite Band" button in the modal
+    document.getElementById('inviteButton').addEventListener('click', function () {
+        const bandEmail = document.getElementById('bandEmail').value;
+        if (bandEmail) {
+            let hiddenInput = document.createElement('input');
+            hiddenInput.setAttribute('type', 'hidden');
+            hiddenInput.setAttribute('name', 'bands[' + currentBandCount+"][email]");
+            hiddenInput.setAttribute('value', bandEmail);
+            
+            // Append to the correct div based on band count
+            document.getElementById('div' + currentBandCount).appendChild(hiddenInput);
+            
+            // Change the yellow exclamation mark to a green checkmark
+            let validationIcon = document.getElementById('validationIcon' + currentBandCount);
+            validationIcon.innerHTML = "✔"; // Green checkmark
+            validationIcon.classList.remove("warning");
+            validationIcon.classList.add("success");
+            
+            // Close the modal and check form validity
+            bootstrap.Modal.getInstance(document.getElementById('newBandModal')).hide();
+            checkFormValidity();
+        }
+    });
+    
+    // Handle the "Add Band Without Invite" button in the modal
+    document.getElementById('noInviteButton').addEventListener('click', function () {
+        let hiddenInput = document.createElement('input');
+        hiddenInput.setAttribute('type', 'hidden');
+        hiddenInput.setAttribute('name', 'bands[' + currentBandCount+"][email]");
+        hiddenInput.setAttribute('value', 'noInvite');
+        
+        // Append to the correct div based on band count
+        document.getElementById('div' + currentBandCount).appendChild(hiddenInput);
+        
+        // Change the yellow exclamation mark to a green checkmark
+        let validationIcon = document.getElementById('validationIcon' + currentBandCount);
+        validationIcon.innerHTML = "✔"; // Green checkmark
+        validationIcon.classList.remove("warning");
+        validationIcon.classList.add("success");
+        
+        // Close the modal and check form validity
+        bootstrap.Modal.getInstance(document.getElementById('newBandModal')).hide();
+        checkFormValidity();
+    });
+    
+    function deleteBandField(bandNum) {
+        let bandCount = $('#bandCount').val();
+        $('#div' + bandNum).remove();
+        
+        for (let i = bandNum + 1; i < bandCount; i++) {
+            let newNum = i - 1;
+            $('#otherBand' + i).attr("id", "band" + newNum);
+            $('#otherBand' + i).attr("name", "bands[" + newNum+"][name]");
+            $('#otherBandX' + i).remove();
+            
+            let bandX = document.createElement("input");
+            bandX.setAttribute("type", "button");
+            bandX.setAttribute("value", "X");
+            bandX.setAttribute("id", "otherBandX" + newNum);
+            bandX.setAttribute("onClick", "deleteBandField(" + newNum + ")");
+            bandX.classList.add("btn", "btn-danger", "ms-2");
+            
+            $('#div' + i).append(bandX);
+            $('#div' + i).attr("id", "div" + (i - 1));
+        }
+        
+        bandCount--;
+        $('#bandCount').val(bandCount);
+        checkFormValidity();  // Check form validity when bands are deleted
+    }
+    
+    // Check if all added bands have a green checkmark, enabling the form submission button if valid
+    function checkFormValidity() {
+        let allValid = true;
+        let bandCount = $('#bandCount').val();
+        
+        console.log("Start: "+bandCount);
+        for (let i = 1; i < bandCount; i++) {
+            let validationIcon = document.getElementById('validationIcon' + i);
+            let hiddenEmail = document.querySelector('[name="bands[' + i + '][email]"]');
+            console.log("ID: "+i);
+            console.log("Val: "+validationIcon);
+            console.log("Hidden: "+hiddenEmail);
+            console.log("");
+            
+            if(validationIcon && validationIcon.innerHTML === "✔"){
+                continue;
+            }
+            
+            if (!validationIcon || validationIcon.innerHTML !== "✔" || !hiddenEmail) {
+                allValid = false;
+                break;
+            }
+        }
+        
+        document.getElementById('submitButton').disabled = !allValid;
+    }
+</script>

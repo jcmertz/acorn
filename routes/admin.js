@@ -16,15 +16,6 @@ router.get('/', async (req, res) => {
     res.render('admin');
 });
 
-router.get('/shows/:id', async (req, res) => {
-    const show = await db.Show.findOne({_id:req.params.id}).populate('messages');
-    res.render('editShow', {
-        show:show,
-        user:req.user.username,
-        isAdmin:true
-    });
-});
-
 router.get('/setShowStatus', async (req, res) => {
     var id = req.query.id;
     var status = req.query.showStatus;
