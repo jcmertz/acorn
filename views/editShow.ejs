@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang='en'>
 <head>
@@ -31,16 +32,28 @@
           <h1 class="card-title">Show Details</h1>
           <p class="card-text">Show Name: <strong><%= show.showName %></strong></p>
           <p class="card-text">Contact Band: <strong><%= show.contactBand.bandName %></strong></p>
-          <p class="card-text">Date: <strong><%= show.showDate.toLocaleDateString() %></strong></p>
-          <p class="card-text">Show Status:</p>
-          <form id="form" action="/admin/setShowStatus" method="get">
-            <input type="hidden" name="id" value="<%= show._id %>"/>
-            <select id="status" name="showStatus" class="form-select" <%if (!isAdmin) { %> disabled <% } %> onchange='if(this.value != "<%= show.showStatus %>") { this.form.submit(); }'>
-              <option value="-1">Rejected/Canceled</option>
-              <option value="0">Submitted, Not Responded To</option>
-              <option value="1">In Negotiation</option>
-              <option value="2">Confirmed</option>
-            </select>
+
+          <!-- New Section for Other Bands -->
+          <h2 class="mt-4">Other Bands</h2>
+          <form action="/show/updateBands" method="post">
+            <div id="bandsList">
+              <% show.bands.forEach((band, index) => { %>
+                <div class="d-flex align-items-center my-2" id="bandDiv<%= index %>">
+                  <input type="text" name="bands[<%= index %>]" class="form-control me-2" value="<%= band.bandName %>" readonly />
+                  <button type="button" class="btn btn-danger" onclick="removeBand(<%= index %>)">Remove</button>
+                  <% if (show.contactBand._id.toString() !== band._id.toString()) { %>
+                    <button type="button" class="btn btn-warning ms-2" onclick="makePrimary('<%= band._id %>')">Make Primary</button>
+                  <% } %>
+                </div>
+              <% }); %>
+            </div>
+
+            <!-- Button to Add New Band -->
+            <div class="mb-3">
+              <button type="button" class="btn btn-outline-primary w-100" onclick="addBand()">Add Band</button>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Save Changes</button>
           </form>
         </div>
       </div>
@@ -51,7 +64,6 @@
       <div class="card">
         <div class="card-body">
           <h1 class="card-title">Messages</h1>
-          <!-- Include your dynamic message partials -->
           <%- include('partials/messages') %>
         </div>
       </div>
@@ -59,8 +71,46 @@
   </div>
   
   <script>
-    // Set the selected status in the dropdown
-    $("#status").find('option[value="<%= show.showStatus %>"]').attr('selected', 'selected');
+    // Function to add a new band field
+    let bandCount = <%= show.bands.length %>;
+    function addBand() {
+      const bandsList = document.getElementById('bandsList');
+      const newDiv = document.createElement('div');
+      newDiv.classList.add('d-flex', 'align-items-center', 'my-2');
+      newDiv.setAttribute('id', 'bandDiv' + bandCount);
+
+      const newBandInput = document.createElement('input');
+      newBandInput.setAttribute('type', 'text');
+      newBandInput.setAttribute('name', 'bands[' + bandCount + ']');
+      newBandInput.classList.add('form-control', 'me-2');
+
+      const removeButton = document.createElement('button');
+      removeButton.setAttribute('type', 'button');
+      removeButton.classList.add('btn', 'btn-danger');
+      removeButton.textContent = 'Remove';
+      removeButton.onclick = function () { removeBand(bandCount); };
+
+      newDiv.appendChild(newBandInput);
+      newDiv.appendChild(removeButton);
+      bandsList.appendChild(newDiv);
+
+      bandCount++;
+    }
+
+    // Function to remove a band field
+    function removeBand(index) {
+      const bandDiv = document.getElementById('bandDiv' + index);
+      if (bandDiv) {
+        bandDiv.remove();
+      }
+    }
+
+    // Function to set a new primary contact band
+    function makePrimary(bandId) {
+      $.post('/show/setPrimaryBand', { showId: '<%= show._id %>', bandId: bandId }, function() {
+        location.reload(); // Reload page after setting primary band
+      });
+    }
   </script>
   
 </body>

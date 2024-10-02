@@ -105,3 +105,7 @@ server.listen(port, () => {
   //Create new admin user if none exists
   defaultAdmin();
 })
+
+// Shows route
+const showsRouter = require('./routes/shows');
+app.use('/shows', showsRouter);
