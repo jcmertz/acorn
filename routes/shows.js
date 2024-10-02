@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../src/db');
-var bands = require('./bands.js');
+var bandUtils = require('./bands.js');
 
 
 router.get('/edit/:id', async (req, res) => {
@@ -13,10 +13,10 @@ router.get('/edit/:id', async (req, res) => {
         if(req.user.role == 'admin' || req.user.role == 'staff'){
             isAdmin = true;
         }else{
-            name = await bands.getBandFromUsername(req.user.username)
+            name = await bandUtils.getBandFromUsername(req.user.username)
         }
     }
-    var knownBands = await bands.getKnownBandList(name);
+    var knownBands = await bandUtils.getKnownBandList(name);
     res.render('editShow', {
         show:show,
         user:req.user.username,
@@ -29,16 +29,16 @@ router.get('/edit/:id', async (req, res) => {
 router.post('/updateBands', async (req, res) => {
     try {
         const { showId, bands } = req.body;
-        
         // Find the show by its ID and update the bands array
         const show = await db.Show.findById(showId);
         if (!show) {
             return res.status(404).send('Show not found');
         }
-        console.log(bands);
         bandsOut=[];
-        for (band in bands){
-            bandsOut.push(band._id);
+        console.log(bands);
+        for(band of bands){
+            var bandObj = await db.Band.findOne({"bandName":band.name});
+            bandsOut.push(bandObj._id)
         }
         show.bands = bandsOut;
         await show.save();

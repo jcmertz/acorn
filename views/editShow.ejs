@@ -10,7 +10,7 @@
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
   <link rel="stylesheet" href="../../styles/styles.css"/>
 </head>
-<body class="p-2">
+<body class="p-2" onload="populateBandTable()">
   
   <div class="row mb-4">
     <div class="col d-flex justify-content-start">
@@ -36,54 +36,54 @@
           <!-- New Section for Other Bands -->
           <h2 class="mt-4">Other Bands</h2>
           <form action="/shows/updateBands" method="post">
+            <input type="hidden" id="bandCount" name="bandCount" value="1">
             <input type="hidden" name="showId" value="<%= show._id %>" />
-            <div id="bandsList">
-              <% show.bands.forEach((band, index) => { %>
-                <div class="d-flex align-items-center my-2" id="bandDiv<%= index %>">
-                  <input type="text" name="bands[<%= index %>][name]" class="form-control me-2" value="<%= band.bandName %>" readonly />
-                  <input type="hidden" name="bands[<%= index %>][_id]" value="<%= band._id %>" />
-                  <button type="button" class="btn btn-danger" onclick="removeBand(<%= index %>)">X</button>
-                  <% if (show.contactBand._id.toString() !== band._id.toString()) { %>
-                    <button type="button" class="btn btn-warning ms-2" onclick="makePrimary('<%= band._id %>')">Make Contact</button>
-                    <% } %>
-                  </div>
-                  <% }); %>
-                </div>
-                
-                <!-- Button to Add New Band -->
-                <div class="mb-3">
-                  <button type="button" class="btn btn-outline-primary addBand w-100" onClick="updateForm();">Add Band</button>
-                </div>
-                
-                <button type="submit" class="btn btn-success w-100">Save Changes</button>
-              </form>
+            <!-- Dynamically Populate the Table -->
+            
+            
+            <!-- Button to Add New Band -->
+            <div class="mb-3">
+              <button type="button" class="btn btn-outline-primary addBand w-100" onClick="addBandtoForm();">Add Band</button>
             </div>
-          </div>
-        </div>
-        
-        <!-- Right Column: Messaging Tool -->
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-body">
-              <h1 class="card-title">Messages</h1>
-              <%- include('partials/messages') %>
-            </div>
-          </div>
+            
+            <button type="submit" id="submitButton" class="btn btn-success w-100">Save Changes</button>
+          </form>
         </div>
       </div>
-      <%- include('partials/newBandsModule') %>
-      <%- include('partials/bandList') %>
-      
-      
-      <script>
-        // Function to set a new primary contact band
-        function makePrimary(bandId) {
-          $.post('/shows/setPrimaryBand', { showId: '<%= show._id %>', bandId: bandId }, function() {
-            location.reload(); // Reload page after setting primary band
-          });
-        }
-      </script>
-      
-    </body>
-    </html>
+    </div>
     
+    <!-- Right Column: Messaging Tool -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h1 class="card-title">Messages</h1>
+          <%- include('partials/messages') %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <%- include('partials/newBandsModule') %>
+  <%- include('partials/bandList') %>
+  
+  
+  <script>
+    // Function to set a new primary contact band
+    function makePrimary(bandId) {
+      $.post('/shows/setPrimaryBand', { showId: '<%= show._id %>', bandId: bandId }, function() {
+        location.reload(); // Reload page after setting primary band
+      });
+    }
+    
+    function populateBandTable(){
+      var bands = <%- JSON.stringify(show.bands) %>
+      console.log(bands);
+      bands.forEach((band,index) => {
+        addBandtoForm(band.bandName);
+      });
+    }
+    
+    
+  </script>
+  
+</body>
+</html>

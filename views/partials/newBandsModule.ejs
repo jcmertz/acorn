@@ -25,7 +25,7 @@
 <script>
     let currentBandCount = 0;
     
-    function updateForm() {
+    function addBandtoForm(newBandName = "") {
         let bandCount = $('#bandCount').val();
         currentBandCount = bandCount;
         
@@ -38,6 +38,7 @@
         newBand.setAttribute("type", "text");
         newBand.setAttribute("id", "band" + bandCount);
         newBand.setAttribute("name", "bands[" + bandCount+"][name]");
+        newBand.setAttribute("value",newBandName);
         newBand.setAttribute("list", "knownBands");
         newBand.setAttribute("autocomplete", "off");
         newBand.classList.add("form-control", "me-2");
@@ -62,6 +63,9 @@
         
         bandCount++;
         $('#bandCount').val(bandCount);
+        if(newBandName != ""){
+            newBand.dispatchEvent(new Event('input'));
+        }
         checkFormValidity();
     }
     
