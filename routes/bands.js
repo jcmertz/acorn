@@ -61,17 +61,42 @@ router.get('/userDetails',ensureLoggedIn, async (req,res) => {
     res.redirect("/");
 });
 
-router.get('/profile',ensureLoggedIn,async (req,res) => {
+router.get('/profile', ensureLoggedIn, async (req, res) => {
     var band = await getBandFromUsername(req.user.username);
     if (band === null){
         console.log("redirecting");
         res.redirect("/");
         return;
     }
-    res.render('bandProfile',{
-        band:band
-    })
-    
+    res.render('bandProfile', {
+        band: band
+    });
+});
+
+// New /band/update POST route
+router.post('/band/update', ensureLoggedIn, async (req, res) => {
+    try {
+        const band = await db.Band.findOne({ "loginInfo": req.user.username });
+        if (!band) {
+            return res.status(404).send("Band not found");
+        }
+
+        // Update band details from the form data
+        band.bandName = req.body.bandName;
+        band.contactEmail = req.body.contactEmail;
+        band.instagram = req.body.instagram;
+        band.genre = req.body.genre;
+        band.homeTown = req.body.homeTown;
+
+        // Save the updated band details
+        await band.save();
+
+        // Redirect back to the profile page after successful update
+        res.redirect('/profile');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server error");
+    }
 });
 
 router.get('/shows/:id', async (req, res) => {

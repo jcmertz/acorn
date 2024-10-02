@@ -42,15 +42,18 @@ router.get('/getRange', async function(req, res, next) {
     }
     const data = await db.Show.find(query);
     var events = [];
+    var authenticated = req.isAuthenticated();
+    if(authenticated){
+        var band = await bands.getBandFromUsername(req.user.username);
+        if(band !== undefined){
+            var name = band.bandName;
+        }
+        else{
+            var name = "NO BAND NAME"
+        }
+    }
     for (const event in data){
-        if(req.isAuthenticated()){
-            var band = await bands.getBandFromUsername(req.user.username);
-            if(band !== undefined){
-                var name = band.bandName;
-            }
-            else{
-                var name = "NO BAND NAME"
-            }
+        if(authenticated){
             if(data[event].contactBand.bandName == name){
                 events.push({
                     title: data[event].contactBand.bandName,

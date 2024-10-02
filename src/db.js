@@ -19,8 +19,8 @@ const bandSchema = new mongoose.Schema({
 const showSchema = new mongoose.Schema({
   showDate: Date,
   requestDate: Date,
-  bands: [bandSchema],
-  contactBand: bandSchema,
+  bands: [{type: mongoose.Types.ObjectId, ref: "Band"}],
+  contactBand: {type: mongoose.Types.ObjectId, ref: "Band"},
   matinee:Boolean,
   ticketPrice:Number,
   ticketsSold:Number,

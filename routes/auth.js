@@ -48,8 +48,13 @@ router.get('/register', function(req, res, next) {
 router.post('/register', async function(req, res, next) {
     try {
         const userRecord = await db.User.findOne({user:req.body.username});
+        const bandRecord = await db.Band.findOne({bandName:req.body.bandName});
         if(!(userRecord == null)){
             res.redirect('/register?invalidUsername=true');
+            return;
+        }
+        if(!(bandName == null)){
+            res.redirect('/register?invalidBandname=true');
             return;
         }
         const salt = crypto.randomBytes(16).toString('hex'); // Convert salt to hexadecimal

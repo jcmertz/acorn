@@ -8,30 +8,70 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.14.0/jquery-ui.min.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
     <link rel="stylesheet" href="../../styles/styles.css"/>
-    
 </head>
-<body>
-    <a href="/"><img src="../../AcornAppLogo.svg" style="width: 10%;" class="mb-3"></a>
-    <div>
-        <h1><%= band.bandName %></h1>
-        <p>Email: <%= band.contactEmail %></p>
-        <p>Instagram: <a href="https://instagram.com/<%= band.instagram%>">@<%= band.instagram %></p></a>
-        <p>Genre: <%= band.genre %></p>
-        <p>Hometown: <%= band.homeTown %></p>
+<body class="p-2">
+    <div class="row mb-4">
+        <div class="col d-flex justify-content-start">
+            <a class="btn btn-primary" href="javascript:history.back()"><h4>BACK</h4></a>
+        </div>
+        <div class="col d-flex justify-content-center">
+            <a href="/"><img src="../../AcornAppLogo.svg" style="height: 100%;" class="mb-3"></a>
+        </div>
+        <div class="col d-flex justify-content-end">
+            <a class="btn btn-primary" href="/logout"><h4>LOGOUT</h4></a>
+        </div>
     </div>
-    <div id="Show Calendar">
-        <h2>Upcoming Shows</h2>
-        <div id='upcomingShows'></div>
+
+    <div class="row">
+        <!-- Left Column: Band Details -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="card-title">Band Details</h1>
+                    <form id="bandDetailsForm" action="/band/update" method="post">
+                        <div class="mb-3">
+                            <label for="bandName" class="form-label">Band Name:</label>
+                            <input type="text" class="form-control" id="bandName" name="bandName" value="<%= band.bandName %>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactEmail" class="form-label">Email:</label>
+                            <input type="email" class="form-control" id="contactEmail" name="contactEmail" value="<%= band.contactEmail %>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="instagram" class="form-label">Instagram:</label>
+                            <input type="text" class="form-control" id="instagram" name="instagram" value="<%= band.instagram %>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="genre" class="form-label">Genre:</label>
+                            <input type="text" class="form-control" id="genre" name="genre" value="<%= band.genre %>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="homeTown" class="form-label">Hometown:</label>
+                            <input type="text" class="form-control" id="homeTown" name="homeTown" value="<%= band.homeTown %>">
+                        </div>
+                        <button type="submit" class="btn btn-success">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Show Calendar -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2>Upcoming Shows</h2>
+                    <div id="upcomingShows"></div>
+                </div>
+            </div>
+        </div>
     </div>
-</body>
-<!-- End of MAIN HTML PAGE, CALENDAR SCRIPT BELOW -->
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('upcomingShows');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'listYear',
-            timeZone:'America/Chicago',
+            timeZone: 'America/Chicago',
             events: {
                 url: '/events/getRange',
                 extraParams: {
@@ -42,22 +82,14 @@
                 }
             },
             headerToolbar: {
-                left:   '',
+                left: '',
                 center: 'title',
-                right:  'prev,next'
+                right: 'prev,next'
             }
         });
         calendar.render();
     });
 </script>
 
+</body>
 </html>
-
-<!-- /*
-bandName: String,
-contactEmail: String,
-instagram: String,
-genre: String,
-homeTown: String,
-loginInfo: userSchema
-*/ -->
