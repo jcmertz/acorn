@@ -21,8 +21,8 @@
                     <div class="card-body">
                         <h1 class="text-center mb-4">New Event Request</h1>
                         <p class="mb-4">New Event Request For: <strong><%= bandName %></strong> on <strong><%= month %>/<%= day %>/<%= year %></strong></p>
-                        <form action="/addEvent" id="newEventForm">
-                            <input type="hidden" id="band0" name="band0" value="<%= bandName %>">
+                        <form action="/addEvent" id="newmEventForm" method="post">
+                            <input type="hidden" id="band0" name="bands[0][name]" value="<%= bandName %>">
                             <input type="hidden" id="bandCount" name="bandCount" value="1">
                             
                             <div class="mb-3">
@@ -99,7 +99,7 @@
                     let newBand = document.createElement("input");
                     newBand.setAttribute("type", "text");
                     newBand.setAttribute("id", "band" + bandCount);
-                    newBand.setAttribute("name", "band" + bandCount);
+                    newBand.setAttribute("name", "bands[" + bandCount+"][name]");
                     newBand.setAttribute("list", "knownBands");
                     newBand.setAttribute("autocomplete", "off");
                     newBand.classList.add("form-control", "me-2");
@@ -173,7 +173,7 @@
                     if (bandEmail) {
                         let hiddenInput = document.createElement('input');
                         hiddenInput.setAttribute('type', 'hidden');
-                        hiddenInput.setAttribute('name', 'bandEmail' + currentBandCount);
+                        hiddenInput.setAttribute('name', 'bands[' + currentBandCount+"][email]");
                         hiddenInput.setAttribute('value', bandEmail);
                         
                         // Append to the correct div based on band count
@@ -195,7 +195,7 @@
                 document.getElementById('noInviteButton').addEventListener('click', function () {
                     let hiddenInput = document.createElement('input');
                     hiddenInput.setAttribute('type', 'hidden');
-                    hiddenInput.setAttribute('name', 'bandEmail' + currentBandCount);
+                    hiddenInput.setAttribute('name', 'bands[' + currentBandCount+"][email]");
                     hiddenInput.setAttribute('value', 'noInvite');
                     
                     // Append to the correct div based on band count
@@ -219,7 +219,7 @@
                     for (let i = bandNum + 1; i < bandCount; i++) {
                         let newNum = i - 1;
                         $('#otherBand' + i).attr("id", "band" + newNum);
-                        $('#otherBand' + i).attr("name", "band" + newNum);
+                        $('#otherBand' + i).attr("name", "bands[" + newNum+"][name]");
                         $('#otherBandX' + i).remove();
                         
                         let bandX = document.createElement("input");
@@ -246,7 +246,7 @@
                     console.log("Start: "+bandCount);
                     for (let i = 1; i < bandCount; i++) {
                         let validationIcon = document.getElementById('validationIcon' + i);
-                        let hiddenEmail = document.querySelector('[name="bandEmail' + i + '"]');
+                        let hiddenEmail = document.querySelector('[name="bands[' + i + '][email]"]');
                         console.log("ID: "+i);
                         console.log("Val: "+validationIcon);
                         console.log("Hidden: "+hiddenEmail);

@@ -41,7 +41,8 @@ router.get('/logout', function(req, res, next) {
 
 router.get('/register', function(req, res, next) {
     res.render('register',{
-        invalidUsername:req.query.invalidUsername
+        invalidUsername:req.query.invalidUsername,
+        invalidBandname:req.query.invalidBandname
     });
 });
 
@@ -53,7 +54,7 @@ router.post('/register', async function(req, res, next) {
             res.redirect('/register?invalidUsername=true');
             return;
         }
-        if(!(bandName == null)){
+        if(!(bandRecord == null)){
             res.redirect('/register?invalidBandname=true');
             return;
         }

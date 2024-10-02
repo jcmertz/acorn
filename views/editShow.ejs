@@ -29,7 +29,8 @@
       <div class="card">
         <div class="card-body">
           <h1 class="card-title">Show Details</h1>
-          <p class="card-text">Band: <strong><%= show.contactBand.bandName %></strong></p>
+          <p class="card-text">Show Name: <strong><%= show.showName %></strong></p>
+          <p class="card-text">Contact Band: <strong><%= show.contactBand.bandName %></strong></p>
           <p class="card-text">Date: <strong><%= show.showDate.toLocaleDateString() %></strong></p>
           <p class="card-text">Show Status:</p>
           <form id="form" action="/admin/setShowStatus" method="get">

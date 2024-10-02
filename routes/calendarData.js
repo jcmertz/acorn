@@ -22,12 +22,13 @@ router.get('/getRange', async function(req, res, next) {
     //console.log("Start: "+start);
     // console.log("End: "+end);
     if(band !== undefined){
+        var bandRecord = await db.Band.findOne({bandName:band});
         var query = {
             showDate: {
                 $gte: start,
                 $lte: end
             },
-            'contactBand.bandName':band,
+            bands: { $in: [bandRecord._id] },
             showStatus: {$gte: 0}
         }
     }
@@ -40,7 +41,7 @@ router.get('/getRange', async function(req, res, next) {
             showStatus: {$gte: 0}
         } 
     }
-    const data = await db.Show.find(query);
+    const data = await db.Show.find(query).populate('bands').populate('contactBand');
     var events = [];
     var authenticated = req.isAuthenticated();
     if(authenticated){
@@ -54,9 +55,19 @@ router.get('/getRange', async function(req, res, next) {
     }
     for (const event in data){
         if(authenticated){
-            if(data[event].contactBand.bandName == name){
+            // if(data[event].contactBand.bandName == name){
+            //     events.push({
+            //         title: data[event].contactBand.bandName,
+            //         start: data[event].showDate,
+            //         color: bands.getColorFromStatus(data[event].showStatus),
+            //         url: "/shows/"+data[event]._id
+            //     });
+            //     continue;
+            // }
+            const bandEval = (bandsElement) => bandsElement.bandName == name; 
+            if(data[event].bands.some(bandEval)){
                 events.push({
-                    title: data[event].contactBand.bandName,
+                    title: data[event].showName,
                     start: data[event].showDate,
                     color: bands.getColorFromStatus(data[event].showStatus),
                     url: "/shows/"+data[event]._id
@@ -84,7 +95,7 @@ router.get('/getRange', async function(req, res, next) {
         }
         if(data[event].showStatus >= 2){
             events.push({
-                title: data[event].contactBand.bandName,
+                title: data[event].showName,
                 start: data[event].showDate
             })
         }
@@ -120,7 +131,7 @@ router.get('/getRangeAdmin',util.checkUserRole(['staff', 'admin']), async functi
     var events = [];
     for (const event in data){
         events.push({
-            title: data[event].contactBand.bandName,
+            title: data[event].showName,
             start: data[event].showDate,
             color: bands.getColorFromStatus(data[event].showStatus),
             url: "/admin/shows/"+data[event]._id

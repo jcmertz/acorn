@@ -17,6 +17,7 @@ const bandSchema = new mongoose.Schema({
   loginInfo: String
 });
 const showSchema = new mongoose.Schema({
+  showName: String,
   showDate: Date,
   requestDate: Date,
   bands: [{type: mongoose.Types.ObjectId, ref: "Band"}],
