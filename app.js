@@ -15,20 +15,6 @@ var db = require('./src/db'); //Require the mongoose database init
 const fullcalendar = require('fullcalendar');
 const util = require("./src/utilities.js");
 
-const nodemailer = require('nodemailer');
-// Configure your SMTP transport (for example, using Gmail SMTP)
-let transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_SERVER, // Your mail server host
-  port: 465, // Port for secure SMTP
-  secure: true, // Use SSL (recommended for port 465)
-  auth: {
-    user: process.env.EMAIL, // Your email stored in the environment variable
-    pass: process.env.EMAIL_PASSWORD // Your password stored in the environment variable
-  }
-});
-module.exports.transporter = transporter; // Export transporter for use elsewhere
-
-
 var crypto = require('crypto');
 
 var passport = require('passport');

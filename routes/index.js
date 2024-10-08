@@ -2,6 +2,8 @@ var db = require('../src/db');
 var express = require('express');
 
 var router = express.Router();
+const { sendMagicLink } = require('../src/utilities');  // Bring in the nodemailer object
+
 
 router.get('/', async (req, res) => {
   //console.log(data);
@@ -21,5 +23,12 @@ router.get('/', async (req, res) => {
     successMessages
   });
 })
+
+router.get('/test', async (req, res) => {
+  let userRecord = await db.User.findOne({ email: "joe@joemertz.com" });
+  console.log(userRecord);
+  sendMagicLink(userRecord);
+  res.render('login/checkEmail');
+});
 
 module.exports = router;

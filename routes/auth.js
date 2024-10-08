@@ -8,7 +8,8 @@ var db = require('../src/db');
 
 router.use(express.urlencoded({ extended: true }));
 
-const { transporter } = require('../app');  // Bring in the nodemailer object
+const { sendToken, transporter } = require('../src/utilities');  // Bring in the nodemailer object
+
 
 // Local Strategy for password-based login
 passport.use(new LocalStrategy(async function verify(username, password, cb) {
@@ -39,26 +40,18 @@ passport.use(new MagicLinkStrategy(
         tokenField: 'token',                     // Field where token is saved
         verifyUserAfterToken: true               // Whether to verify user after token is generated
     },
-    async function send(user, token) {
-        const magicLinkUrl = `http://acorn.thefallenlog.com/login/email/verify?token=${token}`;
-        const mailOptions = {
-            from: process.env.EMAIL,
-            to: user.email,
-            subject: 'Your Magic Login Link',
-            text: `Click this link to log in: ${magicLinkUrl}`,
-        };
-        return transporter.sendMail(mailOptions);
-    },
+    sendToken
+    ,
     async function verify(user) {
         try {
             // Check if the user exists in the database by their email
             let userRecord = await db.User.findOne({ email: user.email });
-
+            
             // If the user doesn't exist, throw an error
             if (!userRecord) {
                 throw new Error('No known user with this email address.');
             }
-
+            
             // If the user exists, return the user object
             return {
                 id: userRecord._id,
