@@ -6,7 +6,10 @@ const userSchema = new mongoose.Schema({
   user: String,
   pass: String,
   salt: String,
-  role: String
+  role: String,
+  email: String,
+  token: String,
+  email_verified: Boolean
 });
 const bandSchema = new mongoose.Schema({
   bandName: String,

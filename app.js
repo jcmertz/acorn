@@ -15,6 +15,20 @@ var db = require('./src/db'); //Require the mongoose database init
 const fullcalendar = require('fullcalendar');
 const util = require("./src/utilities.js");
 
+const nodemailer = require('nodemailer');
+// Configure your SMTP transport (for example, using Gmail SMTP)
+let transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_SERVER, // Your mail server host
+  port: 465, // Port for secure SMTP
+  secure: true, // Use SSL (recommended for port 465)
+  auth: {
+    user: process.env.EMAIL, // Your email stored in the environment variable
+    pass: process.env.EMAIL_PASSWORD // Your password stored in the environment variable
+  }
+});
+module.exports.transporter = transporter; // Export transporter for use elsewhere
+
+
 var crypto = require('crypto');
 
 var passport = require('passport');
@@ -28,9 +42,13 @@ var store = new MongoDBStore({
   collection: 'userSessions'
 });
 
+// store.on('connected', function() {
+//   console.log('MongoDB session store connected');
+// });
+
 // Catch errors
 store.on('error', function(error) {
-  console.log(error);
+  console.error('Session store error:', error);
 });
 
 //Create new admin user if none exists
@@ -69,7 +87,17 @@ app.use(session({
   saveUninitialized: false,
   store: store
 }));
+
+//The below code is used for debugging sessions. It isn't needed generally
+// app.use((req, res, next) => {
+  //   console.log('Session:', req.session);
+//   console.log('Session ID:', req.sessionID);
+//   next();
+// });
+
+app.use(passport.initialize());
 app.use(passport.authenticate('session'));
+
 
 app.use(express.static('public'));
 var authRouter = require('./routes/auth');

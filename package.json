@@ -1,21 +1,25 @@
 {
   "dependencies": {
     "archetype": "github:LaurentGoderre/archetype#fix-lodash_set-vuln",
+    "buffer-crc32": "^1.0.0",
     "connect-ensure-login": "^0.1.1",
     "connect-mongodb-session": "^5.0.0",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
-    "express": "^4.19.2",
+    "express": "^4.21.0",
     "express-session": "^1.18.0",
     "fullcalendar": "^6.1.15",
     "jquery": "^3.7.1",
     "mongoose": "^8.5.4",
     "next": "^14.2.13",
+    "nodemailer": "^6.9.15",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "passport-magic-link": "^2.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.8.0",
+    "uid2": "^1.0.0"
   },
   "name": "acorn",
   "description": "Acorn is a piece of Open Source Venue Management Software being developed for The Fallen Log at Kitchen 17",

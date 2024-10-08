@@ -2,10 +2,14 @@ var express = require('express');
 var router = express.Router();
 var passport = require('passport');
 var LocalStrategy = require('passport-local');
+var MagicLinkStrategy = require('passport-magic-link').Strategy;
 var crypto = require('crypto');
 var db = require('../src/db');
 
 router.use(express.urlencoded({ extended: true }));
+
+const { transporter } = require('../app');  // Bring in the nodemailer object
+
 
 passport.use(new LocalStrategy(async function verify(username, password, cb) {
     const userRecord = await db.User.findOne({user:username});
@@ -23,12 +27,78 @@ passport.use(new LocalStrategy(async function verify(username, password, cb) {
     }
 }));
 
+passport.use(new MagicLinkStrategy(
+    {
+        secret: process.env.MAGIC_LINK_SECRET,     // For token generation
+        userFields: ['email'],           // User field to send email
+        tokenField: 'token',             // Field where token is saved
+        verifyUserAfterToken: true      // Verify user after token generated
+    }, 
+    function send (user, token) {
+        const magicLinkUrl = 'http://acorn.thefallenlog.com/login/email/verify?token=' + token;
+        const mailOptions = {
+            from: process.env.EMAIL,
+            to: user.email,
+            subject: 'Your Magic Login Link',
+            text: `Click this link to log in: ${magicLinkUrl}`,
+        };
+        return transporter.sendMail(mailOptions);
+    }, 
+    function verify (user) {
+        return new Promise(async function(resolve, reject) {
+            try{
+                // 1. Check if the user exists in the database by their email
+                let userRecord =  await db.User.findOne({email:user.email});
+                // 2. If the user doesn't exist, insert a new one
+                if(!userRecord){
+                    const newUser = new db.User({
+                        email:user.email,
+                        email_verified: true
+                    });
+                    // Save the new user to the database
+                    let savedUser = await newUser.save();
+                    // Return the newly created user's info
+                    resolve({
+                        id: savedUser._id, 
+                        email: savedUser.email
+                    });
+                } else {
+                    // 3. If the user exists, return the found user
+                    resolve({
+                        id: userRecord._id,
+                        email: userRecord.email
+                    });
+                }
+            } catch (err) {
+                // If there's an error (e.g., DB issue), reject the promise
+                reject(err);
+            }
+        });
+    }
+));
+
 router.get('/login', function(req, res, next) {
-    res.render('login');
+    res.render('login/email');
 });
 
 router.post('/login/password', passport.authenticate('local', {
     successRedirect: '/',
+    failureRedirect: '/login/'
+}));
+
+router.post('/login/email', passport.authenticate('magiclink', {
+    action: 'requestToken',
+    failureRedirect: '/login'
+}), function(req, res, next) {
+    res.redirect('/login/email/check');
+});
+
+router.get('/login/email/check', function(req, res, next) {
+    res.render('login/email/check');
+});
+
+router.get('/login/email/verify', passport.authenticate('magiclink', {
+    successReturnToOrRedirect: '/',
     failureRedirect: '/login'
 }));
 
@@ -67,7 +137,8 @@ router.post('/register', async function(req, res, next) {
                 user: req.body.username,
                 pass: hashedPassword.toString('hex'), 
                 salt: salt,
-                role: "user"
+                role: "user",
+                email: req.body.contactEmail
             });
             
             // Create user object for login
@@ -84,7 +155,7 @@ router.post('/register', async function(req, res, next) {
                 instagram:req.body.instagram,
                 loginInfo:user.user
             });
-
+            
             // Log the user in
             req.login(loginUser, function(err) {
                 if (err) { return next(err); }
