@@ -12,9 +12,13 @@ router.get('/', async (req, res) => {
       isAdmin = true;
     }
   }
+  const errorMessages = req.flash('error') || [];
+  const successMessages = req.flash('success') || [];
   res.render('index',{
     isLoggedIn:req.isAuthenticated(),
-    isAdmin:isAdmin
+    isAdmin:isAdmin,
+    errorMessages,
+    successMessages
   });
 })
 

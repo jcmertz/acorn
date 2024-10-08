@@ -79,14 +79,21 @@ var url = require("url");
 app.set('views', __dirname + '/views');
 app.set('view engine', "ejs");
 
-
-
 app.use(session({
   secret: 'keyboard cat',
-  resave: false,
-  saveUninitialized: false,
+  resave: true,
+  saveUninitialized: true,
   store: store
 }));
+
+const flash = require('connect-flash');
+app.use(flash());
+
+app.use(function(req, res, next) {
+  res.locals.successMessages = req.flash('success');
+  res.locals.errorMessages = req.flash('error');
+  next();
+});
 
 //The below code is used for debugging sessions. It isn't needed generally
 // app.use((req, res, next) => {
