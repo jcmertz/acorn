@@ -60,6 +60,8 @@ router.post('/addEvent',ensureLoggedIn, async (req,res) => { //Handles the form 
                 const newBandUser = await registerBand(data.bands[i].email,data.bands[i].name);
                 const userObj = await db.User.findOne({user:newBandUser.user})
                 sendMagicLink(userObj);
+                const band = await db.Band.findOne({loginInfo:userObj.user});
+                show.bands.push(band._id);
                 console.log("NEW USER INVITE SENT TO: "+data.bands[i].email);
             }
         }
