@@ -37,21 +37,25 @@ let transporter = nodemailer.createTransport({
 const jwt = require('jsonwebtoken')
 const {promisify} = require('util')
 
-
+var validator = require("email-validator"); 
 async function sendMagicLink(user){
   // Generate JWT
   const createToken = promisify(jwt.sign)
   let token
-  try {
-    token = await createToken(
-      {user: {email: user.email}, iat: Math.floor(Date.now() / 1000)},
-      process.env.MAGIC_LINK_SECRET,
-      {expiresIn: 60*10} //10 Minutes
-    )
-  } catch (err) {
-    return this.error(err)
+  if(validator.validate(user.email)){
+    try {
+      token = await createToken(
+        {user: {email: user.email}, iat: Math.floor(Date.now() / 1000)},
+        process.env.MAGIC_LINK_SECRET,
+        {expiresIn: 60*10} //10 Minutes
+      )
+    } catch (err) {
+      return this.error(err)
+    }
+    sendToken(user,token);
+  } else {
+    return(new Error("Invalid Email Address"));
   }
-  sendToken(user,token);
 };
 
 async function sendToken(user, token) {
@@ -67,10 +71,18 @@ async function sendToken(user, token) {
 
 
 const crypto = require('crypto');
-const util = require('util');
-
 // Promisify the callback-based pbkdf2
-const pbkdf2Async = util.promisify(crypto.pbkdf2);
+const pbkdf2Async = promisify(crypto.pbkdf2);
+
+async function updatePassword(userID,password){
+  user = await db.User.findById(userID);
+  const salt = crypto.randomBytes(16).toString('hex'); // Synchronously generate the salt
+  // Promisified version of pbkdf2
+  const hashedPassword = await pbkdf2Async(password, salt, 310000, 32, 'sha256');
+  user.pass = hashedPassword.toString('hex'),
+  user.salt = salt;
+  await user.save();
+}
 
 async function registerBand(contactEmail, bandName, password) {
   try {
@@ -82,12 +94,7 @@ async function registerBand(contactEmail, bandName, password) {
     });
     
     if(password){
-      const salt = crypto.randomBytes(16).toString('hex'); // Synchronously generate the salt
-      // Promisified version of pbkdf2
-      const hashedPassword = await pbkdf2Async(password, salt, 310000, 32, 'sha256');
-      user.pass = hashedPassword.toString('hex'),
-      user.salt = salt;
-      await user.save();
+      updatePassword(user._id,password);
     }
     
     await db.Band.create({
@@ -117,5 +124,6 @@ module.exports = {
   sendToken,
   sendMagicLink,
   registerBand,
+  updatePassword,
   transporter:transporter
 };

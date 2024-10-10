@@ -9,6 +9,23 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
     <link rel="stylesheet" href="../../styles/styles.css"/>
     
+    <script>
+        $(document).ready(function () {
+            $('#new-password, #confirm-password').on('keyup', function () {
+                var password = $('#new-password').val();
+                var confirmPassword = $('#confirm-password').val();
+                
+                if (password === confirmPassword && password.length > 0) {
+                    $('#passwordMismatch').text(''); // Clear any error message
+                    $('#submitBtn').prop('disabled', false); // Enable submit button
+                } else {
+                    $('#passwordMismatch').text('Passwords do not match');
+                    $('#submitBtn').prop('disabled', true); // Disable submit button
+                }
+            });
+        });
+    </script>
+    
 </head>
 
 <body>
@@ -18,7 +35,7 @@
         
         <h1 class="mb-4 text-center">Register a Band</h1>
         
-        <form action="/register" method="post">
+        <form id="registerForm" action="/register" method="post">
             
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
@@ -29,6 +46,13 @@
                 <label for="new-password" class="form-label">Password</label>
                 <input id="new-password" name="password" type="password" class="form-control" autocomplete="new-password" required>
             </div>
+            
+            <div class="mb-3">
+                <label for="confirm-password" class="form-label">Confirm Password</label>
+                <input id="confirm-password" name="confirmPassword" type="password" class="form-control" autocomplete="new-password" required>
+            </div>
+            
+            <div class="mb-3 text-danger" id="passwordMismatch"></div> <!-- Placeholder for password mismatch message -->
             
             <div class="mb-3">
                 <label for="bandName" class="form-label">Band Name</label>
@@ -46,7 +70,7 @@
                 <input id="instagram" name="instagram" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
             </div>
             
-            <button type="submit" class="btn btn-primary w-100">Register</button>
+            <button id="submitBtn" type="submit" class="btn btn-primary w-100" disabled>Register</button>
             
         </form>
     </div>

@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 
 router.use(express.urlencoded({ extended: true }));
 
-const { sendMagicLink, sendToken,registerBand, transporter } = require('../src/utilities');
+const { sendMagicLink, sendToken,registerBand,updatePassword, transporter } = require('../src/utilities');
 const { register } = require('module');
 
 
@@ -104,7 +104,7 @@ router.get('/login/email/verify', async (req,res) =>{
         // If token is valid, proceed with the authentication
         passport.authenticate('magiclink', { failureRedirect: '/login' })(req, res, () => {
             req.flash('success', 'Logged In');
-            res.redirect('/');
+            res.redirect('/resetPassword');
         });
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
@@ -116,6 +116,20 @@ router.get('/login/email/verify', async (req,res) =>{
             res.redirect('/');
         }
     }
+});
+router.get('/resetPassword', async (req,res) =>{
+    if(req.isAuthenticated()){
+        res.render('login/resetPassword');
+    } else {
+        res.redirect('/');
+    }
+});
+
+router.post('/resetPassword', async (req,res) =>{
+    await updatePassword(req.user.id,req.body.password);
+    console.log(req.body.password);
+    req.flash("success","Password Updated Succesfully");
+    res.redirect('/');    
 });
 
 router.get('/logout', function(req, res, next) {
