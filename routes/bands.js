@@ -3,7 +3,7 @@ var router = express.Router();
 var passport = require('passport');
 var crypto = require('crypto');
 var db = require('../src/db'); //Require the mongoose database init
-
+const { sendMagicLink,registerBand } = require('../src/utilities');
 var ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 var ensureLoggedIn = ensureLogIn();
 
@@ -57,7 +57,12 @@ router.post('/addEvent',ensureLoggedIn, async (req,res) => { //Handles the form 
         }
         else{
             if(data.bands[i].email !== null){
-                console.log("NEW USER INVITE WOULD HAVE HAPPENED");
+                const newBandUser = await registerBand(data.bands[i].email,data.bands[i].name);
+                console.log(newBandUser);
+                const userObj = await db.User.findOne({user:newBandUser.user})
+                console.log(userObj);
+                sendMagicLink(userObj);
+                console.log("NEW USER INVITE SENT TO: "+data.bands[i].email);
             }
         }
         showName = showName + data.bands[i].name + ", ";

@@ -10,7 +10,8 @@ const jwt = require('jsonwebtoken');
 
 router.use(express.urlencoded({ extended: true }));
 
-const { sendMagicLink, sendToken, transporter } = require('../src/utilities');  // Bring in the nodemailer object
+const { sendMagicLink, sendToken,registerBand, transporter } = require('../src/utilities');
+const { register } = require('module');
 
 
 // Local Strategy for password-based login
@@ -151,34 +152,15 @@ router.post('/register', async function(req, res, next) {
             return;
         }
         
-        const salt = crypto.randomBytes(16).toString('hex');
-        crypto.pbkdf2(req.body.password, salt, 310000, 32, 'sha256', async function(err, hashedPassword) {
+        const loginUser = await registerBand(req.body.contactEmail,req.body.username,req.body.password);
+        
+        band = await db.Band.findOneAndUpdate({ bandName: loginUser.user },{instagram:req.body.instagram});        
+        
+        req.login(loginUser, function(err) {
             if (err) { return next(err); }
-            
-            const user = await db.User.create({
-                user: req.body.username,
-                pass: hashedPassword.toString('hex'),
-                salt: salt,
-                role: "user",
-                email: req.body.contactEmail
-            });
-            
-            const loginUser = { id: user._id, user: user.user };
-            
-            await db.Band.create({
-                bandName: req.body.bandName,
-                contactEmail: req.body.contactEmail,
-                homeTown: req.body.homeTown,
-                genre: req.body.genre,
-                instagram: req.body.instagram,
-                loginInfo: user.user
-            });
-            
-            req.login(loginUser, function(err) {
-                if (err) { return next(err); }
-                res.redirect('/');
-            });
+            res.redirect('/');
         });
+        
     } catch (error) {
         next(error);
     }

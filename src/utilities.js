@@ -65,10 +65,57 @@ async function sendToken(user, token) {
   return transporter.sendMail(mailOptions);
 };
 
+
+const crypto = require('crypto');
+const util = require('util');
+
+// Promisify the callback-based pbkdf2
+const pbkdf2Async = util.promisify(crypto.pbkdf2);
+
+async function registerBand(contactEmail, bandName, password) {
+  try {
+    
+    const user = await db.User.create({
+      user: bandName,
+      role: "user",
+      email: contactEmail
+    });
+    
+    if(password){
+      const salt = crypto.randomBytes(16).toString('hex'); // Synchronously generate the salt
+      // Promisified version of pbkdf2
+      const hashedPassword = await pbkdf2Async(password, salt, 310000, 32, 'sha256');
+      user.pass = hashedPassword.toString('hex'),
+      user.salt = salt;
+      await user.save();
+    }
+    
+    await db.Band.create({
+      bandName: bandName,
+      contactEmail: contactEmail,
+      loginInfo: user.user
+    });
+    
+    // Finding the new user after it's created
+    const newUser = await db.User.findOne({ user: bandName });
+    let loginUser = null;
+    if (newUser !== null) {
+      loginUser = { id: newUser._id, user: newUser.user };
+    }
+    return loginUser;
+  } catch (err) {
+    console.error(err);
+    throw new Error('Registration failed');
+  }
+}
+
+
+
 module.exports = {
   checkUserRole,
   logMessage,
   sendToken,
   sendMagicLink,
+  registerBand,
   transporter:transporter
 };

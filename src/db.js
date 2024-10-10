@@ -8,7 +8,6 @@ const userSchema = new mongoose.Schema({
   salt: String,
   role: String,
   email: String,
-  token: String,
   email_verified: Boolean
 });
 const bandSchema = new mongoose.Schema({
