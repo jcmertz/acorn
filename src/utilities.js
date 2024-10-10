@@ -60,14 +60,32 @@ async function sendMagicLink(user){
 
 async function sendToken(user, token) {
   const magicLinkUrl = `http://acorn.thefallenlog.com/login/email/verify?token=${token}`;
+  const logoUrl = `http://acorn.thefallenlog.com/AcornAppLogo.svg`;
+
   const mailOptions = {
     from: process.env.EMAIL,
     to: user.email,
-    subject: 'Your Magic Login Link',
-    text: `Click this link to log in: ${magicLinkUrl}`,
+    subject: 'You Have Been Invited to join The Fallen Log on Acorn',
+    text: `Acorn is the booking app for The Fallen Log at Kitchen 17. You have been invited to create an account to manage your upcoming shows. \nClick this link to log in to your account: ${magicLinkUrl}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; text-align: center;">
+        <img src="${logoUrl}" alt="Acorn Logo" style="width: 150px; margin-bottom: 20px;" />
+        <h2>You Have Been Invited to join The Fallen Log on Acorn</h2>
+        <p>Acorn is the booking app for The Fallen Log at Kitchen 17. You have been invited to create an account to manage your upcoming shows.</p>
+        <p>
+          <a href="${magicLinkUrl}" style="display: inline-block; padding: 12px 24px; font-size: 16px; color: #ffffff; background-color: #4CAF50; text-decoration: none; border-radius: 5px;">
+            Log in to your account
+          </a>
+        </p>
+        <p>If the button above doesn't work, copy and paste the following link into your browser:</p>
+        <p><a href="${magicLinkUrl}">${magicLinkUrl}</a></p>
+      </div>
+    `,
   };
+
   return transporter.sendMail(mailOptions);
-};
+}
+
 
 
 const crypto = require('crypto');
