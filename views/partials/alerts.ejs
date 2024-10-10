@@ -1,0 +1,75 @@
+<% if (errorMessages.length > 0 || successMessages.length > 0) { %>
+    <div class="alert-container">
+        <% errorMessages.forEach(function(message) { %>
+            <div class="alert alert-danger alert-dismissible fade show auto-dismiss overlay-alert" role="alert">
+                <p><%= message %></p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% }) %>
+
+        <% successMessages.forEach(function(message) { %>
+            <div class="alert alert-success alert-dismissible fade show auto-dismiss overlay-alert" role="alert">
+                <p><%= message %></p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% }) %>
+    </div>
+<% } %>
+
+<script>
+    // Auto-dismiss alert function with parent div hover check
+    const alertContainer = document.querySelector('.alert-container');
+
+    if (alertContainer) {
+        let timeout;
+        
+        const startAutoDismiss = () => {
+            timeout = setTimeout(function() {
+                if (!alertContainer.matches(':hover')) { // If none of the alerts or container are hovered
+                    document.querySelectorAll('.auto-dismiss').forEach(function(alert) {
+                        alert.classList.remove('show'); // Hide each alert
+                    });
+                }
+            }, 3000); // 3 seconds
+        };
+        
+        // Start the timeout on page load
+        startAutoDismiss();
+
+        // Clear the timeout when mouse enters the alert container
+        alertContainer.addEventListener('mouseenter', function() {
+            clearTimeout(timeout);
+        });
+
+        // Restart the timeout when mouse leaves the alert container
+        alertContainer.addEventListener('mouseleave', function() {
+            startAutoDismiss();
+        });
+    }
+</script>
+
+<style>
+    .alert-container {
+        position: fixed;
+        top: 2%; /* Adjust the initial position */
+        left: 50%; /* Center horizontally */
+        transform: translateX(-50%); /* Shift left by 50% of its own width */
+        z-index: 9999; /* Ensures the alert stays on top of other content */
+        width: 60%; /* You can adjust the width */
+        max-width: 1000px; /* Set a max width for responsiveness */
+    }
+
+    .overlay-alert {
+        margin-top: 5px; /* Add space between stacked alerts */
+    }
+
+    .overlay-alert p {
+        margin: 0; /* Remove margins from the <p> tags inside the alert */
+    }
+
+    @media (max-width: 768px) {
+        .alert-container {
+            width: 90%; /* Make the alert smaller on smaller screens */
+        }
+    }
+</style>

@@ -14,21 +14,24 @@ router.get('/', async (req, res) => {
       isAdmin = true;
     }
   }
-  const errorMessages = req.flash('error') || [];
-  const successMessages = req.flash('success') || [];
   res.render('index',{
     isLoggedIn:req.isAuthenticated(),
     isAdmin:isAdmin,
-    errorMessages,
-    successMessages
+    errorMessages:res.locals.errorMessages,
+    successMessages:res.locals.successMessages
   });
 })
 
+
+// Test Route
 router.get('/test', async (req, res) => {
   let userRecord = await db.User.findOne({ email: "joe@joemertz.com" });
   console.log(userRecord);
   sendMagicLink(userRecord);
-  res.render('login/checkEmail');
+  res.render('login/checkEmail',{
+    errorMessages:res.locals.errorMessages,
+    successMessages:res.locals.successMessages
+  });
 });
 
 module.exports = router;

@@ -14,7 +14,7 @@ router.use(express.urlencoded({ extended: true }));
 router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => { //Pulls open a form for a band to fill out
     var band = await getBandFromUsername(req.user.username);
     if (band === null){
-        console.log("redirecting");
+        req.flash("error","No Band Logged In or Tied to Your User Profile");
         res.redirect("/");
         return;
     }
@@ -25,7 +25,9 @@ router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => { 
         day:req.params.day,
         year:req.params.year,
         bandName:name,
-        knownBandData:knownBands
+        knownBandData:knownBands,
+        errorMessages:res.locals.errorMessages,
+        successMessages:res.locals.successMessages
     }
 );
 });
@@ -37,6 +39,7 @@ router.post('/addEvent',ensureLoggedIn, async (req,res) => { //Handles the form 
     if (band === null){
         console.log("something went wrong: ");
         console.log("Contact Band Name: "+data.bands[0].name);
+        req.flash("error","No Band Found For User");
         res.redirect("/");
         return;
     }
@@ -80,7 +83,9 @@ router.get('/profile', ensureLoggedIn, async (req, res) => {
         return;
     }
     res.render('bandProfile', {
-        band: band
+        band: band,
+        errorMessages:res.locals.errorMessages,
+        successMessages:res.locals.successMessages
     });
 });
 

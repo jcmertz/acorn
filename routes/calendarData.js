@@ -134,7 +134,7 @@ router.get('/getRangeAdmin',util.checkUserRole(['staff', 'admin']), async functi
             title: data[event].showName,
             start: data[event].showDate,
             color: bands.getColorFromStatus(data[event].showStatus),
-            url: "/shows/edit"+data[event]._id
+            url: "/shows/edit/"+data[event]._id
         });
     }
     // console.log(events);

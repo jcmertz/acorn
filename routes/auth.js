@@ -5,10 +5,12 @@ var LocalStrategy = require('passport-local');
 var MagicLinkStrategy = require('passport-magic-link').Strategy;
 var crypto = require('crypto');
 var db = require('../src/db');
+const jwt = require('jsonwebtoken');
+
 
 router.use(express.urlencoded({ extended: true }));
 
-const { sendToken, transporter } = require('../src/utilities');  // Bring in the nodemailer object
+const { sendMagicLink, sendToken, transporter } = require('../src/utilities');  // Bring in the nodemailer object
 
 
 // Local Strategy for password-based login
@@ -38,12 +40,14 @@ passport.use(new MagicLinkStrategy(
         secret: process.env.MAGIC_LINK_SECRET,   // Secret for token generation
         userFields: ['email'],                   // Field to verify user
         tokenField: 'token',                     // Field where token is saved
-        verifyUserAfterToken: true               // Whether to verify user after token is generated
+        verifyUserAfterToken: true,              // Whether to verify user after token is generated
+        passReqToCallback: true
     },
     sendToken
     ,
     async function verify(user) {
         try {
+            
             // Check if the user exists in the database by their email
             let userRecord = await db.User.findOne({ email: user.email });
             
@@ -68,7 +72,7 @@ passport.use(new MagicLinkStrategy(
 
 // Routes
 router.get('/login', function(req, res) {
-    res.render('login/email');
+    res.render('login/password');
 });
 
 router.post('/login/password', passport.authenticate('local', {
@@ -86,12 +90,32 @@ router.post('/login/email', passport.authenticate('magiclink', {
 });
 
 router.get('/login/email/check', function(req, res) {
+    req.flash("success","Check your email for a login link!");
     res.redirect('/',);
 });
-router.get('/login/email/verify', passport.authenticate('magiclink', {
-    successReturnToOrRedirect: '/',
-    failureRedirect: '/login'
-}));
+router.get('/login/email/verify', async (req,res) =>{
+    // console.log("Query:");
+    // console.log(req.query);
+    const { token, email } = req.query;
+    
+    try{
+        const decoded = jwt.verify(token, process.env.MAGIC_LINK_SECRET);
+        // If token is valid, proceed with the authentication
+        passport.authenticate('magiclink', { failureRedirect: '/login' })(req, res, () => {
+            req.flash('success', 'Logged In');
+            res.redirect('/');
+        });
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            // Token is expired, handle token regeneration 
+            //console.log('Token expired. Generating new token...');
+            const expired = jwt.verify(token, process.env.MAGIC_LINK_SECRET, {ignoreExpiration: true} );
+            sendMagicLink(expired.user);
+            req.flash('error', 'Token Expired: A New Link Has Been Sent to your E-Mail'); 
+            res.redirect('/');
+        }
+    }
+});
 
 router.get('/logout', function(req, res, next) {
     req.logout(function(err) {
@@ -103,8 +127,8 @@ router.get('/logout', function(req, res, next) {
 // Registration route
 router.get('/register', function(req, res) {
     res.render('register', {
-        invalidUsername: req.query.invalidUsername,
-        invalidBandname: req.query.invalidBandname
+        errorMessages:res.locals.errorMessages,
+        successMessages:res.locals.successMessages
     });
 });
 
@@ -113,12 +137,17 @@ router.post('/register', async function(req, res, next) {
         const userRecord = await db.User.findOne({ user: req.body.username });
         const bandRecord = await db.Band.findOne({ bandName: req.body.bandName });
         
+        var redirect = false;
         if (userRecord) {
-            res.redirect('/register?invalidUsername=true');
-            return;
+            req.flash("error","That Username is Already Registered");
+            redirect = true;
         }
         if (bandRecord) {
-            res.redirect('/register?invalidBandname=true');
+            req.flash("error","That Band Name Is Already Registered");
+            redirect = true;
+        }
+        if(redirect){
+            res.redirect('/register');
             return;
         }
         

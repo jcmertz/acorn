@@ -11,115 +11,102 @@
     
 </head>
 <body>
-    <% if (errorMessages.length > 0) { %>
-        <div class="alert alert-danger">
-            <% errorMessages.forEach(function(message) { %>
-                <p><%= message %></p>
-            <% }) %>
-        </div>
-    <% } %>
+    <%- include('partials/alerts') %>
     
-    <% if (successMessages && successMessages.length > 0) { %>
-        <div class="alert alert-success">
-            <% successMessages.forEach(function(message) { %>
-                <p><%= message %></p>
-            <% }) %>
-        </div>
-    <% } %>
-            <div class="row mb-4">
-                <img src="../../AcornAppLogo.svg" style="width: 20%;" >
-                <% if (!isLoggedIn) { %>
-                    <div class="col d-flex justify-content-end">
-                        <a class="btn btn-primary" href="/register"><h4> REGISTER </h4></a>
-                        <a class="btn btn-primary ms-2" href="/login"><h4> LOGIN </h4></a>
-                    </div>
-                    <% } %>
-                    <% if (isLoggedIn) { %>
-                        <div class="col d-flex justify-content-end">
-                            <a class="btn btn-primary" href="/profile"><h4> My Profile </h4></a>
-                            <a class="btn btn-primary ms-2" href="/logout"><h4> LOGOUT </h4></a>
+    <div class="row mb-4">
+        <img src="../../AcornAppLogo.svg" style="width: 20%;" >
+        <% if (!isLoggedIn) { %>
+            <div class="col d-flex justify-content-end">
+                <a class="btn btn-primary" href="/register"><h4> REGISTER </h4></a>
+                <a class="btn btn-primary ms-2" href="/login"><h4> LOGIN </h4></a>
+            </div>
+            <% } %>
+            <% if (isLoggedIn) { %>
+                <div class="col d-flex justify-content-end">
+                    <a class="btn btn-primary" href="/profile"><h4> My Profile </h4></a>
+                    <a class="btn btn-primary ms-2" href="/logout"><h4> LOGOUT </h4></a>
+                </div>
+                <% } %>
+            </div>
+            
+            <!-- FullCalendar container -->
+            <div id='calendar'></div>
+            
+            <!-- Bootstrap Modal -->
+            <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header d-flex justify-content-center">
+                            <!-- Centering the SVG logo -->
+                            <img src="../../AcornAppLogo.svg" class="mx-auto" style="width: 50%;" alt="Acorn App Logo">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; right: 10px;"></button>
                         </div>
-                        <% } %>
-                    </div>
-                    
-                    <!-- FullCalendar container -->
-                    <div id='calendar'></div>
-                    
-                    <!-- Bootstrap Modal -->
-                    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header d-flex justify-content-center">
-                                    <!-- Centering the SVG logo -->
-                                    <img src="../../AcornAppLogo.svg" class="mx-auto" style="width: 50%;" alt="Acorn App Logo">
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; right: 10px;"></button>
-                                </div>
-                                <div class="modal-body text-center">
-                                    <!-- Center-justified text -->
-                                    <h5>Welcome to Acorn, the show booking app for The Fallen Log at Kitchen 17!</h5>
-                                    <p>To use the app to book a show you will first have to register or log into an account. If you just want to browse the upcoming shows you are welcome to do that here without logging in.</p>
-                                </div>
-                                <div class="modal-footer justify-content-center">
-                                    <a class="btn btn-secondary me-2" href="/login">Login</a>
-                                    <a class="btn btn-secondary me-2" href="/register">Register</a>
-                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-                                </div>
-                            </div>
+                        <div class="modal-body text-center">
+                            <!-- Center-justified text -->
+                            <h5>Welcome to Acorn, the show booking app for The Fallen Log at Kitchen 17!</h5>
+                            <p>To use the app to book a show you will first have to register or log into an account. If you just want to browse the upcoming shows you are welcome to do that here without logging in.</p>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <a class="btn btn-secondary me-2" href="/login">Login</a>
+                            <a class="btn btn-secondary me-2" href="/register">Register</a>
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
-                    
-                    
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            var calendarEl = document.getElementById('calendar');
-                            var calendar = new FullCalendar.Calendar(calendarEl, {
-                                initialView: 'dayGridMonth',
-                                timeZone: 'America/Chicago',
-                                dateClick: function(info) {
-                                    <% if (!isLoggedIn) { %>
-                                        // Trigger Bootstrap modal
+                </div>
+            </div>
+            
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var calendarEl = document.getElementById('calendar');
+                    var calendar = new FullCalendar.Calendar(calendarEl, {
+                        initialView: 'dayGridMonth',
+                        timeZone: 'America/Chicago',
+                        dateClick: function(info) {
+                            <% if (!isLoggedIn) { %>
+                                // Trigger Bootstrap modal
+                                var myModal = new bootstrap.Modal(document.getElementById('infoModal'));
+                                myModal.show();
+                                <% } else { %>
+                                    // Handle date click if user is logged in
+                                    if (info.date.getDay() == 0) { // Blockout Mondays
+                                        return;
+                                    } else {
+                                        var month = info.date.getUTCMonth() + 1;
+                                        var day = info.date.getUTCDate();
+                                        var year = info.date.getUTCFullYear();
+                                        window.location.href = '/newEvent/' + month + '/' + day + '/' + year;
+                                    }
+                                    <% } %>
+                                },
+                                events: {
+                                    <% if (isAdmin) { %>
+                                        url: '/events/getRangeAdmin',
+                                        <% } else { %>
+                                            url: '/events/getRange',
+                                            <% } %>
+                                            failure: function() {
+                                                alert('There was an error while fetching events!');
+                                            }
+                                        },
+                                        dayCellDidMount: function(arg) { // Color background of Mondays
+                                            if (arg.dow == 1) {
+                                                arg.el.bgColor = "gray";
+                                            }
+                                        },
+                                        firstDay: 1
+                                    });
+                                    calendar.render();
+                                    
+                                    // Open the modal on page load if this is the user's first visit
+                                    if (!localStorage.getItem('visited')) {
                                         var myModal = new bootstrap.Modal(document.getElementById('infoModal'));
                                         myModal.show();
-                                        <% } else { %>
-                                            // Handle date click if user is logged in
-                                            if (info.date.getDay() == 0) { // Blockout Sundays
-                                                return;
-                                            } else {
-                                                var month = info.date.getUTCMonth() + 1;
-                                                var day = info.date.getUTCDate();
-                                                var year = info.date.getUTCFullYear();
-                                                window.location.href = '/newEvent/' + month + '/' + day + '/' + year;
-                                            }
-                                            <% } %>
-                                        },
-                                        events: {
-                                            <% if (isAdmin) { %>
-                                                url: '/events/getRangeAdmin',
-                                                <% } else { %>
-                                                    url: '/events/getRange',
-                                                    <% } %>
-                                                    failure: function() {
-                                                        alert('There was an error while fetching events!');
-                                                    }
-                                                },
-                                                dayCellDidMount: function(arg) { // Color background of Mondays
-                                                    if (arg.dow == 1) {
-                                                        arg.el.bgColor = "gray";
-                                                    }
-                                                },
-                                                firstDay: 1
-                                            });
-                                            calendar.render();
-                                            
-                                            // Open the modal on page load if this is the user's first visit
-                                            if (!localStorage.getItem('visited')) {
-                                                var myModal = new bootstrap.Modal(document.getElementById('infoModal'));
-                                                myModal.show();
-                                                localStorage.setItem('visited', 'true'); // Set flag so modal won't show again
-                                            }
-                                        });
-                                    </script>
-                                    
-                                </body>
-                                </html>
-                                
+                                        localStorage.setItem('visited', 'true'); // Set flag so modal won't show again
+                                    }
+                                });
+                            </script>
+                            
+                        </body>
+                        </html>
+                        

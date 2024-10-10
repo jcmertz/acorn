@@ -65,6 +65,8 @@ var url = require("url");
 app.set('views', __dirname + '/views');
 app.set('view engine', "ejs");
 
+const flash = require('connect-flash');
+
 app.use(session({
   secret: 'keyboard cat',
   resave: true,
@@ -72,7 +74,6 @@ app.use(session({
   store: store
 }));
 
-const flash = require('connect-flash');
 app.use(flash());
 
 app.use(function(req, res, next) {

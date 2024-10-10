@@ -44,7 +44,7 @@ async function sendMagicLink(user){
   let token
   try {
     token = await createToken(
-      {user: user, iat: Math.floor(Date.now() / 1000)},
+      {user: {email: user.email}, iat: Math.floor(Date.now() / 1000)},
       process.env.MAGIC_LINK_SECRET,
       {expiresIn: 60*10} //10 Minutes
     )

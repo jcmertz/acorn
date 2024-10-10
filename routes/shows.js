@@ -21,7 +21,9 @@ router.get('/edit/:id', async (req, res) => {
         show:show,
         user:req.user.username,
         isAdmin:isAdmin,
-        knownBandData:knownBands
+        knownBandData:knownBands,
+        errorMessages:res.locals.errorMessages,
+        successMessages:res.locals.successMessages
     });
 });
 
