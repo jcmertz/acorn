@@ -82,10 +82,31 @@ router.post('/login/password', passport.authenticate('local', {
     failureMessage: true
 }));
 
-router.post('/login/email', passport.authenticate('magiclink', {
+router.get('/login/email', function(req, res) {
+    res.render('login/email');
+});
+
+// Middleware to check if email exists in the database
+const checkEmailExists = async (req, res, next) => {
+    const { email } = req.body;
+    try {
+        const user = await db.User.findOne({ email: email });
+        
+        if (!user) {
+            res.redirect('/');
+        }
+        else{
+            next(); // Proceed to next middleware (generating the magic link)
+        }
+    } catch (error) {
+        console.error(error);
+        res.redirect('/');
+    }
+};
+
+router.post('/login/email', checkEmailExists, passport.authenticate('magiclink', {
     action: 'requestToken',
-    failureRedirect: '/login',
-    failureFlash: true // Enable failure flash messages
+    failureRedirect: '/',
 }), function(req, res) {
     res.redirect('/login/email/check');
 });
