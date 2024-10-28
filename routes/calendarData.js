@@ -78,7 +78,7 @@ router.get('/getRange', async function(req, res, next) {
                         start: data[event].showDate,
                         allDay : true,
                         display: 'background',
-                        color: '#00FF00'
+                        color: bands.getColorFromStatus(data[event].showStatus)
                     });
                 }
                 continue;
@@ -89,7 +89,7 @@ router.get('/getRange', async function(req, res, next) {
                     start: data[event].showDate,
                     allDay : true,
                     display: 'background',
-                    color: '#ffff00'
+                    color: bands.getColorFromStatus(data[event].showStatus)
                 }
             )}
             else if(data[event].showStatus == 1){
@@ -98,7 +98,7 @@ router.get('/getRange', async function(req, res, next) {
                     start: data[event].showDate,
                     allDay : true,
                     display: 'background',
-                    color: '#aa0000'
+                    color: bands.getColorFromStatus(data[event].showStatus)
                 }
             )}
         }
