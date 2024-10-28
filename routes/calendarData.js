@@ -72,6 +72,15 @@ router.get('/getRange', async function(req, res, next) {
                     color: bands.getColorFromStatus(data[event].showStatus),
                     url: "/shows/edit/"+data[event]._id
                 });
+                if(data[event].showStatus >= 1){
+                    events.push({
+                        title: "Your Hold",
+                        start: data[event].showDate,
+                        allDay : true,
+                        display: 'background',
+                        color: '#00FF00'
+                    });
+                }
                 continue;
             }
             if(data[event].showStatus == 0){
@@ -85,11 +94,11 @@ router.get('/getRange', async function(req, res, next) {
             )}
             else if(data[event].showStatus == 1){
                 events.push({
-                    title: "Hold",
+                    title: "Hold On Date",
                     start: data[event].showDate,
                     allDay : true,
                     display: 'background',
-                    color: '#ff0000'
+                    color: '#aa0000'
                 }
             )}
         }
@@ -130,12 +139,21 @@ router.get('/getRangeAdmin',util.checkUserRole(['staff', 'admin']), async functi
     const data = await db.Show.find(query);
     var events = [];
     for (const event in data){
+        if(data[event].showStatus >= 0){
+            events.push({
+                start: data[event].showDate,
+                color: bands.getColorFromStatus(data[event].showStatus),
+                allDay: true,
+                display: 'background'
+            }
+        )}
         events.push({
             title: data[event].showName,
             start: data[event].showDate,
             color: bands.getColorFromStatus(data[event].showStatus),
             url: "/shows/edit/"+data[event]._id
         });
+        
     }
     // console.log(events);
     res.send(events);
