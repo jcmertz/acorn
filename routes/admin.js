@@ -22,14 +22,13 @@ router.get('/', async (req, res) => {
     res.render('login/checkEmail');
 });
 
-router.get('/setShowStatus', async (req, res) => {
-    var id = req.query.id;
-    var status = req.query.showStatus;
+router.post('/setShowStatus', async (req, res) => {
+    const { id, showStatus } = req.body;
 
-    const show = await db.Show.findOneAndUpdate({_id:id},{showStatus:status});
-    
+    const show = await db.Show.findOneAndUpdate({ _id: id }, { showStatus });
+
     res.redirect(req.get("Referrer") || "/");
-
 });
+
 
 module.exports = router;

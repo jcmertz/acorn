@@ -40,7 +40,7 @@ const messageSchema = new mongoose.Schema({
 Show Status:
 -1 - Rejected or Cancelled
 0 - Submitted, not responded to
-1 - In Negotiation
+1 - Date Held, in Negotiation
 2 - Confirmed
 */
 const Band = mongoose.model('Band',bandSchema);
