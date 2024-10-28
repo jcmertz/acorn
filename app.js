@@ -99,7 +99,7 @@ var indexRouter = require('./routes/index');
 var bandRouter = require('./routes/bands');
 var calendarRouter = require('./routes/calendarData');
 var adminRouter = require('./routes/admin')(io);
-var showsRouter = require('./routes/shows');
+var showsRouter = require('./routes/shows')(io);
 
 
 
