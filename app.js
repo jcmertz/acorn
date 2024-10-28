@@ -98,7 +98,7 @@ var authRouter = require('./routes/auth');
 var indexRouter = require('./routes/index');
 var bandRouter = require('./routes/bands');
 var calendarRouter = require('./routes/calendarData');
-var adminRouter = require('./routes/admin');
+var adminRouter = require('./routes/admin')(io);
 var showsRouter = require('./routes/shows');
 
 

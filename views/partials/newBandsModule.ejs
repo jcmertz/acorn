@@ -70,44 +70,45 @@
     }
     
     function validateBand(event) {
-        const input = event.target;
-        const datalist = document.getElementById('knownBands');
-        const validationIcon = input.nextElementSibling;
-        const enteredValue = input.value;
-        let bandExists = false;
-        
-        // Check if entered value exists in datalist
-        for (let option of datalist.options) {
-            if (option.value.toLowerCase() === enteredValue.toLowerCase()) {
-                bandExists = true;
-                break;
-            }
-        }
-        
-        // Update the validation icon based on band existence
-        if (bandExists) {
-            validationIcon.innerHTML = "✔"; // Green checkmark
-            validationIcon.classList.remove("warning");
-            validationIcon.classList.add("success");
-            validationIcon.style.cursor = "default";
-            checkFormValidity();  // Check form validity whenever a band is validated
-        } else if (enteredValue.trim() !== "") {
-            validationIcon.innerHTML = "⚠"; // Yellow exclamation mark
-            validationIcon.classList.remove("success");
-            validationIcon.classList.add("warning");
-            validationIcon.style.cursor = "pointer";
-            
-            validationIcon.onclick = function () {
-                currentBandCount = validationIcon.id.replace("validationIcon", ""); // Extract band count
-                document.getElementById('bandEmail').value = ''; // Reset email field
-                new bootstrap.Modal(document.getElementById('newBandModal')).show(); // Show modal
-            };
-            checkFormValidity();
-        } else {
-            validationIcon.innerHTML = ""; // Clear icon if input is empty
-            checkFormValidity();  // Check form validity whenever the input changes
-        }
+  const input = event.target;
+  const datalist = document.getElementById('knownBands');
+  const validationIcon = input.nextElementSibling;
+  const enteredValue = input.value.trim();
+  let bandExists = false;
+
+  for (let option of datalist.options) {
+    if (option.value.toLowerCase() === enteredValue.toLowerCase()) {
+      bandExists = true;
+      break;
     }
+  }
+
+  if (bandExists) {
+    validationIcon.innerHTML = "✔";
+    validationIcon.classList.remove("warning");
+    validationIcon.classList.add("success");
+    validationIcon.setAttribute("title", "Band is recognized");
+    validationIcon.style.cursor = "default";
+    checkFormValidity();
+  } else if (enteredValue !== "") {
+    validationIcon.innerHTML = "⚠";
+    validationIcon.classList.remove("success");
+    validationIcon.classList.add("warning");
+    validationIcon.setAttribute("title", "Band not recognized, click to invite");
+    validationIcon.style.cursor = "pointer";
+
+    validationIcon.onclick = function () {
+      currentBandCount = validationIcon.id.replace("validationIcon", "");
+      document.getElementById('bandEmail').value = '';
+      new bootstrap.Modal(document.getElementById('newBandModal')).show();
+    };
+    checkFormValidity();
+  } else {
+    validationIcon.innerHTML = "";
+    checkFormValidity();
+  }
+}
+
     
     // Handle the "Invite Band" button in the modal
     document.getElementById('inviteButton').addEventListener('click', function () {
@@ -185,14 +186,13 @@
         let allValid = true;
         let bandCount = $('#bandCount').val();
         
-        console.log("Start: "+bandCount);
         for (let i = 1; i < bandCount; i++) {
             let validationIcon = document.getElementById('validationIcon' + i);
             let hiddenEmail = document.querySelector('[name="bands[' + i + '][email]"]');
-            console.log("ID: "+i);
-            console.log("Val: "+validationIcon);
-            console.log("Hidden: "+hiddenEmail);
-            console.log("");
+            // console.log("ID: "+i);
+            // console.log("Val: "+validationIcon);
+            // console.log("Hidden: "+hiddenEmail);
+            // console.log("");
             
             if(validationIcon && validationIcon.innerHTML === "✔"){
                 continue;

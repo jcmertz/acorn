@@ -3,6 +3,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../src/db');
 var bandUtils = require('./bands.js');
+const { sendMagicLink,registerBand } = require('../src/utilities');
+
 
 
 router.get('/edit/:id', async (req, res) => {
@@ -34,13 +36,22 @@ router.post('/updateBands', async (req, res) => {
         // Find the show by its ID and update the bands array
         const show = await db.Show.findById(showId);
         if (!show) {
-            return res.status(404).send('Show not found');
+            return res.status(500).send('Show not found');
         }
         bandsOut=[];
         console.log(bands);
         for(band of bands){
             var bandObj = await db.Band.findOne({"bandName":band.name});
-            bandsOut.push(bandObj._id)
+            if (bandObj !== null ){
+                bandsOut.push(bandObj._id);
+            }else if (band.email !== null){
+                const newBandUser = await registerBand(band.email,band.name);
+                const userObj = await db.User.findOne({user:newBandUser.user})
+                sendMagicLink(userObj);
+                const newBand = await db.Band.findOne({loginInfo:userObj.user});
+                bandsOut.push(newBand._id);
+                console.log("NEW USER INVITE SENT TO: "+band.email);
+            }
         }
         show.bands = bandsOut;
         await show.save();

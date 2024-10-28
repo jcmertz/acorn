@@ -40,7 +40,9 @@
                 input.value = '';  // Clear the input field
             }
         });
-        
+        socket.on('showUpdated:<%= show._id %>', (data) => {
+                location.reload(); // Reload the page when the show is updated
+        });
         socket.on('message:<%= show._id %>', function(msg) {
             if (!msg || !msg.user || !msg.message) {
                 console.error("Invalid message received", msg);
