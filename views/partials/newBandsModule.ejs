@@ -70,45 +70,45 @@
     }
     
     function validateBand(event) {
-  const input = event.target;
-  const datalist = document.getElementById('knownBands');
-  const validationIcon = input.nextElementSibling;
-  const enteredValue = input.value.trim();
-  let bandExists = false;
-
-  for (let option of datalist.options) {
-    if (option.value.toLowerCase() === enteredValue.toLowerCase()) {
-      bandExists = true;
-      break;
+        const input = event.target;
+        const datalist = document.getElementById('knownBands');
+        const validationIcon = input.nextElementSibling;
+        const enteredValue = input.value.trim();
+        let bandExists = false;
+        
+        for (let option of datalist.options) {
+            if (option.value.toLowerCase() === enteredValue.toLowerCase()) {
+                bandExists = true;
+                break;
+            }
+        }
+        
+        if (bandExists) {
+            validationIcon.innerHTML = "✔";
+            validationIcon.classList.remove("warning");
+            validationIcon.classList.add("success");
+            validationIcon.setAttribute("title", "Band is recognized");
+            validationIcon.style.cursor = "default";
+            checkFormValidity();
+        } else if (enteredValue !== "") {
+            validationIcon.innerHTML = "⚠";
+            validationIcon.classList.remove("success");
+            validationIcon.classList.add("warning");
+            validationIcon.setAttribute("title", "Band not recognized, click to invite");
+            validationIcon.style.cursor = "pointer";
+            
+            validationIcon.onclick = function () {
+                currentBandCount = validationIcon.id.replace("validationIcon", "");
+                document.getElementById('bandEmail').value = '';
+                new bootstrap.Modal(document.getElementById('newBandModal')).show();
+            };
+            checkFormValidity();
+        } else {
+            validationIcon.innerHTML = "";
+            checkFormValidity();
+        }
     }
-  }
-
-  if (bandExists) {
-    validationIcon.innerHTML = "✔";
-    validationIcon.classList.remove("warning");
-    validationIcon.classList.add("success");
-    validationIcon.setAttribute("title", "Band is recognized");
-    validationIcon.style.cursor = "default";
-    checkFormValidity();
-  } else if (enteredValue !== "") {
-    validationIcon.innerHTML = "⚠";
-    validationIcon.classList.remove("success");
-    validationIcon.classList.add("warning");
-    validationIcon.setAttribute("title", "Band not recognized, click to invite");
-    validationIcon.style.cursor = "pointer";
-
-    validationIcon.onclick = function () {
-      currentBandCount = validationIcon.id.replace("validationIcon", "");
-      document.getElementById('bandEmail').value = '';
-      new bootstrap.Modal(document.getElementById('newBandModal')).show();
-    };
-    checkFormValidity();
-  } else {
-    validationIcon.innerHTML = "";
-    checkFormValidity();
-  }
-}
-
+    
     
     // Handle the "Invite Band" button in the modal
     document.getElementById('inviteButton').addEventListener('click', function () {

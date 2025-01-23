@@ -85,6 +85,7 @@ router.get('/profile', ensureLoggedIn, async (req, res) => {
     if (band === null){
         console.log("redirecting");
         res.redirect("/");
+        req.flash("error","No Band Logged In or Tied to Your User Profile");
         return;
     }
     res.render('bandProfile', {
@@ -94,7 +95,40 @@ router.get('/profile', ensureLoggedIn, async (req, res) => {
     });
 });
 
-// New /band/update POST route
+router.get('/band/profile/:bandID', ensureLoggedIn, async (req,res) => {
+    var isAdmin = false;
+    var name;
+    const bandId = req.params.bandID;
+    console.log(bandId);
+    const band = await db.Band.findById(bandId);
+    if(band === null){
+        console.log("redirecting");
+        req.flash("error","Band Not Found");
+        res.redirect("/");
+        return;
+    } else{
+        if(req.isAuthenticated()){
+            if(req.user.role == 'admin' || req.user.role == 'staff'){
+                isAdmin = true;
+            }else{
+                name = await getBandFromUsername(req.user.username)
+            }
+        }
+        
+        if(!isAdmin){
+            res.redirect("/profile");
+            return;
+        }
+        else if(isAdmin){
+            res.render('bandProfile',{
+                band: band,
+                errorMessages:res.locals.errorMessages,
+                successMessages:res.locals.successMessages
+            })
+        }
+    }
+});
+
 router.post('/band/update', ensureLoggedIn, async (req, res) => {
     try {
         const band = await db.Band.findOne({ "loginInfo": req.user.username });
