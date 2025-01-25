@@ -8,7 +8,8 @@ const userSchema = new mongoose.Schema({
   salt: String,
   role: String,
   email: String,
-  email_verified: Boolean
+  email_verified: Boolean,
+  bands: [{type: mongoose.Types.ObjectId, ref: "Band"}]
 });
 const bandSchema = new mongoose.Schema({
   bandName: String,
