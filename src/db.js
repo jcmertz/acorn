@@ -13,19 +13,17 @@ const userSchema = new mongoose.Schema({
 });
 const bandSchema = new mongoose.Schema({
   bandName: String,
-  contactEmail: String,
   instagram: String,
   genre: String,
   homeTown: String,
-  loginInfo: String
+  bandMembers: [{type: mongoose.Types.ObjectId, ref: "User"}]
 });
 const showSchema = new mongoose.Schema({
   showName: String,
   showDate: Date,
   requestDate: Date,
   bands: [{type: mongoose.Types.ObjectId, ref: "Band"}],
-  contactBand: {type: mongoose.Types.ObjectId, ref: "Band"},
-  matinee:Boolean,
+  contact: {type: mongoose.Types.ObjectId, ref: "User"},
   ticketPrice:Number,
   ticketsSold:Number,
   showStatus:Number,
