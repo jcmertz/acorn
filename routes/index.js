@@ -29,20 +29,45 @@ router.get('/', async (req, res) => {
 })
 
 router.get('/profile', ensureLoggedIn, async (req, res) => {
-    var user = await db.User.findOne({"user":req.user.username}).populate("bands");
-    if (user === null){
-        console.log("redirecting");
-        res.redirect("/");
-        req.flash("error","Something went wrong. We couldn't find your user profile. Contact Fallen Log for Support.");
-        return;
+  var user = await db.User.findOne({"user":req.user.username}).populate("bands");
+  if (user === null){
+    console.log("redirecting");
+    res.redirect("/");
+    req.flash("error","Something went wrong. We couldn't find your user profile. Contact Fallen Log for Support.");
+    return;
+  }
+  res.render('userProfile', {
+    user: user,
+    userName: req.user.username,
+    isLoggedIn: req.isAuthenticated(),
+    errorMessages:res.locals.errorMessages,
+    successMessages:res.locals.successMessages
+  });
+});
+
+router.post('/user/update', ensureLoggedIn, async (req, res) => {
+  try {
+    const user = await db.User.findOne({ "user": req.user.username });
+    if (!user) {
+      console.log("redirecting");
+      res.redirect("/");
+      req.flash("error","Something went wrong. We couldn't find your user profile. Contact Fallen Log for Support.");
+      return;
     }
-    res.render('userProfile', {
-        user: user,
-        userName: req.user.username,
-        isLoggedIn: req.isAuthenticated(),
-        errorMessages:res.locals.errorMessages,
-        successMessages:res.locals.successMessages
-    });
+    
+    // Update band details from the form data
+    user.user = req.body.userName;
+    user.email = req.body.email;
+    
+    // Save the updated band details
+    await user.save();
+    
+    // Redirect back to the profile page after successful update
+    res.redirect('/profile');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server error");
+  }
 });
 
 module.exports = router;

@@ -50,7 +50,8 @@ async function defaultAdmin() {
       if (err) { return next(err); }
       const user = await db.User.create({
         user: process.env.defaultAdminUser,
-        pass: hashedPassword.toString('hex'), 
+        pass: hashedPassword.toString('hex'),
+        email: process.env.defaultAdminEmail, 
         
         salt: salt,
         role: "admin"
