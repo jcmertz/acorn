@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
 })
 
 router.get('/profile', ensureLoggedIn, async (req, res) => {
-    var user = db.Band.findOne({"user":req.user.username});
+    var user = await db.User.findOne({"user":req.user.username}).populate("bands");
     if (user === null){
         console.log("redirecting");
         res.redirect("/");

@@ -42,6 +42,18 @@
                     </form>
                 </div>
             </div>
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="card-title">My Bands</h1>
+                    <ul class="list-group">
+                        <% user.bands.forEach(function(band) { %>
+                            <li class="list-group-item">
+                                <h5><%= band.bandName %></h5>
+                            </li>
+                        <% }); %>
+                    </ul>
+                </div>
+            </div>
         </div>
         
     </body>
