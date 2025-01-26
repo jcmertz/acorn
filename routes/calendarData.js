@@ -41,31 +41,17 @@ router.get('/getRange', async function(req, res, next) {
             showStatus: {$gte: 0}
         } 
     }
-    const data = await db.Show.find(query).populate('bands').populate('contactBand');
+    const data = await db.Show.find(query).populate('bands').populate('bandMembers');
     var events = [];
     var authenticated = req.isAuthenticated();
-    if(authenticated){
-        var band = await bands.getBandFromUsername(req.user.username);
-        if(band !== undefined){
-            var name = band.bandName;
-        }
-        else{
-            var name = "NO BAND NAME"
-        }
-    }
+    
     for (const event in data){
         if(authenticated){
-            // if(data[event].contactBand.bandName == name){
-            //     events.push({
-            //         title: data[event].contactBand.bandName,
-            //         start: data[event].showDate,
-            //         color: bands.getColorFromStatus(data[event].showStatus),
-            //         url: "/shows/edit/"+data[event]._id
-            //     });
-            //     continue;
-            // }
-            const bandEval = (bandsElement) => bandsElement.bandName == name; 
-            if(data[event].bands.some(bandEval)){
+            //Check to see if the user is playing in a band in the show, or is the contact for the show
+            function bandEval(band) {
+                return band.bandMembers.includes(req.user._id) || band._id.equals(data[event].contact);
+            }
+            if(data[event].some(bandEval)){
                 events.push({
                     title: data[event].showName,
                     start: data[event].showDate,

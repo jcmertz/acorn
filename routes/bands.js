@@ -12,7 +12,7 @@ var url = require("url");
 router.use(express.urlencoded({ extended: true }));
 
 router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => { //Pulls open a form for a band to fill out
-    var band = await getBandFromUsername(req.user.username);
+    var band = await getBandsFromUsername(req.user.username);
     if (band === null){
         req.flash("error","No Band Logged In or Tied to Your User Profile");
         res.redirect("/");
@@ -76,7 +76,7 @@ router.post('/addEvent',ensureLoggedIn, async (req,res) => { //Handles the form 
 
 router.get('/userDetails',ensureLoggedIn, async (req,res) => {
     console.log(req.user);
-    getBandFromUsername(req.user.username);
+    getBandsFromUsername(req.user.username);
     res.redirect("/");
 });
 
@@ -95,7 +95,7 @@ router.post('/band/create', ensureLoggedIn, async (req, res) => {
         const newBand = new db.Band({
             bandName: newBandName,
             instagram: instagramHandle,
-            bandMembers: [req.user._id]
+            bandMembers: [req.user.id]
         });
         
         // Save the new band
@@ -181,9 +181,17 @@ router.post('/band/update', ensureLoggedIn, async (req, res) => {
 
 
 
-function getBandFromUsername(username){
-    var band = db.Band.findOne({"loginInfo":username});
-    return band;
+async function getBandsFromUsername(username){
+    var user = await db.User.findOne({"user":username}).populate("bands");
+    if(user === null){
+        console.log("something went wrong: ");
+        console.log("Username: "+username);
+        req.flash("error","User doesn't exist");
+        res.redirect("/");
+        return;
+    }
+    bands = user.bands;
+    return bands;
 }
 
 function getColorFromStatus(showStatus){
@@ -218,7 +226,7 @@ async function getKnownBandList(name){
 
 module.exports = {
     router:router,
-    getBandFromUsername:getBandFromUsername,
+    getBandsFromUsername:getBandsFromUsername,
     getColorFromStatus:getColorFromStatus,
     getKnownBandList:getKnownBandList
 };
