@@ -52,6 +52,52 @@
                             </li>
                         <% }); %>
                     </ul>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#bandModal">
+                        Add or Join a Band
+                    </button>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="bandModal" tabindex="-1" aria-labelledby="bandModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="bandModalLabel">Add a Band</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- Nav tabs -->
+                                    <ul class="nav nav-tabs" id="bandTab" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab" aria-controls="create" aria-selected="true">Create New Band</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="join-tab" data-bs-toggle="tab" data-bs-target="#join" type="button" role="tab" aria-controls="join" aria-selected="false">Join a Band</button>
+                                        </li>
+                                    </ul>
+                                    <!-- Tab panes -->
+                                    <div class="tab-content">
+                                        <div class="tab-pane fade show active" id="create" role="tabpanel" aria-labelledby="create-tab">
+                                            <form id="createBandForm" action="/band/create" method="post">
+                                                <div class="mb-3">
+                                                    <label for="newBandName" class="form-label">Band Name:</label>
+                                                    <input type="text" class="form-control" id="newBandName" name="newBandName">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="instagramHandle" class="form-label">Instagram Handle:</label>
+                                                    <input type="text" class="form-control" id="instagramHandle" name="instagramHandle">
+                                                </div>
+                                                <button type="submit" class="btn btn-success">Create Band</button>
+                                            </form>
+                                        </div>
+                                        <div class="tab-pane fade" id="join" role="tabpanel" aria-labelledby="join-tab">
+                                            <p> Want to join an existing that is already on acorn? Ask your band mates to invite you!" </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

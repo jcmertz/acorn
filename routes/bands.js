@@ -80,6 +80,48 @@ router.get('/userDetails',ensureLoggedIn, async (req,res) => {
     res.redirect("/");
 });
 
+router.post('/band/create', ensureLoggedIn, async (req, res) => {
+    try {
+        const { newBandName, instagramHandle } = req.body;
+        
+        // Check if the band already exists
+        const existingBand = await db.Band.findOne({ bandName: newBandName });
+        if (existingBand) {
+            req.flash("error", "Band already exists");
+            return res.redirect("/profile");
+        }
+        
+        // Create a new band
+        const newBand = new db.Band({
+            bandName: newBandName,
+            instagram: instagramHandle,
+            bandMembers: [req.user._id]
+        });
+        
+        // Save the new band
+        await newBand.save();
+        
+        // Add the new band to the user's bands
+        const user = await db.User.findById(req.user.id);
+        if(user === null)
+            {
+            req.flash("error","No User Found");
+            res.redirect("/profile");
+            return;
+        }
+        else{
+            user.bands.push(newBand._id);
+            await user.save();
+        }
+        req.flash("success", "Band created successfully");
+        res.redirect("/profile");
+    } catch (error) {
+        console.error(error);
+        req.flash("error", "Server error");
+        res.redirect("/profile");
+    }
+});
+
 router.get('/band/profile/:bandID', ensureLoggedIn, async (req,res) => {
     var isAdmin = false;
     var name;
@@ -138,6 +180,8 @@ router.post('/band/update', ensureLoggedIn, async (req, res) => {
         res.status(500).send("Server error");
     }
 });
+
+
 
 function getBandFromUsername(username){
     var band = db.Band.findOne({"loginInfo":username});
