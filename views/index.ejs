@@ -12,22 +12,9 @@
 </head>
 <body>
     <%- include('partials/alerts') %>
+    <%- include('partials/nav') %> <!-- Include the navigation bar -->  
     
     <div class="row mb-4">
-        <img src="../../AcornAppLogo.svg" style="width: 20%;" >
-        <% if (!isLoggedIn) { %>
-            <div class="col d-flex justify-content-end">
-                <a class="btn btn-primary" href="/register"><h4> REGISTER </h4></a>
-                <a class="btn btn-primary ms-2" href="/login"><h4> LOGIN </h4></a>
-            </div>
-            <% } %>
-            <% if (isLoggedIn) { %>
-                <div class="col d-flex justify-content-end">
-                    <a class="btn btn-primary" href="/profile"><h4> My Profile </h4></a>
-                    <a class="btn btn-primary ms-2" href="/logout"><h4> LOGOUT </h4></a>
-                </div>
-                <% } %>
-            </div>
             
             <!-- FullCalendar container -->
             <div id='calendar'></div>

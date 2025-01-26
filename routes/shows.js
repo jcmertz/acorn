@@ -10,7 +10,7 @@ var ensureLoggedIn = ensureLogIn();
 module.exports = function(io) {
     
     router.get('/edit/:id', async (req, res) => {
-        const show = await db.Show.findOne({_id:req.params.id}).populate('messages').populate('bands');
+        const show = await db.Show.findOne({_id:req.params.id}).populate('messages').populate('bands').populate('contact');
         var isAdmin = false;
         if(req.isAuthenticated()){
             if(req.user.role == 'admin' || req.user.role == 'staff'){
@@ -21,6 +21,8 @@ module.exports = function(io) {
         res.render('editShow', {
             show:show,
             user:req.user.username,
+            userName:req.user.username,
+            isLoggedIn:req.isAuthenticated(),
             isAdmin:isAdmin,
             knownBandData:knownBands,
             errorMessages:res.locals.errorMessages,

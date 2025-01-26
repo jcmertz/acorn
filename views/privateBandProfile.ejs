@@ -11,17 +11,7 @@
 </head>
 <body class="p-2">
     <%- include('partials/alerts') %>
-    <div class="row mb-4">
-        <div class="col d-flex justify-content-start">
-            <a class="btn btn-primary" href="javascript:history.back()"><h4>BACK</h4></a>
-        </div>
-        <div class="col d-flex justify-content-center">
-            <a href="/"><img src="../../AcornAppLogo.svg" style="height: 100%;" class="mb-3"></a>
-        </div>
-        <div class="col d-flex justify-content-end">
-            <a class="btn btn-primary" href="/logout"><h4>LOGOUT</h4></a>
-        </div>
-    </div>
+    <%- include('partials/nav') %> <!-- Include the navigation bar -->
 
     <div class="row">
         <!-- Left Column: Band Details -->

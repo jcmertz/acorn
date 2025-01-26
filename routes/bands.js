@@ -20,6 +20,8 @@ router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => { 
     }
     var knownBands = await getKnownBandList();
     res.render('newEvent',{
+        userName:req.user.username,
+        isLoggedIn:req.isAuthenticated(),
         month:req.params.month,
         day:req.params.day,
         year:req.params.year,
@@ -34,7 +36,7 @@ router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => { 
 router.post('/addEvent',ensureLoggedIn, async (req,res) => { //Handles the form submitted by a band
     const data = req.body;
     console.log(data);
-
+    
     const show = new db.Show({
         showDate:data.showDate,
         requestDate:data.reqDate,
@@ -152,19 +154,27 @@ router.get('/band/:bandID', ensureLoggedIn, async (req,res) => {
             if(req.user.role == 'admin' || req.user.role == 'staff'){
                 isAdmin = true;
             }
+            //If the user is an admin or a member of the band, show the private band profile
+            if(isAdmin || band.bandMembers.some(user => user._id.toString() === req.user.id.toString()) ){
+                
+                res.render('privateBandProfile',{
+                    userName:req.user.username,
+                    isLoggedIn:req.isAuthenticated(),
+                    band: band,
+                    errorMessages:res.locals.errorMessages,
+                    successMessages:res.locals.successMessages
+                })
+            } else{ //If the user is not a member of the band, show the public band profile
+                res.render('publicBandProfile',{
+                    isLoggedIn:req.isAuthenticated(),
+                    userName:req.user.username,
+                    band: band,
+                    errorMessages:res.locals.errorMessages,
+                    successMessages:res.locals.successMessages
+                })  
+            }
         }
         
-        if(!isAdmin){
-            res.redirect("/profile");
-            return;
-        }
-        else if(isAdmin){
-            res.render('bandProfile',{
-                band: band,
-                errorMessages:res.locals.errorMessages,
-                successMessages:res.locals.successMessages
-            })
-        }
     }
 });
 

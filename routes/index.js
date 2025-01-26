@@ -12,13 +12,16 @@ router.get('/', async (req, res) => {
   //console.log(data);
   //console.log(req.isAuthenticated());
   var isAdmin = false;
+  var userName = "";
   if(req.isAuthenticated()){
     if(req.user.role == 'admin' || req.user.role == 'staff'){
       isAdmin = true;
     }
+    userName = req.user.username;
   }
   res.render('index',{
     isLoggedIn:req.isAuthenticated(),
+    userName:userName,
     isAdmin:isAdmin,
     errorMessages:res.locals.errorMessages,
     successMessages:res.locals.successMessages
@@ -35,21 +38,11 @@ router.get('/profile', ensureLoggedIn, async (req, res) => {
     }
     res.render('userProfile', {
         user: user,
+        userName: req.user.username,
+        isLoggedIn: req.isAuthenticated(),
         errorMessages:res.locals.errorMessages,
         successMessages:res.locals.successMessages
     });
-});
-
-
-// Test Route
-router.get('/test', async (req, res) => {
-  let userRecord = await db.User.findOne({ email: "joe@joemertz.com" });
-  console.log(userRecord);
-  sendMagicLink(userRecord);
-  res.render('login/checkEmail',{
-    errorMessages:res.locals.errorMessages,
-    successMessages:res.locals.successMessages
-  });
 });
 
 module.exports = router;
