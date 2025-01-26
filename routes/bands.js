@@ -143,7 +143,7 @@ router.get('/band/:bandID', ensureLoggedIn, async (req,res) => {
     var name;
     const bandId = req.params.bandID;
     console.log(bandId);
-    const band = await db.Band.findById(bandId);
+    const band = await db.Band.findById(bandId).populate("bandMembers");
     if(band === null){
         console.log("redirecting");
         req.flash("error","Band Not Found");
@@ -178,16 +178,19 @@ router.get('/band/:bandID', ensureLoggedIn, async (req,res) => {
     }
 });
 
-router.post('/band/update', ensureLoggedIn, async (req, res) => {
+router.post('/band/:bandID/update', ensureLoggedIn, async (req, res) => {
     try {
-        const band = await db.Band.findOne({ "loginInfo": req.user.username });
+        console.log()
+        const band = await db.Band.findById(req.params.bandID);
         if (!band) {
-            return res.status(404).send("Band not found");
+            console.log("redirecting");
+            req.flash("error","Band Not Found");
+            res.redirect("/profile");
+            return;       
         }
         
         // Update band details from the form data
         band.bandName = req.body.bandName;
-        band.contactEmail = req.body.contactEmail;
         band.instagram = req.body.instagram;
         band.genre = req.body.genre;
         band.homeTown = req.body.homeTown;
@@ -196,7 +199,7 @@ router.post('/band/update', ensureLoggedIn, async (req, res) => {
         await band.save();
         
         // Redirect back to the profile page after successful update
-        res.redirect('/profile');
+        res.redirect('/band/' + req.params.bandID);
     } catch (error) {
         console.error(error);
         res.status(500).send("Server error");

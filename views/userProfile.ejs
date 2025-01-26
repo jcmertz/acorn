@@ -12,7 +12,7 @@
 <body class="p-2">
     <%- include('partials/alerts') %>
     <%- include('partials/nav') %> <!-- Include the navigation bar -->
-
+    
     
     <div class="row">
         <!-- Left Column: Band Details -->
@@ -20,7 +20,7 @@
             <div class="card">
                 <div class="card-body">
                     <h1 class="card-title">User Details</h1>
-                    <form id="bandDetailsForm" action="/user/update" method="post">
+                    <form id="bandDetailsForm" action="/user/update" method="post" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label for="bandName" class="form-label">User Name:</label>
                             <input type="text" class="form-control" id="userName" name="userName" value="<%= userName %>">
@@ -29,10 +29,58 @@
                             <label for="contactEmail" class="form-label">Email:</label>
                             <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>">
                         </div>
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">First Name:</label>
+                            <input type="text" class="form-control" id="firstName" name="firstName" value="<%= user.firstName %>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Last Name:</label>
+                            <input type="text" class="form-control" id="lastName" name="lastName" value="<%= user.lastName %>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="pronouns" class="form-label">Pronouns:</label>
+                            <input type="text" class="form-control" id="pronouns" name="pronouns" value="<%= user.pronouns %>">
+                        </div>
+                        <div class="mb-3">
+                            <label for="profilePicturePreview" class="form-label d-block">Profile Picture:</label>
+                            <div>
+                                <!-- Clicking the image will trigger the file input -->
+                                <img src="<%= user.profilePicture %>" 
+                                alt="Profile Picture" 
+                                class="img-thumbnail" 
+                                style="max-width: 150px; cursor: pointer;" 
+                                id="profilePicturePreview" 
+                                onclick="document.getElementById('profilePicture').click();">
+                            </div>
+                            <!-- Hidden file input -->
+                            <input type="file" 
+                            class="form-control d-none" 
+                            id="profilePicture" 
+                            name="profilePicture" 
+                            accept="image/*" 
+                            onchange="previewImage(event)">
+                        </div>
+                        
+                        <script>
+                            // Preview the selected image
+                            function previewImage(event) {
+                                const file = event.target.files[0];
+                                if (file) {
+                                    const reader = new FileReader();
+                                    reader.onload = function(e) {
+                                        document.getElementById('profilePicturePreview').src = e.target.result;
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            }
+                        </script>
+                        
                         <button type="submit" class="btn btn-success">Save Changes</button>
                     </form>
                 </div>
             </div>
+        </div>
+        <div class="col-md-6 mb-4">
             <div class="card">
                 <div class="card-body">
                     <h1 class="card-title">My Bands</h1>
@@ -41,48 +89,49 @@
                             <li class="list-group-item">
                                 <h5><a href="/band/<%= band.id %>"><%= band.bandName %></a></h5>
                             </li>
-                        <% }); %>
-                    </ul>                    
-                    <!-- Button trigger modal -->
-                    <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#bandModal">
-                        Add or Join a Band
-                    </button>
-
-                    <!-- Modal -->
-                    <div class="modal fade" id="bandModal" tabindex="-1" aria-labelledby="bandModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="bandModalLabel">Add a Band</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <!-- Nav tabs -->
-                                    <ul class="nav nav-tabs" id="bandTab" role="tablist">
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link active" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab" aria-controls="create" aria-selected="true">Create New Band</button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="join-tab" data-bs-toggle="tab" data-bs-target="#join" type="button" role="tab" aria-controls="join" aria-selected="false">Join a Band</button>
-                                        </li>
-                                    </ul>
-                                    <!-- Tab panes -->
-                                    <div class="tab-content">
-                                        <div class="tab-pane fade show active" id="create" role="tabpanel" aria-labelledby="create-tab">
-                                            <form id="createBandForm" action="/band/create" method="post">
-                                                <div class="mb-3">
-                                                    <label for="newBandName" class="form-label">Band Name:</label>
-                                                    <input type="text" class="form-control" id="newBandName" name="newBandName">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="instagramHandle" class="form-label">Instagram Handle:</label>
-                                                    <input type="text" class="form-control" id="instagramHandle" name="instagramHandle">
-                                                </div>
-                                                <button type="submit" class="btn btn-success">Create Band</button>
-                                            </form>
-                                        </div>
-                                        <div class="tab-pane fade" id="join" role="tabpanel" aria-labelledby="join-tab">
-                                            <p> Want to join an existing that is already on acorn? Ask your band mates to invite you!" </p>
+                            <% }); %>
+                        </ul>                    
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#bandModal">
+                            Add or Join a Band
+                        </button>
+                        
+                        <!-- Modal -->
+                        <div class="modal fade" id="bandModal" tabindex="-1" aria-labelledby="bandModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="bandModalLabel">Add a Band</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Nav tabs -->
+                                        <ul class="nav nav-tabs" id="bandTab" role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link active" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab" aria-controls="create" aria-selected="true">Create New Band</button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="join-tab" data-bs-toggle="tab" data-bs-target="#join" type="button" role="tab" aria-controls="join" aria-selected="false">Join a Band</button>
+                                            </li>
+                                        </ul>
+                                        <!-- Tab panes -->
+                                        <div class="tab-content">
+                                            <div class="tab-pane fade show active" id="create" role="tabpanel" aria-labelledby="create-tab">
+                                                <form id="createBandForm" action="/band/create" method="post">
+                                                    <div class="mb-3">
+                                                        <label for="newBandName" class="form-label">Band Name:</label>
+                                                        <input type="text" class="form-control" id="newBandName" name="newBandName">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="instagramHandle" class="form-label">Instagram Handle:</label>
+                                                        <input type="text" class="form-control" id="instagramHandle" name="instagramHandle">
+                                                    </div>
+                                                    <button type="submit" class="btn btn-success">Create Band</button>
+                                                </form>
+                                            </div>
+                                            <div class="tab-pane fade" id="join" role="tabpanel" aria-labelledby="join-tab">
+                                                <p> Want to join an existing that is already on acorn? Ask your band mates to invite you!" </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -91,8 +140,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+            
+        </body>
+        </html>
         
-    </body>
-    </html>
-    

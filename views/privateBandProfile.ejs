@@ -12,14 +12,14 @@
 <body class="p-2">
     <%- include('partials/alerts') %>
     <%- include('partials/nav') %> <!-- Include the navigation bar -->
-
+    
     <div class="row">
         <!-- Left Column: Band Details -->
         <div class="col-md-6 mb-4">
             <div class="card">
                 <div class="card-body">
                     <h1 class="card-title">Band Details</h1>
-                    <form id="bandDetailsForm" action="/band/update" method="post">
+                    <form id="bandDetailsForm" action="/band/<%=band._id%>/update" method="post">
                         <div class="mb-3">
                             <label for="bandName" class="form-label">Band Name:</label>
                             <input type="text" class="form-control" id="bandName" name="bandName" value="<%= band.bandName %>">
@@ -40,43 +40,73 @@
                     </form>
                 </div>
             </div>
-        </div>
-
-        <!-- Right Column: Show Calendar -->
-        <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h2>Upcoming Shows</h2>
-                    <div id="upcomingShows"></div>
+                    <h1 class="card-title">Band Members</h1>
+                    <%console.log(band);%>
+                    <% band.bandMembers.forEach(function(member) { %>
+                        <div class="card mb-2">
+                            <a href="mailto:<%= member.email %>" class="text-decoration-none text-reset">
+                                <div class="card-body d-flex align-items-center">
+                                    <!-- Profile Picture -->
+                                    <img src="<%= member.profilePicture %>" 
+                                    alt="Profile Picture" 
+                                    class="img-thumbnail me-3" 
+                                    style="width: 50px; height: 50px; object-fit: cover;">
+                                    
+                                    <!-- Name and Email -->
+                                    <div>
+                                        <h5 class="card-title mb-1">
+                                            <%= member.firstName ? (member.firstName + ' ' + member.lastName + (member.pronouns ? " (" + member.pronouns + ")" : "")) : (member.user + (member.pronouns ? " (" + member.pronouns + ")" : "")) %>
+                                        </h5>
+                                        <p class="card-text mb-0"><%= member.email %></p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <% }); %>
+                    </div>
+                </div>
+            </div>
+            
+            
+            <!-- Right Column: Show Calendar -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Upcoming Shows</h2>
+                        <div id="upcomingShows"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('upcomingShows');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'listYear',
-            timeZone: 'America/Chicago',
-            events: {
-                url: '/events/getRange',
-                extraParams: {
-                    band: '<%=band.bandName%>'
-                },
-                failure: function() {
-                    alert('there was an error while fetching events!');
-                }
-            },
-            headerToolbar: {
-                left: '',
-                center: 'title',
-                right: 'prev,next'
-            }
-        });
-        calendar.render();
-    });
-</script>
-
-</body>
-</html>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var calendarEl = document.getElementById('upcomingShows');
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'listYear',
+                    timeZone: 'America/Chicago',
+                    events: {
+                        url: '/events/getRange',
+                        extraParams: {
+                            band: '<%=band.bandName%>'
+                        },
+                        failure: function() {
+                            alert('there was an error while fetching events!');
+                        }
+                    },
+                    headerToolbar: {
+                        left: '',
+                        center: 'title',
+                        right: 'prev,next'
+                    }
+                });
+                calendar.render();
+            });
+        </script>
+        
+    </body>
+    </html>
+    

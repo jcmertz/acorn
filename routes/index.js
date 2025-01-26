@@ -2,7 +2,7 @@ var db = require('../src/db');
 var express = require('express');
 
 var router = express.Router();
-const { sendMagicLink } = require('../src/utilities');  // Bring in the nodemailer object
+const { sendMagicLink, upload } = require('../src/utilities');  // Bring in the nodemailer and multer objects
 
 var ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 var ensureLoggedIn = ensureLogIn();
@@ -45,7 +45,7 @@ router.get('/profile', ensureLoggedIn, async (req, res) => {
   });
 });
 
-router.post('/user/update', ensureLoggedIn, async (req, res) => {
+router.post('/user/update',ensureLoggedIn, upload.single('profilePicture'), async (req, res) => {
   try {
     const user = await db.User.findOne({ "user": req.user.username });
     if (!user) {
@@ -58,6 +58,12 @@ router.post('/user/update', ensureLoggedIn, async (req, res) => {
     // Update band details from the form data
     user.user = req.body.userName;
     user.email = req.body.email;
+    user.firstName = req.body.firstName;
+    user.lastName = req.body.lastName;
+    user.pronouns = req.body.pronouns;
+    if (req.file) {
+      user.profilePicture = `/uploads/${req.file.filename}`;
+    }
     
     // Save the updated band details
     await user.save();

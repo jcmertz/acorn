@@ -7,8 +7,12 @@ const userSchema = new mongoose.Schema({
   pass: String,
   salt: String,
   role: String,
+  firstName: String,
+  lastName: String,
+  pronouns: String,
   email: String,
   email_verified: Boolean,
+  profilePicture: { type: String, default: '/noProfile.webp' },
   bands: [{type: mongoose.Types.ObjectId, ref: "Band"}]
 });
 const bandSchema = new mongoose.Schema({

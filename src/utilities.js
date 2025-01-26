@@ -1,3 +1,6 @@
+const multer  = require('multer');
+const upload = multer({ dest: 'public/uploads/' });
+
 const checkUserRole = (requiredRoles = []) => (req, res, next) => {
   if (!Array.isArray(requiredRoles)) {
     return res.status(500).json({ message: 'Server error. Roles should be an array.' });
@@ -137,5 +140,6 @@ module.exports = {
   sendMagicLink,
   registerUser,
   updatePassword,
-  transporter:transporter
+  transporter:transporter,
+  upload:upload
 };
