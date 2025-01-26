@@ -33,7 +33,7 @@
     <div class="container mt-5">
         <a href="/"><img src="../../AcornAppLogo.svg" style="width: 20%;" class="mb-3"></a>
         
-        <h1 class="mb-4 text-center">Register a Band</h1>
+        <h1 class="mb-4 text-center">Register a New User</h1>
         
         <form id="registerForm" action="/register" method="post">
             
@@ -55,19 +55,8 @@
             <div class="mb-3 text-danger" id="passwordMismatch"></div> <!-- Placeholder for password mismatch message -->
             
             <div class="mb-3">
-                <label for="bandName" class="form-label">Band Name</label>
-                <input id="bandName" name="bandName" type="text" class="form-control" required>
-            </div>
-            
-            <div class="mb-3">
                 <label for="contactEmail" class="form-label">Contact Email</label>
                 <input id="contactEmail" name="contactEmail" type="email" class="form-control" required>
-            </div>
-            
-            <label for="instagram" class="form-label">Instagram</label>
-            <div class="input-group mb-3">
-                <span class="input-group-text" id="basic-addon1">@</span>
-                <input id="instagram" name="instagram" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
             </div>
             
             <button id="submitBtn" type="submit" class="btn btn-primary w-100" disabled>Register</button>
