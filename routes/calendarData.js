@@ -41,7 +41,13 @@ router.get('/getRange', async function(req, res, next) {
             showStatus: {$gte: 0}
         } 
     }
-    const data = await db.Show.find(query).populate('bands').populate('bandMembers');
+    const data = await db.Show.find(query).populate({
+        path: 'bands',
+        populate: {
+            path: 'bandMembers',
+        }
+    });
+    
     var events = [];
     var authenticated = req.isAuthenticated();
     
@@ -49,9 +55,10 @@ router.get('/getRange', async function(req, res, next) {
         if(authenticated){
             //Check to see if the user is playing in a band in the show, or is the contact for the show
             function bandEval(band) {
-                return band.bandMembers.includes(req.user._id) || band._id.equals(data[event].contact);
+                return band.bandMembers.some(user => user._id.toString() === req.user.id.toString());
             }
-            if(data[event].some(bandEval)){
+            console.log(data[event]);
+            if(data[event].bands.some(bandEval) || data[event].contact.toString() === req.user.id.toString()){
                 events.push({
                     title: data[event].showName,
                     start: data[event].showDate,
@@ -102,26 +109,15 @@ router.get('/getRange', async function(req, res, next) {
 router.get('/getRangeAdmin',util.checkUserRole(['staff', 'admin']), async function(req, res, next) {
     var start = req.query.start;
     var end = req.query.end;
-    var band = req.query.band;
     //console.log("Start: "+start);
     // console.log("End: "+end);
-    if(band !== undefined){
-        var query = {
-            showDate: {
-                $gte: start,
-                $lte: end
-            },
-            'contactBand.bandName':band,
-        }
-    }
-    else{
-        var query = {
-            showDate: {
-                $gte: start,
-                $lte: end
-            },
-        } 
-    }
+    var query = {
+        showDate: {
+            $gte: start,
+            $lte: end
+        },
+    } 
+    
     const data = await db.Show.find(query);
     var events = [];
     for (const event in data){

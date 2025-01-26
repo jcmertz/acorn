@@ -31,7 +31,6 @@
           <h1 class="card-title">Show Details</h1>
           <p class="card-text">Show Name: <strong><%= show.showName || '' %></strong></p>
           <% if (isAdmin) { %>
-            <p class="card-text">Contact Band: <strong><%= show.contactBand ? show.contactBand.bandName : '' %></strong></p>
             <div class="input-group mb-3">
               <div class="input-group-prepend">
                 <span class="input-group-text">Show Date:</span>
@@ -161,27 +160,6 @@
                           addBandtoForm(band.bandName);
                         });
                         
-                        // Add gold or white star after the delete button for each band and make them clickable
-                        $('#bandTable .d-flex').each(function (index) {
-                          let bandId = bands[index]._id;
-                          let starIcon = document.createElement('span');
-                          starIcon.classList.add('ms-2');
-                          starIcon.style.cursor = 'pointer';
-                          
-                          if (bandId === '<%= show.contactBand ? show.contactBand._id : "" %>') {
-                            starIcon.innerHTML = "★"; // Gold star for contact band
-                            starIcon.style.color = 'gold';
-                          } else {
-                            starIcon.innerHTML = "☆"; // White star for other bands
-                            starIcon.style.color = 'lightgrey';
-                          }
-                          
-                          starIcon.onclick = function () {
-                            makePrimary(bandId);
-                          };
-                          starIcon.setAttribute('title', bandId === '<%= show.contactBand ? show.contactBand._id : "" %>' ? 'Current Contact Band' : 'Click to set as Contact Band');
-                          this.appendChild(starIcon);
-                        });
                       }
                       
                       function updateShowDetail(showId, field, value) {

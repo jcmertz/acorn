@@ -20,18 +20,12 @@
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h1 class="text-center mb-4">New Event Request</h1>
-                        <p class="mb-4">New Event Request For: <strong><%= bandName %></strong> on <strong><%= month %>/<%= day %>/<%= year %></strong></p>
+                        <p class="mb-4">New Event Request For: <strong><%= userName %></strong> on <strong><%= month %>/<%= day %>/<%= year %></strong></p>
                         <form action="/addEvent" id="newmEventForm" method="post">
-                            <input type="hidden" id="band0" name="bands[0][name]" value="<%= bandName %>">
-                            <input type="hidden" id="bandCount" name="bandCount" value="1">
+                            <input type="hidden" id="bandCount" name="bandCount" value="0">
                             
                             <div class="mb-3">
                                 <button type="button" class="btn btn-outline-primary addBand w-100" onClick="addBandtoForm();">Add Band</button>
-                            </div>
-                            
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" id="isMatinee" name="isMatinee">
-                                <label class="form-check-label" for="isMatinee">Check this box if you'd like a Matinee</label>
                             </div>
                             
                             <input type="hidden" name="showDate" value="<%= month %>/<%= day %>/<%= year %>"/>

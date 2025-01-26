@@ -3,7 +3,7 @@ var router = express.Router();
 var passport = require('passport');
 var crypto = require('crypto');
 var db = require('../src/db'); //Require the mongoose database init
-const { sendMagicLink,registerBand } = require('../src/utilities');
+const { sendMagicLink,registerUser } = require('../src/utilities');
 var ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 var ensureLoggedIn = ensureLogIn();
 
@@ -18,13 +18,12 @@ router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => { 
         res.redirect("/");
         return;
     }
-    var name = band.bandName;
-    var knownBands = await getKnownBandList(name);
+    var knownBands = await getKnownBandList();
     res.render('newEvent',{
         month:req.params.month,
         day:req.params.day,
         year:req.params.year,
-        bandName:name,
+        userName:req.user.username,
         knownBandData:knownBands,
         errorMessages:res.locals.errorMessages,
         successMessages:res.locals.successMessages
@@ -35,18 +34,11 @@ router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => { 
 router.post('/addEvent',ensureLoggedIn, async (req,res) => { //Handles the form submitted by a band
     const data = req.body;
     console.log(data);
-    const band = await db.Band.findOne({bandName:data.bands[0].name});
-    if (band === null){
-        console.log("something went wrong: ");
-        console.log("Contact Band Name: "+data.bands[0].name);
-        req.flash("error","No Band Found For User");
-        res.redirect("/");
-        return;
-    }
+
     const show = new db.Show({
         showDate:data.showDate,
         requestDate:data.reqDate,
-        contactBand:band._id,
+        contact:req.user.id,
         showStatus:0
     });
     var showName = "";
@@ -57,18 +49,40 @@ router.post('/addEvent',ensureLoggedIn, async (req,res) => { //Handles the form 
         }
         else{
             if(data.bands[i].email !== null){
-                const newBandUser = await registerBand(data.bands[i].email,data.bands[i].name);
-                const userObj = await db.User.findOne({user:newBandUser.user})
-                sendMagicLink(userObj);
-                const band = await db.Band.findOne({loginInfo:userObj.user});
-                show.bands.push(band._id);
-                console.log("NEW USER INVITE SENT TO: "+data.bands[i].email);
+                try {
+                    const newBandUser = await registerUser(data.bands[i].email, data.bands[i].name);
+                    const userObj = await db.User.findOne({ user: newBandUser.user });
+                    if (userObj) {
+                        sendMagicLink(userObj);
+                        const newBand = new db.Band({
+                            bandName: data.bands[i].name,
+                            bandMembers: [userObj._id]
+                        });
+                        await newBand.save();
+                        if (newBand) {
+                            show.bands.push(newBand._id);
+                            newBand.bandMembers.push(userObj._id);
+                            await newBand.save();
+                            userObj.bands.push(newBand._id);
+                            await userObj.save();
+                            console.log("NEW USER INVITE SENT TO: " + data.bands[i].email);
+                        } else {
+                            console.error("New band not found for band name: " + data.bands[i].name);
+                        }
+                    } else {
+                        console.error("User object not found for new band user: " + newBandUser.user);
+                    }
+                } catch (err) {
+                    console.error("Error processing new band user: ", err);
+                }
             }
         }
         showName = showName + data.bands[i].name + ", ";
     }
+    show.contact = await db.User.findById(req.user.id);
     show.showName = showName.slice(0,-2);
-    console.log(show.showName);
+    console.log("New Show created:");
+    console.log(show);
     show.showDate.setHours(15); // Set the time for the show. This is a hack and should be fixed.
     await show.save();
     res.redirect("/");
@@ -213,12 +227,10 @@ function getColorFromStatus(showStatus){
     };
 }
 
-async function getKnownBandList(name){
+async function getKnownBandList(){
     var knownBandList = await db.Band.find();
     var knownBands = [];
     for(const knownBand of knownBandList){
-        if(knownBand.bandName == name)
-            continue;
         knownBands.push(knownBand.bandName);
     }
     return knownBands;
