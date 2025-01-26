@@ -4,6 +4,9 @@ var express = require('express');
 var router = express.Router();
 const { sendMagicLink } = require('../src/utilities');  // Bring in the nodemailer object
 
+var ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
+var ensureLoggedIn = ensureLogIn();
+
 
 router.get('/', async (req, res) => {
   //console.log(data);
@@ -21,6 +24,21 @@ router.get('/', async (req, res) => {
     successMessages:res.locals.successMessages
   });
 })
+
+router.get('/profile', ensureLoggedIn, async (req, res) => {
+    var user = db.Band.findOne({"user":req.user.username});
+    if (user === null){
+        console.log("redirecting");
+        res.redirect("/");
+        req.flash("error","Something went wrong. We couldn't find your user profile. Contact Fallen Log for Support.");
+        return;
+    }
+    res.render('userProfile', {
+        user: user,
+        errorMessages:res.locals.errorMessages,
+        successMessages:res.locals.successMessages
+    });
+});
 
 
 // Test Route

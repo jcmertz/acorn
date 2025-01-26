@@ -80,21 +80,6 @@ router.get('/userDetails',ensureLoggedIn, async (req,res) => {
     res.redirect("/");
 });
 
-router.get('/profile', ensureLoggedIn, async (req, res) => {
-    var band = await getBandFromUsername(req.user.username);
-    if (band === null){
-        console.log("redirecting");
-        res.redirect("/");
-        req.flash("error","No Band Logged In or Tied to Your User Profile");
-        return;
-    }
-    res.render('bandProfile', {
-        band: band,
-        errorMessages:res.locals.errorMessages,
-        successMessages:res.locals.successMessages
-    });
-});
-
 router.get('/band/profile/:bandID', ensureLoggedIn, async (req,res) => {
     var isAdmin = false;
     var name;
