@@ -57,7 +57,6 @@ router.get('/getRange', async function(req, res, next) {
             function bandEval(band) {
                 return band.bandMembers.some(user => user._id.toString() === req.user.id.toString());
             }
-            console.log(data[event]);
             if(data[event].bands.some(bandEval) || data[event].contact.toString() === req.user.id.toString()){
                 events.push({
                     title: data[event].showName,

@@ -3,7 +3,7 @@ var router = express.Router();
 var passport = require('passport');
 var crypto = require('crypto');
 var db = require('../src/db'); //Require the mongoose database init
-const { sendMagicLink,registerUser } = require('../src/utilities');
+const { sendMagicLink,sendBandInvite, registerUser } = require('../src/utilities');
 var ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 var ensureLoggedIn = ensureLogIn();
 
@@ -35,7 +35,7 @@ router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => { 
 
 router.post('/addEvent',ensureLoggedIn, async (req,res) => { //Handles the form submitted by a band
     const data = req.body;
-    console.log(data);
+    //console.log(data);
     
     const show = new db.Show({
         showDate:data.showDate,
@@ -142,7 +142,7 @@ router.get('/band/:bandID', ensureLoggedIn, async (req,res) => {
     var isAdmin = false;
     var name;
     const bandId = req.params.bandID;
-    console.log(bandId);
+    //console.log(bandId);
     const band = await db.Band.findById(bandId).populate("bandMembers");
     if(band === null){
         console.log("redirecting");
@@ -207,6 +207,87 @@ router.post('/band/:bandID/update', ensureLoggedIn, async (req, res) => {
 });
 
 
+router.post('/band/:bandID/addMember', ensureLoggedIn, async (req, res) => {
+    try {
+        const { memberEmail } = req.body;
+        const band = await db.Band.findById(req.params.bandID);
+        
+        if (!band) {
+            req.flash("error", "Band not found");
+            return res.redirect('/band/' + req.params.bandID);
+        }
+        
+        const user = await db.User.findOne({ email: memberEmail });
+        
+        if (user) {
+            // User exists, add to band
+            band.bandMembers.push(user._id);
+            await band.save();
+            
+            user.bands.push(band._id);
+            await user.save();
+            
+            req.flash("success", "Member added to band");
+        } else {
+            // User does not exist, send join link
+            const joinCode = crypto.randomBytes(20).toString('hex');
+            band.joinCodes.push(joinCode);
+            await band.save();
+            
+            sendBandInvite(memberEmail, joinCode, band.bandName, req.params.bandID);
+            req.flash("success", "Invitation sent to new member");
+        }
+        
+        res.redirect('/band/' + req.params.bandID);
+    } catch (error) {
+        console.error(error);
+        req.flash("error", "Server error");
+        res.redirect('/band/' + req.params.bandID);
+    }
+});
+
+router.get('/band/:bandID/join/:inviteCode', async (req, res) => {
+    const { bandID, inviteCode } = req.params;
+    
+    if (!req.isAuthenticated()) {
+        req.session.returnTo = req.originalUrl;
+        return res.redirect('/login');
+    }
+    
+    try {
+        const band = await db.Band.findById(bandID);
+        if (!band) {
+            req.flash("error", "Band not found");
+            return res.redirect('/');
+        }
+        
+        const invite = band.joinCodes.find((code) => code === inviteCode);
+        if (!invite) {
+            req.flash("error", "Invalid or expired invite code");
+            return res.redirect('/');
+        }
+        
+        const user = await db.User.findById(req.user.id);
+        if (!user) {
+            req.flash("error", "User not found");
+            return res.redirect('/');
+        }
+        
+        band.bandMembers.push(user._id);
+        band.joinCodes = band.joinCodes.filter(code => code !== inviteCode);
+        await band.save();
+        
+        user.bands.push(band._id);
+        await user.save();
+        
+        req.flash("success", "Successfully joined the band");
+        res.redirect('/band/' + bandID);
+    } catch (error) {
+        console.error(error);
+        req.flash("error", "Server error");
+        res.redirect('/');
+    }
+});
 
 async function getBandsFromUsername(username){
     var user = await db.User.findOne({"user":username}).populate("bands");

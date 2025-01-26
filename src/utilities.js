@@ -68,7 +68,7 @@ async function sendToken(user, token) {
   const mailOptions = {
     from: process.env.EMAIL,
     to: user.email,
-    subject: 'You Have Been Invited to join The Fallen Log on Acorn',
+    subject: 'You Have Been Invited to Join The Fallen Log on Acorn',
     text: `Acorn is the booking app for The Fallen Log at Kitchen 17. You have been invited to create an account to manage your upcoming shows. \nClick this link to log in to your account: ${magicLinkUrl}`,
     html: `
       <div style="font-family: Arial, sans-serif; text-align: center;">
@@ -89,6 +89,35 @@ async function sendToken(user, token) {
   return transporter.sendMail(mailOptions);
 }
 
+async function sendBandInvite(destination, joinCode, bandName, bandID) {
+  const logoUrl = `http://acorn.thefallenlog.com/AcornAppLogo.svg`;
+  const linkUrl = `http://acorn.thefallenlog.com/band/${bandID}/join/${joinCode}`;
+  console.log("Sending to:");
+  console.log(destination);
+  console.log(joinCode)
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: destination,
+    subject: `You Have Been Invited to Join ${bandName} on Acorn`,
+    text: `Acorn is the booking app for The Fallen Log at Kitchen 17. You have been invited to join ${bandName} on Acorn. \nClick this link to accept the invitation ${linkUrl}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; text-align: center;">
+        <img src="${logoUrl}" alt="Acorn Logo" style="width: 150px; margin-bottom: 20px;" />
+        <h2>You Have Been Invited to join ${bandName} on Acorn</h2>
+        <p>Acorn is the booking app for The Fallen Log at Kitchen 17. You have been invited to manage ${bandName} on the platform.</p>
+        <p>
+          <a href="${linkUrl}" style="display: inline-block; padding: 12px 24px; font-size: 16px; color: #ffffff; background-color: #4CAF50; text-decoration: none; border-radius: 5px;">
+            Accept the Invitation
+          </a>
+        </p>
+        <p>If the button above doesn't work, copy and paste the following link into your browser:</p>
+        <p><a href="${linkUrl}">${linkUrl}</a></p>
+      </div>
+    `,
+  };
+
+  return transporter.sendMail(mailOptions);
+};
 
 
 const crypto = require('crypto');
@@ -138,6 +167,7 @@ module.exports = {
   logMessage,
   sendToken,
   sendMagicLink,
+  sendBandInvite,
   registerUser,
   updatePassword,
   transporter:transporter,

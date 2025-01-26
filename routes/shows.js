@@ -40,7 +40,6 @@ module.exports = function(io) {
                 return res.status(500).send('Show not found');
             }
             bandsOut=[];
-            console.log(bands);
             for(band of bands){
                 var bandObj = await db.Band.findOne({"bandName":band.name});
                 if (bandObj !== null ){

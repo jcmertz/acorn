@@ -20,6 +20,7 @@ const bandSchema = new mongoose.Schema({
   instagram: String,
   genre: String,
   homeTown: String,
+  joinCodes:[{type: String, ref:"code"}],
   bandMembers: [{type: mongoose.Types.ObjectId, ref: "User"}]
 });
 const showSchema = new mongoose.Schema({
