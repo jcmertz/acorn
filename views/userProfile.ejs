@@ -48,10 +48,10 @@
                     <ul class="list-group">
                         <% user.bands.forEach(function(band) { %>
                             <li class="list-group-item">
-                                <h5><%= band.bandName %></h5>
+                                <h5><a href="/band/<%= band.id %>"><%= band.bandName %></a></h5>
                             </li>
                         <% }); %>
-                    </ul>
+                    </ul>                    
                     <!-- Button trigger modal -->
                     <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#bandModal">
                         Add or Join a Band

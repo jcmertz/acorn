@@ -122,7 +122,7 @@ router.post('/band/create', ensureLoggedIn, async (req, res) => {
     }
 });
 
-router.get('/band/profile/:bandID', ensureLoggedIn, async (req,res) => {
+router.get('/band/:bandID', ensureLoggedIn, async (req,res) => {
     var isAdmin = false;
     var name;
     const bandId = req.params.bandID;
@@ -137,8 +137,6 @@ router.get('/band/profile/:bandID', ensureLoggedIn, async (req,res) => {
         if(req.isAuthenticated()){
             if(req.user.role == 'admin' || req.user.role == 'staff'){
                 isAdmin = true;
-            }else{
-                name = await getBandFromUsername(req.user.username)
             }
         }
         
