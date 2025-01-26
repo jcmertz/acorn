@@ -5,6 +5,8 @@ var router = express.Router();
 const { sendMagicLink, upload } = require('../src/utilities');  // Bring in the nodemailer and multer objects
 
 var ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
+const fs = require('fs');
+const path = require('path');
 var ensureLoggedIn = ensureLogIn();
 
 
@@ -62,6 +64,16 @@ router.post('/user/update',ensureLoggedIn, upload.single('profilePicture'), asyn
     user.lastName = req.body.lastName;
     user.pronouns = req.body.pronouns;
     if (req.file) {
+      // Delete the old profile picture if it exists
+      if (user.profilePicture && user.profilePicture !== '/noProfile.webp') {
+      const oldPath = path.join(__dirname, '..', 'public', user.profilePicture);
+      fs.unlink(oldPath, (err) => {
+        if (err) {
+        console.error(`Failed to delete old profile picture: ${err.message}`);
+        }
+      });
+      }
+      // Save the new profile picture path
       user.profilePicture = `/uploads/${req.file.filename}`;
     }
     
