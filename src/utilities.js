@@ -102,11 +102,11 @@ async function updatePassword(userID,password){
   await user.save();
 }
 
-async function registerBand(contactEmail, bandName, password) {
+async function registerUser(contactEmail, userName, password) {
   try {
     
     const user = await db.User.create({
-      user: bandName,
+      user: userName,
       role: "user",
       email: contactEmail
     });
@@ -115,14 +115,8 @@ async function registerBand(contactEmail, bandName, password) {
       updatePassword(user._id,password);
     }
     
-    await db.Band.create({
-      bandName: bandName,
-      contactEmail: contactEmail,
-      loginInfo: user.user
-    });
-    
     // Finding the new user after it's created
-    const newUser = await db.User.findOne({ user: bandName });
+    const newUser = await db.User.findOne({ user: userName });
     let loginUser = null;
     if (newUser !== null) {
       loginUser = { id: newUser._id, user: newUser.user };
@@ -141,7 +135,7 @@ module.exports = {
   logMessage,
   sendToken,
   sendMagicLink,
-  registerBand,
+  registerUser,
   updatePassword,
   transporter:transporter
 };

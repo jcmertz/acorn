@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 
 router.use(express.urlencoded({ extended: true }));
 
-const { sendMagicLink, sendToken,registerBand,updatePassword, transporter } = require('../src/utilities');
+const { sendMagicLink, sendToken,registerUser,updatePassword, transporter } = require('../src/utilities');
 const { register } = require('module');
 
 
@@ -171,15 +171,10 @@ router.get('/register', function(req, res) {
 router.post('/register', async function(req, res, next) {
     try {
         const userRecord = await db.User.findOne({ user: req.body.username });
-        const bandRecord = await db.Band.findOne({ bandName: req.body.bandName });
         
         var redirect = false;
         if (userRecord) {
             req.flash("error","That Username is Already Registered");
-            redirect = true;
-        }
-        if (bandRecord) {
-            req.flash("error","That Band Name Is Already Registered");
             redirect = true;
         }
         if(redirect){
@@ -187,10 +182,8 @@ router.post('/register', async function(req, res, next) {
             return;
         }
         
-        const loginUser = await registerBand(req.body.contactEmail,req.body.username,req.body.password);
-        
-        band = await db.Band.findOneAndUpdate({ bandName: loginUser.user },{instagram:req.body.instagram});        
-        
+        const loginUser = await registerUser(req.body.contactEmail,req.body.username,req.body.password);
+                
         req.login(loginUser, function(err) {
             if (err) { return next(err); }
             res.redirect('/');
