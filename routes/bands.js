@@ -34,7 +34,6 @@ router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => {
 router.post('/addEvent', ensureLoggedIn, async (req, res) => {
     const data = req.body;
     console.log("DATA:");
-    console.log(data);
     try {
         function padToTwoDigits(num) {
             return num.toString().padStart(2, '0');
@@ -55,7 +54,7 @@ router.post('/addEvent', ensureLoggedIn, async (req, res) => {
         } else {
             console.error("Missing date or time");
         }
-
+        
         const show = new db.Show({
             showDate: showDate,
             requestDate: new Date(),
@@ -65,7 +64,7 @@ router.post('/addEvent', ensureLoggedIn, async (req, res) => {
             messages: [],
             bands: []
         });
-
+        
         var showName = "";
         for (let i = 0; i < data.bands.length; i++) {
             const band = await db.Band.findOne({ bandName: data.bands[i].name });
@@ -99,9 +98,18 @@ router.post('/addEvent', ensureLoggedIn, async (req, res) => {
         }
         show.showName = showName.slice(0, -2);
         show.additionalDetails = data.additionalDetails;
-        console.log("Ping?");
+        
+        // Add the additional details as the first message in the chat window
+        if (data.additionalDetails) {
+            const message = new db.Message({
+                user: req.user.username,
+                msg: data.additionalDetails
+            });
+            await message.save();
+            show.messages.push(message._id);
+        }
+        
         await show.save();
-        console.log("Pong?");
         res.json({ success: true });
     } catch (error) {
         console.error(error);
