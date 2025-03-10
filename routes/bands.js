@@ -6,6 +6,7 @@ var db = require('../src/db'); //Require the mongoose database init
 const { sendMagicLink,sendBandInvite, registerUser } = require('../src/utilities');
 var ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 var ensureLoggedIn = ensureLogIn();
+const util = require("../src/utilities.js");
 
 var url = require("url");
 
@@ -330,9 +331,103 @@ async function getKnownBandList(){
     return knownBands;
 }
 
+// New route for managing bands (admin/staff only)
+router.get('/bands/manage', util.checkUserRole(['staff', 'admin']), async (req, res) => {
+    try {
+        // Fetch all bands with their members
+        const bands = await db.Band.find().populate('bandMembers');
+        
+        res.render('manageBands', {
+            userName: req.user.username,
+            isLoggedIn: req.isAuthenticated(),
+            userRole: req.user.role,
+            bands: bands,
+            errorMessages: res.locals.errorMessages,
+            successMessages: res.locals.successMessages
+        });
+    } catch (error) {
+        console.error(error);
+        req.flash("error", "Error fetching bands");
+        res.redirect("/");
+    }
+});
+
+// Route for creating a band (from the manage bands page)
+router.post('/bands/create', util.checkUserRole(['staff', 'admin']), async (req, res) => {
+    try {
+        const { newBandName, instagramHandle, genre, homeTown } = req.body;
+        
+        // Check if the band already exists
+        const existingBand = await db.Band.findOne({ bandName: newBandName });
+        if (existingBand) {
+            req.flash("error", "Band already exists");
+            return res.redirect("/bands/manage");
+        }
+        
+        // Create a new band
+        const newBand = new db.Band({
+            bandName: newBandName,
+            instagram: instagramHandle,
+            genre: genre,
+            homeTown: homeTown,
+            bandMembers: []
+        });
+        
+        // Save the new band
+        await newBand.save();
+        
+        req.flash("success", "Band created successfully");
+        res.redirect("/bands/manage");
+    } catch (error) {
+        console.error(error);
+        req.flash("error", "Server error");
+        res.redirect("/bands/manage");
+    }
+});
+
+// Route for deleting a band
+router.post('/bands/:bandId/delete', util.checkUserRole(['staff', 'admin']), async (req, res) => {
+    try {
+        const bandId = req.params.bandId;
+        
+        // Find the band
+        const band = await db.Band.findById(bandId);
+        if (!band) {
+            req.flash("error", "Band not found");
+            return res.redirect("/bands/manage");
+        }
+        
+        // Find all shows that include this band
+        const shows = await db.Show.find({ bands: bandId });
+        
+        // Remove the band from all shows
+        for (const show of shows) {
+            show.bands = show.bands.filter(b => b.toString() !== bandId);
+            await show.save();
+        }
+        
+        // Remove the band from all users
+        const users = await db.User.find({ bands: bandId });
+        for (const user of users) {
+            user.bands = user.bands.filter(b => b.toString() !== bandId);
+            await user.save();
+        }
+        
+        // Delete the band
+        await db.Band.findByIdAndDelete(bandId);
+        
+        req.flash("success", "Band deleted successfully");
+        res.redirect("/bands/manage");
+    } catch (error) {
+        console.error(error);
+        req.flash("error", "Server error");
+        res.redirect("/bands/manage");
+    }
+});
+
 module.exports = {
-    router:router,
-    getBandsFromUsername:getBandsFromUsername,
-    getColorFromStatus:getColorFromStatus,
-    getKnownBandList:getKnownBandList
+    router: router,
+    getBandsFromUsername: getBandsFromUsername,
+    getColorFromStatus: getColorFromStatus,
+    getKnownBandList: getKnownBandList
 };

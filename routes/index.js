@@ -15,16 +15,19 @@ router.get('/', async (req, res) => {
   //console.log(req.isAuthenticated());
   var isAdmin = false;
   var userName = "";
+  var userRole = "";
   if(req.isAuthenticated()){
     if(req.user.role == 'admin' || req.user.role == 'staff'){
       isAdmin = true;
     }
     userName = req.user.username;
+    userRole = req.user.role;
   }
   res.render('index',{
     isLoggedIn:req.isAuthenticated(),
     userName:userName,
     isAdmin:isAdmin,
+    userRole:userRole,
     errorMessages:res.locals.errorMessages,
     successMessages:res.locals.successMessages
   });
@@ -42,6 +45,7 @@ router.get('/profile', ensureLoggedIn, async (req, res) => {
     user: user,
     userName: req.user.username,
     isLoggedIn: req.isAuthenticated(),
+    userRole: req.user.role,
     errorMessages:res.locals.errorMessages,
     successMessages:res.locals.successMessages
   });
