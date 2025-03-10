@@ -334,14 +334,45 @@ async function getKnownBandList(){
 // New route for managing bands (admin/staff only)
 router.get('/bands/manage', util.checkUserRole(['staff', 'admin']), async (req, res) => {
     try {
-        // Fetch all bands with their members
-        const bands = await db.Band.find().populate('bandMembers');
+        // Get query parameters for search and pagination
+        const search = req.query.search || '';
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        
+        // Create search filter
+        let filter = {};
+        if (search) {
+            filter = {
+                $or: [
+                    { bandName: { $regex: search, $options: 'i' } },
+                    { instagram: { $regex: search, $options: 'i' } },
+                    { genre: { $regex: search, $options: 'i' } },
+                    { homeTown: { $regex: search, $options: 'i' } }
+                ]
+            };
+        }
+        
+        // Count total bands matching the filter
+        const totalBands = await db.Band.countDocuments(filter);
+        const totalPages = Math.ceil(totalBands / limit);
+        
+        // Fetch bands with pagination
+        const bands = await db.Band.find(filter)
+            .populate('bandMembers')
+            .sort({ bandName: 1 })
+            .skip(skip)
+            .limit(limit);
         
         res.render('manageBands', {
             userName: req.user.username,
             isLoggedIn: req.isAuthenticated(),
             userRole: req.user.role,
             bands: bands,
+            search: search,
+            currentPage: page,
+            totalPages: totalPages,
+            totalBands: totalBands,
             errorMessages: res.locals.errorMessages,
             successMessages: res.locals.successMessages
         });
