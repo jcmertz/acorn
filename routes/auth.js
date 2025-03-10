@@ -197,7 +197,7 @@ router.post('/register', async function(req, res, next) {
 // Passport session setup
 passport.serializeUser(function(user, cb) {
     process.nextTick(function() {
-        cb(null, { id: user.id, username: user.user, role: user.role });
+        cb(null, { id: user.id, username: user.user, roles: user.roles });
     });
 });
 
@@ -211,7 +211,7 @@ passport.deserializeUser(async function(user, cb) {
         cb(null, {
             id: userRecord._id,
             username: userRecord.user,
-            role: userRecord.role,
+            roles: userRecord.roles || ['user'], // Fallback for existing users
             email: userRecord.email
         });
     } catch (err) {

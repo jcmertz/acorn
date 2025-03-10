@@ -12,6 +12,9 @@
             font-size: 0.8rem;
             padding: 5px 10px;
             border-radius: 20px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            display: inline-block;
         }
         .role-admin {
             background-color: #dc3545;
@@ -24,6 +27,18 @@
         .role-user {
             background-color: #28a745;
             color: white;
+        }
+        .role-sound {
+            background-color: #6f42c1;
+            color: white;
+        }
+        .role-door {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .role-promoter {
+            background-color: #ffc107;
+            color: black;
         }
         .action-buttons {
             display: flex;
@@ -89,6 +104,9 @@
                                 <option value="admin" <%= filters && filters.role === 'admin' ? 'selected' : '' %>>Admin</option>
                                 <option value="staff" <%= filters && filters.role === 'staff' ? 'selected' : '' %>>Staff</option>
                                 <option value="user" <%= filters && filters.role === 'user' ? 'selected' : '' %>>User</option>
+                                <option value="sound" <%= filters && filters.role === 'sound' ? 'selected' : '' %>>Sound</option>
+                                <option value="door" <%= filters && filters.role === 'door' ? 'selected' : '' %>>Door</option>
+                                <option value="promoter" <%= filters && filters.role === 'promoter' ? 'selected' : '' %>>Promoter</option>
                             </select>
                         </div>
                     </div>
@@ -114,7 +132,18 @@
                             <tr>
                                 <td><%= user.user %></td>
                                 <td><%= user.email || 'No email' %></td>
-                                <td><span class="role-badge role-<%= user.role %>"><%= user.role %></span></td>
+                                <td>
+                                    <% if (user.roles && Array.isArray(user.roles)) { %>
+                                        <% user.roles.forEach(function(role) { %>
+                                            <span class="role-badge role-<%= role %>"><%= role %></span>
+                                        <% }); %>
+                                    <% } else if (user.role) { %>
+                                        <!-- Backward compatibility for users with old schema -->
+                                        <span class="role-badge role-<%= user.role %>"><%= user.role %></span>
+                                    <% } else { %>
+                                        <span class="role-badge role-user">user</span>
+                                    <% } %>
+                                </td>
                                 <td>
                                     <div class="action-buttons">
                                         <button class="btn btn-sm btn-outline-primary" 
@@ -123,7 +152,8 @@
                                                 data-id="<%= user._id %>"
                                                 data-username="<%= user.user %>"
                                                 data-email="<%= user.email %>"
-                                                data-role="<%= user.role %>">
+                                                data-role="<%= user.role %>"
+                                                data-roles='<%= JSON.stringify(user.roles || []) %>'>
                                             <i class="fas fa-edit"></i> Edit
                                         </button>
                                         
@@ -206,12 +236,31 @@
                                 <input type="email" class="form-control" id="email" name="email" required>
                             </div>
                             <div class="form-group">
-                                <label for="role">Role</label>
-                                <select class="form-control" id="role" name="role">
-                                    <option value="user">User</option>
-                                    <option value="staff">Staff</option>
-                                    <option value="admin">Admin</option>
-                                </select>
+                                <label for="role">Roles</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="user" id="role-user" checked>
+                                    <label class="form-check-label" for="role-user">User</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="staff" id="role-staff">
+                                    <label class="form-check-label" for="role-staff">Staff</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="admin" id="role-admin">
+                                    <label class="form-check-label" for="role-admin">Admin</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="sound" id="role-sound">
+                                    <label class="form-check-label" for="role-sound">Sound</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="door" id="role-door">
+                                    <label class="form-check-label" for="role-door">Door</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="promoter" id="role-promoter">
+                                    <label class="form-check-label" for="role-promoter">Promoter</label>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="password">Password</label>
@@ -249,12 +298,31 @@
                                 <input type="email" class="form-control" id="edit-email" name="email" required>
                             </div>
                             <div class="form-group">
-                                <label for="edit-role">Role</label>
-                                <select class="form-control" id="edit-role" name="role">
-                                    <option value="user">User</option>
-                                    <option value="staff">Staff</option>
-                                    <option value="admin">Admin</option>
-                                </select>
+                                <label for="edit-role">Roles</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="user" id="edit-role-user">
+                                    <label class="form-check-label" for="edit-role-user">User</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="staff" id="edit-role-staff">
+                                    <label class="form-check-label" for="edit-role-staff">Staff</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="admin" id="edit-role-admin">
+                                    <label class="form-check-label" for="edit-role-admin">Admin</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="sound" id="edit-role-sound">
+                                    <label class="form-check-label" for="edit-role-sound">Sound</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="door" id="edit-role-door">
+                                    <label class="form-check-label" for="edit-role-door">Door</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="promoter" id="edit-role-promoter">
+                                    <label class="form-check-label" for="edit-role-promoter">Promoter</label>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -332,11 +400,41 @@
                 var username = button.data('username');
                 var email = button.data('email');
                 var role = button.data('role');
+                var rolesData = button.data('roles');
+                
+                // Parse roles data
+                var roles = [];
+                try {
+                    if (typeof rolesData === 'string') {
+                        roles = JSON.parse(rolesData);
+                    } else if (Array.isArray(rolesData)) {
+                        roles = rolesData;
+                    }
+                } catch (e) {
+                    console.error('Error parsing roles:', e);
+                }
                 
                 var modal = $(this);
                 modal.find('#edit-username').val(username);
                 modal.find('#edit-email').val(email);
-                modal.find('#edit-role').val(role);
+                
+                // Reset all checkboxes
+                modal.find('input[name="roles[]"]').prop('checked', false);
+                
+                // Handle both old single role and new roles array
+                if (roles && Array.isArray(roles) && roles.length > 0) {
+                    // For users with roles array
+                    roles.forEach(function(role) {
+                        modal.find('#edit-role-' + role).prop('checked', true);
+                    });
+                } else if (role) {
+                    // For users with old single role
+                    modal.find('#edit-role-' + role).prop('checked', true);
+                } else {
+                    // Default to user role if none set
+                    modal.find('#edit-role-user').prop('checked', true);
+                }
+                
                 modal.find('#editUserForm').attr('action', '/admin/users/update/' + userId);
             });
             

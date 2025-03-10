@@ -48,7 +48,11 @@ module.exports = function(io) {
             
             // Role filter
             if (role && role !== 'all') {
-                query.role = role;
+                // Handle both old schema (role field) and new schema (roles array)
+                query.$or = [
+                    { roles: role },  // New schema: match if role is in the roles array
+                    { role: role }    // Old schema: match if role field equals the role
+                ];
             }
             
             // Count total users matching the query
@@ -66,6 +70,7 @@ module.exports = function(io) {
                 userName: req.user.username,
                 isLoggedIn: req.isAuthenticated(),
                 userRole: req.user.role,
+                userRoles: req.user.roles || [req.user.role || 'user'],
                 errorMessages: res.locals.errorMessages,
                 successMessages: res.locals.successMessages,
                 pagination: {
@@ -89,7 +94,7 @@ module.exports = function(io) {
     // Add new user
     router.post('/users/add', async (req, res) => {
         try {
-            const { username, email, role, password } = req.body;
+            const { username, email, roles, password } = req.body;
             
             // Check if user already exists
             const existingUser = await db.User.findOne({ user: username });
@@ -101,10 +106,17 @@ module.exports = function(io) {
             // Create new user
             await registerUser(email, username, password);
             
-            // If a specific role was selected, update it
-            if (role && role !== 'user') {
+            // Update roles if provided
+            if (roles && (Array.isArray(roles) || typeof roles === 'string')) {
                 const newUser = await db.User.findOne({ user: username });
-                newUser.role = role;
+                
+                // Handle both array and single string cases
+                if (Array.isArray(roles)) {
+                    newUser.roles = roles.length > 0 ? roles : ['user']; // Default to user if empty
+                } else {
+                    newUser.roles = [roles]; // Convert single role to array
+                }
+                
                 await newUser.save();
             }
             
@@ -121,7 +133,7 @@ module.exports = function(io) {
     router.post('/users/update/:id', async (req, res) => {
         try {
             const userId = req.params.id;
-            const { email, role } = req.body;
+            const { email, roles } = req.body;
             
             const user = await db.User.findById(userId);
             if (!user) {
@@ -131,7 +143,18 @@ module.exports = function(io) {
             
             // Update user details
             user.email = email;
-            user.role = role;
+            
+            // Handle roles update
+            if (roles) {
+                if (Array.isArray(roles)) {
+                    user.roles = roles.length > 0 ? roles : ['user']; // Default to user if empty
+                } else {
+                    user.roles = [roles]; // Convert single role to array
+                }
+            } else {
+                user.roles = ['user']; // Default to user if no roles provided
+            }
+            
             await user.save();
             
             req.flash('success', 'User updated successfully');
