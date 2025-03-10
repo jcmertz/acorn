@@ -25,8 +25,10 @@
 <script>
     let currentBandCount = 0;
     
-    function addBandtoForm(newBandName = "") {
-        let bandCount = $('#bandCount').val();
+    // Make addBandtoForm globally accessible
+    window.addBandtoForm = function(newBandName = "") {
+        console.log("addBandtoForm called with:", newBandName);
+        let bandCount = parseInt($('#bandCount').val()) || 0;
         currentBandCount = bandCount;
         
         // Create a div to hold the new band input, validation icon, and the remove button
@@ -38,19 +40,18 @@
         newBand.setAttribute("type", "text");
         newBand.setAttribute("id", "band" + bandCount);
         newBand.setAttribute("name", "bands[" + bandCount+"][name]");
-        newBand.setAttribute("value",newBandName);
+        newBand.setAttribute("value", newBandName);
         newBand.setAttribute("list", "knownBands");
         newBand.setAttribute("autocomplete", "off");
         newBand.classList.add("form-control", "me-2");
-        newBand.addEventListener("input", validateBand);
         
         let validationIcon = document.createElement("span");
         validationIcon.setAttribute("id", "validationIcon" + bandCount);
         validationIcon.classList.add("validation-box", "me-2"); // Placeholder for checkmark or exclamation icon
         
-        let bandX = document.createElement("input");
+        let bandX = document.createElement("button");
         bandX.setAttribute("type", "button");
-        bandX.setAttribute("value", "X");
+        bandX.textContent = "X";
         bandX.setAttribute("id", "otherBandX" + bandCount);
         bandX.setAttribute("onClick", "deleteBandField(" + bandCount + ")");
         bandX.classList.add("btn", "btn-danger");
@@ -61,12 +62,99 @@
         
         $('.addBand').before(div);
         
+        // Add event listeners after the element is added to the DOM
+        newBand.addEventListener("input", validateBand);
+        newBand.addEventListener("input", debounce(handleBandSearch, 300));
+        
         bandCount++;
         $('#bandCount').val(bandCount);
-        if(newBandName != ""){
+        
+        if(newBandName !== ""){
             newBand.dispatchEvent(new Event('input'));
         }
+        
         checkFormValidity();
+    };
+    
+    // Debounce function to limit API calls during typing
+    function debounce(func, delay) {
+        let timeout;
+        return function() {
+            const context = this;
+            const args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), delay);
+        };
+    }
+    
+    // Function to handle band search as user types
+    function handleBandSearch(event) {
+        const input = event.target;
+        const query = input.value.trim();
+        
+        if (query.length < 1) {
+            clearBandSuggestions();
+            return;
+        }
+        
+        // Make an AJAX call to the fuzzy search endpoint
+        $.ajax({
+            url: '/bands/search',
+            method: 'GET',
+            data: { q: query },
+            success: function(data) {
+                updateBandSuggestions(data);
+            },
+            error: function(error) {
+                console.error('Error fetching band suggestions:', error);
+                // Fallback to filtering the existing options
+                const datalist = document.getElementById('knownBands');
+                const filteredOptions = [];
+                
+                // Get all band names from the original data
+                <% for (let singleItem of knownBandData) { %>
+                    if ('<%= singleItem %>'.toLowerCase().includes(query.toLowerCase())) {
+                        filteredOptions.push('<%= singleItem %>');
+                    }
+                <% } %>
+                
+                updateBandSuggestions(filteredOptions);
+            }
+        });
+    }
+    
+    // Function to update the datalist with new suggestions
+    function updateBandSuggestions(suggestions) {
+        const datalist = document.getElementById('knownBands');
+        
+        // Clear existing options
+        while (datalist.firstChild) {
+            datalist.removeChild(datalist.firstChild);
+        }
+        
+        // Add new options
+        suggestions.forEach(bandName => {
+            const option = document.createElement('option');
+            option.value = bandName;
+            datalist.appendChild(option);
+        });
+    }
+    
+    // Function to clear band suggestions
+    function clearBandSuggestions() {
+        const datalist = document.getElementById('knownBands');
+        
+        // Clear existing options
+        while (datalist.firstChild) {
+            datalist.removeChild(datalist.firstChild);
+        }
+        
+        // Directly use the original band data
+        <% for (let singleItem of knownBandData) { %>
+            let option = document.createElement('option');
+            option.value = '<%= singleItem %>';
+            datalist.appendChild(option);
+        <% } %>
     }
     
     function validateBand(event) {
@@ -74,8 +162,16 @@
         const datalist = document.getElementById('knownBands');
         const validationIcon = input.nextElementSibling;
         const enteredValue = input.value.trim();
+        
+        if (!enteredValue) {
+            validationIcon.innerHTML = "";
+            checkFormValidity();
+            return;
+        }
+        
         let bandExists = false;
         
+        // Check if the entered value matches any option in the datalist
         for (let option of datalist.options) {
             if (option.value.toLowerCase() === enteredValue.toLowerCase()) {
                 bandExists = true;
@@ -90,7 +186,7 @@
             validationIcon.setAttribute("title", "Band is recognized");
             validationIcon.style.cursor = "default";
             checkFormValidity();
-        } else if (enteredValue !== "") {
+        } else {
             validationIcon.innerHTML = "⚠";
             validationIcon.classList.remove("success");
             validationIcon.classList.add("warning");
@@ -98,13 +194,10 @@
             validationIcon.style.cursor = "pointer";
             
             validationIcon.onclick = function () {
-                currentBandCount = validationIcon.id.replace("validationIcon", "");
+                currentBandCount = parseInt(validationIcon.id.replace("validationIcon", ""));
                 document.getElementById('bandEmail').value = '';
                 new bootstrap.Modal(document.getElementById('newBandModal')).show();
             };
-            checkFormValidity();
-        } else {
-            validationIcon.innerHTML = "";
             checkFormValidity();
         }
     }
@@ -155,55 +248,100 @@
         checkFormValidity();
     });
     
-    function deleteBandField(bandNum) {
-        let bandCount = $('#bandCount').val();
+    // Make deleteBandField globally accessible
+    window.deleteBandField = function(bandNum) {
+        let bandCount = parseInt($('#bandCount').val());
         $('#div' + bandNum).remove();
         
+        // Renumber the remaining band fields
         for (let i = bandNum + 1; i < bandCount; i++) {
             let newNum = i - 1;
-            $('#otherBand' + i).attr("id", "band" + newNum);
-            $('#otherBand' + i).attr("name", "bands[" + newNum+"][name]");
-            $('#otherBandX' + i).remove();
             
-            let bandX = document.createElement("input");
-            bandX.setAttribute("type", "button");
-            bandX.setAttribute("value", "X");
-            bandX.setAttribute("id", "otherBandX" + newNum);
-            bandX.setAttribute("onClick", "deleteBandField(" + newNum + ")");
-            bandX.classList.add("btn", "btn-danger", "ms-2");
+            // Update the band input field
+            let bandInput = document.getElementById('band' + i);
+            if (bandInput) {
+                bandInput.id = 'band' + newNum;
+                bandInput.name = 'bands[' + newNum + '][name]';
+            }
             
-            $('#div' + i).append(bandX);
-            $('#div' + i).attr("id", "div" + (i - 1));
+            // Update the validation icon
+            let validationIcon = document.getElementById('validationIcon' + i);
+            if (validationIcon) {
+                validationIcon.id = 'validationIcon' + newNum;
+            }
+            
+            // Update the remove button
+            let removeButton = document.getElementById('otherBandX' + i);
+            if (removeButton) {
+                removeButton.id = 'otherBandX' + newNum;
+                removeButton.setAttribute('onClick', 'deleteBandField(' + newNum + ')');
+            }
+            
+            // Update the div container
+            let divContainer = document.getElementById('div' + i);
+            if (divContainer) {
+                divContainer.id = 'div' + newNum;
+            }
+            
+            // Update any hidden email input if it exists
+            let hiddenEmail = document.querySelector('[name="bands[' + i + '][email]"]');
+            if (hiddenEmail) {
+                hiddenEmail.name = 'bands[' + newNum + '][email]';
+            }
         }
         
         bandCount--;
         $('#bandCount').val(bandCount);
         checkFormValidity();  // Check form validity when bands are deleted
-    }
+    };
     
     // Check if all added bands have a green checkmark, enabling the form submission button if valid
     function checkFormValidity() {
         let allValid = true;
-        let bandCount = $('#bandCount').val();
+        let bandCount = parseInt($('#bandCount').val()) || 0;
         
-        for (let i = 1; i < bandCount; i++) {
+        // If no bands have been added yet, form is invalid
+        if (bandCount <= 0) {
+            document.getElementById('submitButton').disabled = true;
+            return;
+        }
+        
+        // Check each band field
+        for (let i = 0; i < bandCount; i++) {
             let validationIcon = document.getElementById('validationIcon' + i);
-            let hiddenEmail = document.querySelector('[name="bands[' + i + '][email]"]');
-            // console.log("ID: "+i);
-            // console.log("Val: "+validationIcon);
-            // console.log("Hidden: "+hiddenEmail);
-            // console.log("");
+            let bandInput = document.getElementById('band' + i);
             
-            if(validationIcon && validationIcon.innerHTML === "✔"){
-                continue;
-            }
+            // Skip if this band field doesn't exist (might have been deleted)
+            if (!bandInput) continue;
             
-            if (!validationIcon || validationIcon.innerHTML !== "✔" || !hiddenEmail) {
+            // If the band input is empty, form is invalid
+            if (!bandInput.value.trim()) {
                 allValid = false;
                 break;
+            }
+            
+            // If the validation icon doesn't have a checkmark, check if it has a hidden email
+            if (!validationIcon || validationIcon.innerHTML !== "✔") {
+                let hiddenEmail = document.querySelector('[name="bands[' + i + '][email]"]');
+                if (!hiddenEmail) {
+                    allValid = false;
+                    break;
+                }
             }
         }
         
         document.getElementById('submitButton').disabled = !allValid;
     }
+    
+    // Initialize the form when the page loads
+    $(document).ready(function() {
+        // Initialize the band count
+        $('#bandCount').val(0);
+        
+        // Disable the submit button initially
+        document.getElementById('submitButton').disabled = true;
+        
+        // Ensure the datalist is populated
+        clearBandSuggestions();
+    });
 </script>

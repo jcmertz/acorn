@@ -456,6 +456,41 @@ router.post('/bands/:bandId/delete', util.checkUserRole(['staff', 'admin']), asy
     }
 });
 
+// New endpoint for fuzzy search of bands
+router.get('/search', async (req, res) => {
+    try {
+        const query = req.query.q || '';
+        if (!query || query.length < 1) {
+            return res.json([]);
+        }
+        
+        // Create a case-insensitive regex for fuzzy matching
+        const regex = new RegExp(query.split('').join('.*'), 'i');
+        
+        // Find bands that match the regex pattern
+        const bands = await db.Band.find({ bandName: regex }).limit(10).select('bandName');
+        
+        // Return just the band names
+        const results = bands.map(band => band.bandName);
+        
+        res.json(results);
+    } catch (error) {
+        console.error('Error in band search:', error);
+        res.status(500).json({ error: 'An error occurred during search' });
+    }
+});
+
+// Endpoint to get all known bands
+router.get('/getKnownBands', async (req, res) => {
+    try {
+        const bands = await getKnownBandList();
+        res.json(bands);
+    } catch (error) {
+        console.error('Error fetching known bands:', error);
+        res.status(500).json({ error: 'An error occurred while fetching bands' });
+    }
+});
+
 module.exports = {
     router: router,
     getBandsFromUsername: getBandsFromUsername,

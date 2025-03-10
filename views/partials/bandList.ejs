@@ -4,5 +4,49 @@
     %>
     <% for (let singleItem of dataObj) { %>
         <option value='<%= singleItem %>'>
-            <% } %>
-        </datalist>
+    <% } %>
+</datalist>
+
+<style>
+    /* Style for the dropdown suggestions */
+    .band-suggestion {
+        padding: 8px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .band-suggestion:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .band-suggestions-container {
+        position: absolute;
+        background: white;
+        border: 1px solid #ced4da;
+        border-radius: 0 0 4px 4px;
+        max-height: 200px;
+        overflow-y: auto;
+        width: 100%;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Style for validation icons */
+    .validation-box {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        font-size: 14px;
+    }
+    
+    .validation-box.success {
+        color: #198754;
+    }
+    
+    .validation-box.warning {
+        color: #ffc107;
+    }
+</style>

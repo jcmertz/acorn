@@ -25,7 +25,7 @@
                             <input type="hidden" id="bandCount" name="bandCount" value="0">
                             
                             <div class="mb-3">
-                                <button type="button" class="btn btn-outline-primary addBand w-100" onClick="addBandtoForm();">Add Band</button>
+                                <button type="button" class="btn btn-outline-primary addBand w-100" id="addBandButton">Add Band</button>
                             </div>
                             
                             <input type="hidden" name="showDate" value="<%= month %>/<%= day %>/<%= year %>"/>
@@ -50,6 +50,60 @@
 <script>
     var date = new Date().toLocaleDateString();
     document.getElementById("reqDate").setAttribute("value", date);
+    
+    // Ensure the addBandtoForm function is properly defined
+    $(document).ready(function() {
+        // Make sure the Add Band button works
+        $('#addBandButton').on('click', function() {
+            console.log('Add Band button clicked');
+            if (typeof window.addBandtoForm === 'function') {
+                window.addBandtoForm();
+            } else {
+                console.error('addBandtoForm function is not defined');
+                // Fallback implementation
+                let bandCount = parseInt($('#bandCount').val()) || 0;
+                
+                // Create a div to hold the new band input and the remove button
+                let div = document.createElement("div");
+                div.classList.add("d-flex", "align-items-center", "my-2");
+                div.setAttribute("id", "div" + bandCount);
+                
+                let newBand = document.createElement("input");
+                newBand.setAttribute("type", "text");
+                newBand.setAttribute("id", "band" + bandCount);
+                newBand.setAttribute("name", "bands[" + bandCount+"][name]");
+                newBand.setAttribute("list", "knownBands");
+                newBand.setAttribute("autocomplete", "off");
+                newBand.classList.add("form-control", "me-2");
+                
+                let validationIcon = document.createElement("span");
+                validationIcon.setAttribute("id", "validationIcon" + bandCount);
+                validationIcon.classList.add("validation-box", "me-2");
+                
+                let bandX = document.createElement("button");
+                bandX.setAttribute("type", "button");
+                bandX.textContent = "X";
+                bandX.setAttribute("id", "otherBandX" + bandCount);
+                bandX.classList.add("btn", "btn-danger");
+                
+                bandX.addEventListener('click', function() {
+                    $('#div' + bandCount).remove();
+                    let count = parseInt($('#bandCount').val());
+                    count--;
+                    $('#bandCount').val(count);
+                });
+                
+                div.appendChild(newBand);
+                div.appendChild(validationIcon);
+                div.appendChild(bandX);
+                
+                $('#addBandButton').before(div);
+                
+                bandCount++;
+                $('#bandCount').val(bandCount);
+            }
+        });
+    });
 </script>
 </body>
 

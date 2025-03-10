@@ -195,5 +195,94 @@
     </div>
 </div>
 
+<script>
+    $(document).ready(function() {
+        const searchInput = $('#search');
+        
+        // Create a container for suggestions
+        const suggestionsContainer = $('<div class="band-suggestions-container" style="display: none;"></div>');
+        searchInput.after(suggestionsContainer);
+        
+        // Debounce function to limit API calls during typing
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        // Handle input changes with debounce
+        searchInput.on('input', debounce(function() {
+            const query = $(this).val().trim();
+            
+            if (query.length < 1) {
+                suggestionsContainer.hide();
+                return;
+            }
+            
+            // Make an AJAX call to the fuzzy search endpoint
+            $.ajax({
+                url: '/bands/search',
+                method: 'GET',
+                data: { q: query },
+                success: function(data) {
+                    updateSuggestions(data);
+                },
+                error: function(error) {
+                    console.error('Error fetching band suggestions:', error);
+                }
+            });
+        }, 300));
+        
+        // Update suggestions in the dropdown
+        function updateSuggestions(suggestions) {
+            suggestionsContainer.empty();
+            
+            if (suggestions.length === 0) {
+                suggestionsContainer.hide();
+                return;
+            }
+            
+            suggestions.forEach(bandName => {
+                const suggestion = $(`<div class="band-suggestion">${bandName}</div>`);
+                suggestion.on('click', function() {
+                    searchInput.val(bandName);
+                    suggestionsContainer.hide();
+                    searchInput.closest('form').submit();
+                });
+                suggestionsContainer.append(suggestion);
+            });
+            
+            suggestionsContainer.show();
+        }
+        
+        // Hide suggestions when clicking outside
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.band-suggestions-container').length && 
+                !$(e.target).is(searchInput)) {
+                suggestionsContainer.hide();
+            }
+        });
+        
+        // Show suggestions when focusing on the search input
+        searchInput.on('focus', function() {
+            const query = $(this).val().trim();
+            if (query.length > 0) {
+                $.ajax({
+                    url: '/bands/search',
+                    method: 'GET',
+                    data: { q: query },
+                    success: function(data) {
+                        updateSuggestions(data);
+                    }
+                });
+            }
+        });
+    });
+</script>
+
 </body>
 </html>
