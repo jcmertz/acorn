@@ -7,14 +7,14 @@ LABEL maintainer="The fun folks at the Fallen Log at Kitchen 17"
 # Set the working directory
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . .
-
 # Make sure we have the latest-n-greatest
 RUN apt-get update; apt-get upgrade -y
 
 # This is a node app so we gotta install node stuff
 RUN apt-get install -y nodejs npm node-mongodb
+
+# Copy the current directory contents into the container at /app
+COPY . .
 
 # Install the dependencies
 RUN npm install
