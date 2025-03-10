@@ -134,3 +134,8 @@ dist
 
 # Photos
 public/uploads/
+
+# Nginx
+nginx/nginx_secrets/cloudflare.ini
+nginx/user_conf.d/nginx.conf
+nginx-certbot.env
