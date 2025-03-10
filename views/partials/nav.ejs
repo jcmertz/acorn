@@ -21,6 +21,9 @@
                     <a class="dropdown-item" href="/profile">My Profile</a>
                     <% if (typeof userRole !== 'undefined' && (userRole === 'admin' || userRole === 'staff')) { %>
                         <a class="dropdown-item" href="/bands/manage">Manage Bands</a>
+                        <% if (userRole === 'admin') { %>
+                            <a class="dropdown-item" href="/admin/users">Manage Users</a>
+                        <% } %>
                     <% } %>
                     <a class="dropdown-item" href="/logout">Logout</a>
                 </div>
