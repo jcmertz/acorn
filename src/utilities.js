@@ -66,8 +66,8 @@ async function sendMagicLink(user){
 };
 
 async function sendToken(user, token) {
-  const magicLinkUrl = `http://acorn.thefallenlog.com/login/email/verify?token=${token}`;
-  const logoUrl = `http://acorn.thefallenlog.com/AcornAppLogo.svg`;
+  const magicLinkUrl = `${process.env.BASE_URL}/login/email/verify?token=${token}`;
+  const logoUrl = `${process.env.BASE_URL}/AcornAppLogo.svg`;
 
   const mailOptions = {
     from: process.env.EMAIL,
@@ -94,8 +94,8 @@ async function sendToken(user, token) {
 }
 
 async function sendBandInvite(destination, joinCode, bandName, bandID) {
-  const logoUrl = `http://acorn.thefallenlog.com/AcornAppLogo.svg`;
-  const linkUrl = `http://acorn.thefallenlog.com/band/${bandID}/join/${joinCode}`;
+  const logoUrl = `${process.env.BASE_URL}/AcornAppLogo.svg`;
+  const linkUrl = `${process.env.BASE_URL}/band/${bandID}/join/${joinCode}`;
   console.log("Sending to:");
   console.log(destination);
   console.log(joinCode)
