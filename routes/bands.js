@@ -176,7 +176,6 @@ router.get('/band/:bandID', ensureLoggedIn, async (req, res) => {
         res.redirect("/");
         return;
     } else {
-        console.log("Band Exists");
         if (req.isAuthenticated()) {
             if (req.user.roles.includes('admin') || req.user.roles.includes('staff')){
                 isAdmin = true;
