@@ -21,7 +21,7 @@
             <div class="step" id="step-intro">
                 <h2>Welcome to the Event Request Form!</h2>
                 <br>
-                <p>We’ll guide you step by step to make your event submission easy and clear.</p>
+                <p>We'll guide you step by step to make your event submission easy and clear.</p>
                 <p> Click "Start" to begin.</p>
                 <button class="btn btn-primary" onclick="nextStep()">Start</button>
             </div>
@@ -91,7 +91,7 @@
             <!-- Step 8: Confirmation -->
             <div class="step d-none" id="step-confirmation">
                 <h2>Confirm Your Submission</h2>
-                <p>Here’s what you’ve entered:</p>
+                <p>Here's what you've entered:</p>
                 <ul>
                     <li><strong>Date:</strong> <span id="confirmDate"></span></li>
                     <li><strong>Bands:</strong> <span id="confirmBands"></span></li>
@@ -187,8 +187,117 @@
             bandInput.name = 'bands[]';
             bandInput.className = 'form-control my-2';
             bandInput.placeholder = 'Enter band name';
-            document.getElementById('bandsList').appendChild(bandInput);
+            bandInput.setAttribute('list', 'knownBands');
+            bandInput.setAttribute('autocomplete', 'off');
+            
+            // Create autocomplete dropdown container
+            const dropdownContainer = document.createElement('div');
+            dropdownContainer.className = 'position-relative';
+            
+            // Create the dropdown
+            const dropdown = document.createElement('div');
+            dropdown.className = 'dropdown-menu w-100 d-none';
+            dropdown.style.maxHeight = '200px';
+            dropdown.style.overflowY = 'auto';
+            
+            // Add event listeners for input
+            bandInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const knownBands = Array.from(document.getElementById('knownBands').options).map(opt => opt.value);
+                const matchingBands = knownBands.filter(band => 
+                    band.toLowerCase().includes(searchTerm)
+                ).slice(0, 5);
+                
+                // Clear previous options
+                dropdown.innerHTML = '';
+                
+                // Add "Add as new band" option at the top
+                if (searchTerm.length > 0) {
+                    const newBandOption = document.createElement('a');
+                    newBandOption.className = 'dropdown-item';
+                    newBandOption.href = '#';
+                    newBandOption.textContent = `Add "${this.value}" as new band`;
+                    newBandOption.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        // Show the new band modal
+                        document.getElementById('bandEmail').value = '';
+                        new bootstrap.Modal(document.getElementById('newBandModal')).show();
+                        // Store the current input for later use
+                        currentBandInput = this;
+                        // dropdown.classList.add('d-none');
+                    });
+                    dropdown.appendChild(newBandOption);
+                }
+                
+                // Add matching bands
+                matchingBands.forEach(band => {
+                    const option = document.createElement('a');
+                    option.className = 'dropdown-item';
+                    option.href = '#';
+                    option.textContent = band;
+                    option.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.value = band;
+                        dropdown.classList.add('d-none');
+                    });
+                    dropdown.appendChild(option);
+                });
+                
+                // Show/hide dropdown based on content
+                dropdown.classList.toggle('d-none', matchingBands.length === 0 && searchTerm.length === 0);
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!dropdownContainer.contains(e.target)) {
+                    dropdown.classList.add('d-none');
+                }
+            });
+            
+            // Add elements to container
+            dropdownContainer.appendChild(bandInput);
+            dropdownContainer.appendChild(dropdown);
+            
+            document.getElementById('bandsList').appendChild(dropdownContainer);
         }
+
+        // Store reference to current input being edited
+        let currentBandInput = null;
+
+        // Handle the "Invite Band" button in the modal
+        document.getElementById('inviteButton').addEventListener('click', function () {
+            const bandEmail = document.getElementById('bandEmail').value;
+            if (bandEmail && currentBandInput) {
+                let hiddenInput = document.createElement('input');
+                hiddenInput.setAttribute('type', 'hidden');
+                hiddenInput.setAttribute('name', 'bands[' + currentBandInput.name.match(/\[(\d+)\]/)[1] + '][email]');
+                hiddenInput.setAttribute('value', bandEmail);
+                
+                // Append to the correct div based on band count
+                currentBandInput.parentElement.appendChild(hiddenInput);
+                
+                // Close the modal
+                bootstrap.Modal.getInstance(document.getElementById('newBandModal')).hide();
+                currentBandInput = null;
+            }
+        });
+        
+        // Handle the "Add Band Without Invite" button in the modal
+        document.getElementById('noInviteButton').addEventListener('click', function () {
+            if (currentBandInput) {
+                let hiddenInput = document.createElement('input');
+                hiddenInput.setAttribute('type', 'hidden');
+                hiddenInput.setAttribute('name', 'bands[' + currentBandInput.name.match(/\[(\d+)\]/)[1] + '][email]');
+                hiddenInput.setAttribute('value', 'noInvite');
+                
+                // Append to the correct div based on band count
+                currentBandInput.parentElement.appendChild(hiddenInput);
+                
+                // Close the modal
+                bootstrap.Modal.getInstance(document.getElementById('newBandModal')).hide();
+                currentBandInput = null;
+            }
+        });
     </script>
 </body>
 
