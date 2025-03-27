@@ -76,3 +76,15 @@ a {
   height: auto !important;
   max-height: 2.4em; /* Consistent height */
 }
+
+#formContainer {
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-height: 500px; /* Lock in a minimum height */
+  width: 100%;
+  max-width: 720px; /* Consistent width */
+  transition: min-height 0.3s ease;
+}

@@ -12,22 +12,24 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 </head>
 
-<body>
+<body class="bg-secondary">
     <%- include('partials/alerts') %>
     <%- include('partials/nav') %> <!-- Include the navigation bar -->  
-    <div class="container my-5">
-        <div id="formContainer" class="d-flex flex-column align-items-center">
+    <div class="container my-5 d-flex justify-content-center">
+        <div id="formContainer" class="d-flex flex-column">
             <!-- Step 1: Introduction -->
             <div class="step" id="step-intro">
-                <h1>Welcome to the Event Request Form!</h1>
-                <p>We’ll guide you step by step to make your event submission easy and clear. Click "Start" to begin.</p>
+                <h2>Welcome to the Event Request Form!</h2>
+                <br>
+                <p>We’ll guide you step by step to make your event submission easy and clear.</p>
+                <p> Click "Start" to begin.</p>
                 <button class="btn btn-primary" onclick="nextStep()">Start</button>
             </div>
             
             <!-- Step 2: Confirm Date -->
             <div class="step d-none" id="step-date">
                 <h2>Confirm Event Date</h2>
-                <p>The event is scheduled for: <strong id="eventDate"><%= month %>/<%= day %>/<%= year %></strong></p>
+                <p>You are scheduling for: <strong id="eventDate"><%= month %>/<%= day %>/<%= year %></strong></p>
                 <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
                 <button class="btn btn-primary mt-3" onclick="nextStep()">Confirm Date</button>
             </div>
@@ -128,6 +130,10 @@
                 document.getElementById('confirmCover').innerText = document.getElementById('coverCharge').value;
             } else if (currentStep === 5) {
                 document.getElementById('confirmDetails').innerText = document.getElementById('additionalDetails').value;
+            }
+            else if (currentStep === 6 && !document.getElementById('agreeTerms').checked) {
+                alert('You must agree to the venue rules before continuing.');
+                return;
             }
             
             // Move to the next step
