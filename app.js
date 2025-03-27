@@ -39,7 +39,7 @@ store.on('error', function(error) {
 
 //Create new admin user if none exists
 async function defaultAdmin() {
-  const adminUsers = await db.User.find({role:"admin"});
+  const adminUsers = await db.User.find({roles:"admin"});
   if(adminUsers === 'undefined' || adminUsers.length == 0){
     console.log("New Admin User Created:");
     console.log("Username: " + process.env.defaultAdminUser);
@@ -54,7 +54,7 @@ async function defaultAdmin() {
         email: process.env.defaultAdminEmail, 
         
         salt: salt,
-        role: "admin"
+        roles: ["admin"]
       });
     });
   }
