@@ -6,11 +6,15 @@ const checkUserRole = (requiredRoles = []) => (req, res, next) => {
     return res.status(500).json({ message: 'Server error. Roles should be an array.' });
   }
   
-  if (req.user && requiredRoles.includes(req.user.role)) {
-    return next();
-  } else {
-    return res.status(403).json({ message: 'Access denied. Insufficient permissions.' });
+  if (req.user && req.user.roles && Array.isArray(req.user.roles)) {
+    // Check if any of the user's roles match any of the required roles
+    const hasRequiredRole = req.user.roles.some(role => requiredRoles.includes(role));
+    if (hasRequiredRole) {
+      return next();
+    }
   }
+  
+  return res.status(403).json({ message: 'Access denied. Insufficient permissions.' });
 };
 
 var db = require('../src/db'); //Require the mongoose database init

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - Acorn</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="../../styles/styles.css"/>
+    <style>
+        .role-badge {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
+        .role-admin {
+            background-color: #dc3545;
+            color: white;
+        }
+        .role-staff {
+            background-color: #fd7e14;
+            color: white;
+        }
+        .role-user {
+            background-color: #28a745;
+            color: white;
+        }
+        .role-sound {
+            background-color: #6f42c1;
+            color: white;
+        }
+        .role-door {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .role-promoter {
+            background-color: #ffc107;
+            color: black;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .search-filter-container {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .table th {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <%- include('partials/nav') %>
+        <%- include('partials/alerts') %>
+
+        <div class="row mb-4">
+            <div class="col">
+                <h1>Manage Users</h1>
+                <p>Add, edit, or remove users and manage their roles.</p>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary" data-toggle="modal" data-target="#addUserModal">
+                    <i class="fas fa-plus"></i> Add New User
+                </button>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="search-filter-container">
+            <form action="/admin/users" method="GET" id="filterForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" id="searchInput" name="search" class="form-control" placeholder="Search by username or email..." value="<%= filters ? filters.search : '' %>">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-0">
+                            <select id="roleFilter" name="role" class="form-control" onchange="document.getElementById('filterForm').submit()">
+                                <option value="all" <%= filters && filters.role === 'all' ? 'selected' : '' %>>All Roles</option>
+                                <option value="admin" <%= filters && filters.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                                <option value="staff" <%= filters && filters.role === 'staff' ? 'selected' : '' %>>Staff</option>
+                                <option value="user" <%= filters && filters.role === 'user' ? 'selected' : '' %>>User</option>
+                                <option value="sound" <%= filters && filters.role === 'sound' ? 'selected' : '' %>>Sound</option>
+                                <option value="door" <%= filters && filters.role === 'door' ? 'selected' : '' %>>Door</option>
+                                <option value="promoter" <%= filters && filters.role === 'promoter' ? 'selected' : '' %>>Promoter</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="page" id="pageInput" value="<%= pagination ? pagination.page : 1 %>">
+            </form>
+        </div>
+
+        <!-- User List -->
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (users && users.length > 0) { %>
+                        <% users.forEach(function(user) { %>
+                            <tr>
+                                <td><%= user.user %></td>
+                                <td><%= user.email || 'No email' %></td>
+                                <td>
+                                    <% if (user.roles && Array.isArray(user.roles)) { %>
+                                        <% user.roles.forEach(function(role) { %>
+                                            <span class="role-badge role-<%= role %>"><%= role %></span>
+                                        <% }); %>
+                                    <% } else if (user.role) { %>
+                                        <!-- Backward compatibility for users with old schema -->
+                                        <span class="role-badge role-<%= user.role %>"><%= user.role %></span>
+                                    <% } else { %>
+                                        <span class="role-badge role-user">user</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                data-toggle="modal" 
+                                                data-target="#editUserModal" 
+                                                data-id="<%= user._id %>"
+                                                data-username="<%= user.user %>"
+                                                data-email="<%= user.email %>"
+                                                data-role="<%= user.role %>"
+                                                data-roles='<%= JSON.stringify(user.roles || []) %>'>
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        
+                                        <button class="btn btn-sm btn-outline-warning" 
+                                                data-toggle="modal" 
+                                                data-target="#resetPasswordModal" 
+                                                data-id="<%= user._id %>"
+                                                data-username="<%= user.user %>">
+                                            <i class="fas fa-key"></i> Reset
+                                        </button>
+                                        
+                                        <button class="btn btn-sm btn-outline-danger" 
+                                                data-toggle="modal" 
+                                                data-target="#deleteUserModal" 
+                                                data-id="<%= user._id %>"
+                                                data-username="<%= user.user %>">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4" class="text-center">No users found</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination && pagination.totalPages > 1) { %>
+            <div class="pagination-container">
+                <nav aria-label="User pagination">
+                    <ul class="pagination">
+                        <!-- Previous button -->
+                        <li class="page-item <%= pagination.page === 1 ? 'disabled' : '' %>">
+                            <a class="page-link" href="javascript:void(0)" onclick="changePage(<%= pagination.page - 1 %>)" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        
+                        <!-- Page numbers -->
+                        <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                            <li class="page-item <%= pagination.page === i ? 'active' : '' %>">
+                                <a class="page-link" href="javascript:void(0)" onclick="changePage(<%= i %>)"><%= i %></a>
+                            </li>
+                        <% } %>
+                        
+                        <!-- Next button -->
+                        <li class="page-item <%= pagination.page === pagination.totalPages ? 'disabled' : '' %>">
+                            <a class="page-link" href="javascript:void(0)" onclick="changePage(<%= pagination.page + 1 %>)" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        <% } %>
+
+        <!-- Add User Modal -->
+        <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form action="/admin/users/add" method="POST">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="role">Roles</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="user" id="role-user" checked>
+                                    <label class="form-check-label" for="role-user">User</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="staff" id="role-staff">
+                                    <label class="form-check-label" for="role-staff">Staff</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="admin" id="role-admin">
+                                    <label class="form-check-label" for="role-admin">Admin</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="sound" id="role-sound">
+                                    <label class="form-check-label" for="role-sound">Sound</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="door" id="role-door">
+                                    <label class="form-check-label" for="role-door">Door</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="promoter" id="role-promoter">
+                                    <label class="form-check-label" for="role-promoter">Promoter</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                                <small class="form-text text-muted">Password must be at least 6 characters.</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Add User</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit User Modal -->
+        <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="editUserForm" action="/admin/users/update/" method="POST">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="edit-username">Username</label>
+                                <input type="text" class="form-control" id="edit-username" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-email">Email</label>
+                                <input type="email" class="form-control" id="edit-email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-role">Roles</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="user" id="edit-role-user">
+                                    <label class="form-check-label" for="edit-role-user">User</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="staff" id="edit-role-staff">
+                                    <label class="form-check-label" for="edit-role-staff">Staff</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="admin" id="edit-role-admin">
+                                    <label class="form-check-label" for="edit-role-admin">Admin</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="sound" id="edit-role-sound">
+                                    <label class="form-check-label" for="edit-role-sound">Sound</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="door" id="edit-role-door">
+                                    <label class="form-check-label" for="edit-role-door">Door</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roles[]" value="promoter" id="edit-role-promoter">
+                                    <label class="form-check-label" for="edit-role-promoter">Promoter</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reset Password Modal -->
+        <div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="resetPasswordModalLabel">Reset Password</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="resetPasswordForm" action="/admin/users/reset-password/" method="POST">
+                        <div class="modal-body">
+                            <p>Reset password for <strong id="reset-username"></strong></p>
+                            <div class="form-group">
+                                <label for="new-password">New Password</label>
+                                <input type="password" class="form-control" id="new-password" name="password" required>
+                                <small class="form-text text-muted">Password must be at least 6 characters.</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-warning">Reset Password</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete User Modal -->
+        <div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteUserModalLabel">Delete User</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="deleteUserForm" action="/admin/users/delete/" method="POST">
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete <strong id="delete-username"></strong>?</p>
+                            <p class="text-danger">This action cannot be undone.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger">Delete User</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Edit User Modal
+            $('#editUserModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var userId = button.data('id');
+                var username = button.data('username');
+                var email = button.data('email');
+                var role = button.data('role');
+                var rolesData = button.data('roles');
+                
+                // Parse roles data
+                var roles = [];
+                try {
+                    if (typeof rolesData === 'string') {
+                        roles = JSON.parse(rolesData);
+                    } else if (Array.isArray(rolesData)) {
+                        roles = rolesData;
+                    }
+                } catch (e) {
+                    console.error('Error parsing roles:', e);
+                }
+                
+                var modal = $(this);
+                modal.find('#edit-username').val(username);
+                modal.find('#edit-email').val(email);
+                
+                // Reset all checkboxes
+                modal.find('input[name="roles[]"]').prop('checked', false);
+                
+                // Handle both old single role and new roles array
+                if (roles && Array.isArray(roles) && roles.length > 0) {
+                    // For users with roles array
+                    roles.forEach(function(role) {
+                        modal.find('#edit-role-' + role).prop('checked', true);
+                    });
+                } else if (role) {
+                    // For users with old single role
+                    modal.find('#edit-role-' + role).prop('checked', true);
+                } else {
+                    // Default to user role if none set
+                    modal.find('#edit-role-user').prop('checked', true);
+                }
+                
+                modal.find('#editUserForm').attr('action', '/admin/users/update/' + userId);
+            });
+            
+            // Reset Password Modal
+            $('#resetPasswordModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var userId = button.data('id');
+                var username = button.data('username');
+                
+                var modal = $(this);
+                modal.find('#reset-username').text(username);
+                modal.find('#resetPasswordForm').attr('action', '/admin/users/reset-password/' + userId);
+            });
+            
+            // Delete User Modal
+            $('#deleteUserModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var userId = button.data('id');
+                var username = button.data('username');
+                
+                var modal = $(this);
+                modal.find('#delete-username').text(username);
+                modal.find('#deleteUserForm').attr('action', '/admin/users/delete/' + userId);
+            });
+        });
+
+        // Function to change page
+        function changePage(page) {
+            document.getElementById('pageInput').value = page;
+            document.getElementById('filterForm').submit();
+        }
+    </script>
+</body>
+</html> 

@@ -2,95 +2,124 @@ var express = require('express');
 var router = express.Router();
 var passport = require('passport');
 var crypto = require('crypto');
-var db = require('../src/db'); //Require the mongoose database init
-const { sendMagicLink,sendBandInvite, registerUser } = require('../src/utilities');
+var db = require('../src/db'); // Require the mongoose database init
+const { sendMagicLink, sendBandInvite, registerUser } = require('../src/utilities');
 var ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 var ensureLoggedIn = ensureLogIn();
+const util = require("../src/utilities.js");
 
 var url = require("url");
 
 router.use(express.urlencoded({ extended: true }));
 
-router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => { //Pulls open a form for a band to fill out
+router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => {
     var band = await getBandsFromUsername(req.user.username);
-    if (band === null){
-        req.flash("error","No Band Logged In or Tied to Your User Profile");
+    if (band === null) {
+        req.flash("error", "No Band Logged In or Tied to Your User Profile");
         res.redirect("/");
         return;
     }
     var knownBands = await getKnownBandList();
-    res.render('newEvent',{
-        userName:req.user.username,
-        isLoggedIn:req.isAuthenticated(),
-        month:req.params.month,
-        day:req.params.day,
-        year:req.params.year,
-        userName:req.user.username,
-        knownBandData:knownBands,
-        errorMessages:res.locals.errorMessages,
-        successMessages:res.locals.successMessages
-    }
-);
+    res.render('newEvent', {
+        userName: req.user.username,
+        isLoggedIn: req.isAuthenticated(),
+        month: req.params.month,
+        day: req.params.day,
+        year: req.params.year,
+        knownBandData: knownBands,
+        errorMessages: res.locals.errorMessages,
+        successMessages: res.locals.successMessages
+    });
 });
 
-router.post('/addEvent',ensureLoggedIn, async (req,res) => { //Handles the form submitted by a band
+router.post('/addEvent', ensureLoggedIn, async (req, res) => {
     const data = req.body;
-    //console.log(data);
-    
-    const show = new db.Show({
-        showDate:data.showDate,
-        requestDate:data.reqDate,
-        contact:req.user.id,
-        showStatus:0
-    });
-    var showName = "";
-    for(let i = 0; i < data.bandCount; i++){
-        const band = await db.Band.findOne({bandName:data.bands[i].name});
-        if (band !== null ){
-            show.bands.push(band._id);
+    console.log("DATA:");
+    try {
+        function padToTwoDigits(num) {
+            return num.toString().padStart(2, '0');
         }
-        else{
-            if(data.bands[i].email !== null){
-                try {
-                    const newBandUser = await registerUser(data.bands[i].email, data.bands[i].name);
-                    const userObj = await db.User.findOne({ user: newBandUser.user });
-                    if (userObj) {
-                        sendMagicLink(userObj);
-                        const newBand = new db.Band({
-                            bandName: data.bands[i].name,
-                            bandMembers: [userObj._id]
-                        });
-                        await newBand.save();
-                        if (newBand) {
-                            show.bands.push(newBand._id);
-                            newBand.bandMembers.push(userObj._id);
+        var showDate;
+        if (data.showDate && data.eventTime) {
+            // Split the date and pad month and day
+            const [year, month, day] = data.showDate.split('-');
+            const formattedDate = `${year}-${padToTwoDigits(month)}-${padToTwoDigits(day)}`;
+            const isoString = `${formattedDate}T${data.eventTime}:00`;
+            
+            showDate = new Date(isoString);
+            if (!isNaN(showDate)) {
+                console.log("Valid Date:", showDate);
+            } else {
+                console.error("Invalid date or time:", isoString);
+            }
+        } else {
+            console.error("Missing date or time");
+        }
+        
+        const show = new db.Show({
+            showDate: showDate,
+            requestDate: new Date(),
+            contact: req.user.id,
+            showStatus: 0,
+            ticketPrice: data.coverCharge,
+            messages: [],
+            bands: []
+        });
+        
+        var showName = "";
+        for (let i = 0; i < data.bands.length; i++) {
+            const band = await db.Band.findOne({ bandName: data.bands[i].name });
+            if (band !== null) {
+                show.bands.push(band._id);
+            } else {
+                if (data.bands[i].email !== null) {
+                    try {
+                        const newBandUser = await registerUser(data.bands[i].email, data.bands[i].name);
+                        const userObj = await db.User.findOne({ user: newBandUser.user });
+                        if (userObj) {
+                            sendMagicLink(userObj);
+                            const newBand = new db.Band({
+                                bandName: data.bands[i].name,
+                                bandMembers: [userObj._id]
+                            });
                             await newBand.save();
+                            show.bands.push(newBand._id);
                             userObj.bands.push(newBand._id);
                             await userObj.save();
                             console.log("NEW USER INVITE SENT TO: " + data.bands[i].email);
                         } else {
-                            console.error("New band not found for band name: " + data.bands[i].name);
+                            console.error("User object not found for new band user: " + newBandUser.user);
                         }
-                    } else {
-                        console.error("User object not found for new band user: " + newBandUser.user);
+                    } catch (err) {
+                        console.error("Error processing new band user: ", err);
                     }
-                } catch (err) {
-                    console.error("Error processing new band user: ", err);
                 }
             }
+            showName += data.bands[i].name + ", ";
         }
-        showName = showName + data.bands[i].name + ", ";
+        show.showName = showName.slice(0, -2);
+        show.additionalDetails = data.additionalDetails;
+        
+        // Add the additional details as the first message in the chat window
+        if (data.additionalDetails) {
+            const message = new db.Message({
+                user: req.user.username,
+                msg: data.additionalDetails
+            });
+            await message.save();
+            show.messages.push(message._id);
+        }
+        
+        await show.save();
+        res.json({ success: true });
+    } catch (error) {
+        console.error(error);
+        req.flash("error", "Server error");
+        res.json({ success: false, message: "Server error" });
     }
-    show.contact = await db.User.findById(req.user.id);
-    show.showName = showName.slice(0,-2);
-    console.log("New Show created:");
-    console.log(show);
-    show.showDate.setHours(15); // Set the time for the show. This is a hack and should be fixed.
-    await show.save();
-    res.redirect("/");
 });
 
-router.get('/userDetails',ensureLoggedIn, async (req,res) => {
+router.get('/userDetails', ensureLoggedIn, async (req, res) => {
     console.log(req.user);
     getBandsFromUsername(req.user.username);
     res.redirect("/");
@@ -119,13 +148,11 @@ router.post('/band/create', ensureLoggedIn, async (req, res) => {
         
         // Add the new band to the user's bands
         const user = await db.User.findById(req.user.id);
-        if(user === null)
-            {
-            req.flash("error","No User Found");
+        if (user === null) {
+            req.flash("error", "No User Found");
             res.redirect("/profile");
             return;
-        }
-        else{
+        } else {
             user.bands.push(newBand._id);
             await user.save();
         }
@@ -138,55 +165,44 @@ router.post('/band/create', ensureLoggedIn, async (req, res) => {
     }
 });
 
-router.get('/band/:bandID', ensureLoggedIn, async (req,res) => {
+router.get('/band/:bandID', ensureLoggedIn, async (req, res) => {
     var isAdmin = false;
     var name;
     const bandId = req.params.bandID;
-    //console.log(bandId);
     const band = await db.Band.findById(bandId).populate("bandMembers");
-    if(band === null){
+    if (band === null) {
         console.log("redirecting");
-        req.flash("error","Band Not Found");
+        req.flash("error", "Band Not Found");
         res.redirect("/");
         return;
-    } else{
-        if(req.isAuthenticated()){
-            if(req.user.role == 'admin' || req.user.role == 'staff'){
+    } else {
+        if (req.isAuthenticated()) {
+            if (req.user.role == 'admin' || req.user.role == 'staff') {
                 isAdmin = true;
-            }
-            //If the user is an admin or a member of the band, show the private band profile
-            if(isAdmin || band.bandMembers.some(user => user._id.toString() === req.user.id.toString()) ){
-                
-                res.render('privateBandProfile',{
-                    userName:req.user.username,
-                    isLoggedIn:req.isAuthenticated(),
-                    band: band,
-                    errorMessages:res.locals.errorMessages,
-                    successMessages:res.locals.successMessages
-                })
-            } else{ //If the user is not a member of the band, show the public band profile
-                res.render('publicBandProfile',{
-                    isLoggedIn:req.isAuthenticated(),
-                    userName:req.user.username,
-                    band: band,
-                    errorMessages:res.locals.errorMessages,
-                    successMessages:res.locals.successMessages
-                })  
+            } else {
+                name = await getBandsFromUsername(req.user.username);
             }
         }
         
+        if (!isAdmin) {
+            res.redirect("profile");
+            return;
+        } else if (isAdmin) {
+            res.render('bandProfile', {
+                band: band,
+                errorMessages: res.locals.errorMessages,
+                successMessages: res.locals.successMessages
+            });
+        }
     }
 });
 
 router.post('/band/:bandID/update', ensureLoggedIn, async (req, res) => {
     try {
-        console.log()
         const band = await db.Band.findById(req.params.bandID);
         if (!band) {
-            console.log("redirecting");
-            req.flash("error","Band Not Found");
-            res.redirect("/profile");
-            return;       
+            req.flash("error", "Band not found");
+            return res.redirect('/profile');
         }
         
         // Update band details from the form data
@@ -202,10 +218,10 @@ router.post('/band/:bandID/update', ensureLoggedIn, async (req, res) => {
         res.redirect('/band/' + req.params.bandID);
     } catch (error) {
         console.error(error);
-        res.status(500).send("Server error");
+        req.flash("error", "Server error");
+        res.redirect('/profile');
     }
 });
-
 
 router.post('/band/:bandID/addMember', ensureLoggedIn, async (req, res) => {
     try {
@@ -289,12 +305,12 @@ router.get('/band/:bandID/join/:inviteCode', async (req, res) => {
     }
 });
 
-async function getBandsFromUsername(username){
-    var user = await db.User.findOne({"user":username}).populate("bands");
-    if(user === null){
+async function getBandsFromUsername(username) {
+    var user = await db.User.findOne({ "user": username }).populate("bands");
+    if (user === null) {
         console.log("something went wrong: ");
-        console.log("Username: "+username);
-        req.flash("error","User doesn't exist");
+        console.log("Username: " + username);
+        req.flash("error", "User doesn't exist");
         res.redirect("/");
         return;
     }
@@ -302,37 +318,158 @@ async function getBandsFromUsername(username){
     return bands;
 }
 
-function getColorFromStatus(showStatus){
-    switch(showStatus){
+function getColorFromStatus(showStatus) {
+    switch (showStatus) {
         case -1:
         return "#ff0000";
-        break;
         case 0:
         return "#ffff00";
-        break;
         case 1:
         return "#ffA500";
-        break;
         case 2:
         return "#00FF00";
-        break;
         default:
         return "gray";
-    };
+    }
 }
 
-async function getKnownBandList(){
+async function getKnownBandList() {
     var knownBandList = await db.Band.find();
     var knownBands = [];
-    for(const knownBand of knownBandList){
+    for (const knownBand of knownBandList) {
         knownBands.push(knownBand.bandName);
     }
     return knownBands;
 }
 
+// New route for managing bands (admin/staff only)
+router.get('/bands/manage', util.checkUserRole(['staff', 'admin']), async (req, res) => {
+    try {
+        // Get query parameters for search and pagination
+        const search = req.query.search || '';
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        
+        // Create search filter
+        let filter = {};
+        if (search) {
+            filter = {
+                $or: [
+                    { bandName: { $regex: search, $options: 'i' } },
+                    { instagram: { $regex: search, $options: 'i' } },
+                    { genre: { $regex: search, $options: 'i' } },
+                    { homeTown: { $regex: search, $options: 'i' } }
+                ]
+            };
+        }
+        
+        // Count total bands matching the filter
+        const totalBands = await db.Band.countDocuments(filter);
+        const totalPages = Math.ceil(totalBands / limit);
+        
+        // Fetch bands with pagination
+        const bands = await db.Band.find(filter)
+            .populate('bandMembers')
+            .sort({ bandName: 1 })
+            .skip(skip)
+            .limit(limit);
+        
+        res.render('manageBands', {
+            userName: req.user.username,
+            isLoggedIn: req.isAuthenticated(),
+            userRole: req.user.role,
+            bands: bands,
+            search: search,
+            currentPage: page,
+            totalPages: totalPages,
+            totalBands: totalBands,
+            errorMessages: res.locals.errorMessages,
+            successMessages: res.locals.successMessages
+        });
+    } catch (error) {
+        console.error(error);
+        req.flash("error", "Error fetching bands");
+        res.redirect("/");
+    }
+});
+
+// Route for creating a band (from the manage bands page)
+router.post('/bands/create', util.checkUserRole(['staff', 'admin']), async (req, res) => {
+    try {
+        const { newBandName, instagramHandle, genre, homeTown } = req.body;
+        
+        // Check if the band already exists
+        const existingBand = await db.Band.findOne({ bandName: newBandName });
+        if (existingBand) {
+            req.flash("error", "Band already exists");
+            return res.redirect("/bands/manage");
+        }
+        
+        // Create a new band
+        const newBand = new db.Band({
+            bandName: newBandName,
+            instagram: instagramHandle,
+            genre: genre,
+            homeTown: homeTown,
+            bandMembers: []
+        });
+        
+        // Save the new band
+        await newBand.save();
+        
+        req.flash("success", "Band created successfully");
+        res.redirect("/bands/manage");
+    } catch (error) {
+        console.error(error);
+        req.flash("error", "Server error");
+        res.redirect("/bands/manage");
+    }
+});
+
+// Route for deleting a band
+router.post('/bands/:bandId/delete', util.checkUserRole(['staff', 'admin']), async (req, res) => {
+    try {
+        const bandId = req.params.bandId;
+        
+        // Find the band
+        const band = await db.Band.findById(bandId);
+        if (!band) {
+            req.flash("error", "Band not found");
+            return res.redirect("/bands/manage");
+        }
+        
+        // Find all shows that include this band
+        const shows = await db.Show.find({ bands: bandId });
+        
+        // Remove the band from all shows
+        for (const show of shows) {
+            show.bands = show.bands.filter(b => b.toString() !== bandId);
+            await show.save();
+        }
+        
+        // Remove the band from all users
+        const users = await db.User.find({ bands: bandId });
+        for (const user of users) {
+            user.bands = user.bands.filter(b => b.toString() !== bandId);
+            await user.save();
+        }
+        
+        // Delete the band
+        await db.Band.findByIdAndDelete(bandId);
+        
+        req.flash("success", "Band deleted successfully");
+        res.redirect("/bands/manage");
+    } catch (error) {
+        console.error(error);
+        req.flash("error", "Server error");
+        res.redirect("/bands/manage");
+    }
+});
+
 module.exports = {
-    router:router,
-    getBandsFromUsername:getBandsFromUsername,
-    getColorFromStatus:getColorFromStatus,
-    getKnownBandList:getKnownBandList
+    router: router,
+    getBandsFromUsername: getBandsFromUsername,
+    getColorFromStatus: getColorFromStatus,
+    getKnownBandList: getKnownBandList
 };

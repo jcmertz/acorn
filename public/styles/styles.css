@@ -43,3 +43,36 @@ a {
   text-decoration: none;
   color: inherit;
 }
+
+/* Calendar event text wrapping */
+.fc-event-title {
+  padding: 0 1px;
+  white-space: normal !important; /* Override FullCalendar's default nowrap */
+  display: -webkit-box;
+  -webkit-line-clamp: 4; /* Limit to 4 lines */
+  -webkit-box-orient: vertical;
+  line-height: 1.2em;
+  max-height: 8em; /* 4 lines × 1.2em line-height */
+}
+
+.fc-daygrid-dot-event .fc-event-title {
+  padding: 0 1px;
+  white-space: normal !important;
+}
+
+.fc-event, .event-title {
+  padding: 0 1px;
+  white-space: normal;
+  height: auto !important;
+  max-height: 2.4em; /* Consistent height */
+}
+
+.fc-daygrid-event {
+  height: auto !important;
+  max-height: 2.4em; /* Consistent height */
+}
+
+.fc-h-event {
+  height: auto !important;
+  max-height: 2.4em; /* Consistent height */
+}

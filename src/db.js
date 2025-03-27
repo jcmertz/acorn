@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   user: String,
   pass: String,
   salt: String,
-  role: String,
+  roles: { type: [String], default: ['user'] },
   firstName: String,
   lastName: String,
   pronouns: String,
