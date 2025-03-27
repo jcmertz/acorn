@@ -176,24 +176,33 @@ router.get('/band/:bandID', ensureLoggedIn, async (req, res) => {
         res.redirect("/");
         return;
     } else {
+        console.log("Band Exists");
         if (req.isAuthenticated()) {
-            if (req.user.role == 'admin' || req.user.role == 'staff') {
+            if (req.user.roles.includes('admin') || req.user.roles.includes('staff')){
                 isAdmin = true;
             } else {
                 name = await getBandsFromUsername(req.user.username);
             }
-        }
+        } 
+    }
+    //If the user is an admin or a member of the band, show the private band profile
+    if(isAdmin || band.bandMembers.some(user => user._id.toString() === req.user.id.toString()) ){
         
-        if (!isAdmin) {
-            res.redirect("profile");
-            return;
-        } else if (isAdmin) {
-            res.render('bandProfile', {
-                band: band,
-                errorMessages: res.locals.errorMessages,
-                successMessages: res.locals.successMessages
-            });
-        }
+        res.render('privateBandProfile',{
+            userName:req.user.username,
+            isLoggedIn:req.isAuthenticated(),
+            band: band,
+            errorMessages:res.locals.errorMessages,
+            successMessages:res.locals.successMessages
+        })
+    } else{ //If the user is not a member of the band, show the public band profile
+        res.render('publicBandProfile',{
+            isLoggedIn:req.isAuthenticated(),
+            userName:req.user.username,
+            band: band,
+            errorMessages:res.locals.errorMessages,
+            successMessages:res.locals.successMessages
+        })  
     }
 });
 
@@ -370,10 +379,10 @@ router.get('/bands/manage', util.checkUserRole(['staff', 'admin']), async (req, 
         
         // Fetch bands with pagination
         const bands = await db.Band.find(filter)
-            .populate('bandMembers')
-            .sort({ bandName: 1 })
-            .skip(skip)
-            .limit(limit);
+        .populate('bandMembers')
+        .sort({ bandName: 1 })
+        .skip(skip)
+        .limit(limit);
         
         res.render('manageBands', {
             userName: req.user.username,

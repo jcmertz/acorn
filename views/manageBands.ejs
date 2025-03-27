@@ -81,7 +81,7 @@
                         <tbody>
                             <% bands.forEach(band => { %>
                                 <tr class="band-row">
-                                    <td><a href="/band/<%= band._id %>"><%= band.bandName %></a></td>
+                                    <td><a href="/band/<%= band.id %>"><%= band.bandName %></a></td>
                                     <td><%= band.instagram || '-' %></td>
                                     <td><%= band.genre || '-' %></td>
                                     <td><%= band.homeTown || '-' %></td>
