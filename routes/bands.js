@@ -13,9 +13,9 @@ var url = require("url");
 router.use(express.urlencoded({ extended: true }));
 
 router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => {
-    var bands = await getBandsFromUsername(req.user.username);
-    if (bands === undefined || bands.length == 0) {
-        req.flash("error", "No Band is Tied to Your User Profile");
+    var band = await getBandsFromUsername(req.user.username);
+    if (band === null) {
+        req.flash("error", "No Band Logged In or Tied to Your User Profile");
         res.redirect("/");
         return;
     }
@@ -176,6 +176,7 @@ router.get('/band/:bandID', ensureLoggedIn, async (req, res) => {
         res.redirect("/");
         return;
     } else {
+        console.log("Band Exists");
         if (req.isAuthenticated()) {
             if (req.user.roles.includes('admin') || req.user.roles.includes('staff')){
                 isAdmin = true;
@@ -310,6 +311,40 @@ router.get('/band/:bandID/join/:inviteCode', async (req, res) => {
         console.error(error);
         req.flash("error", "Server error");
         res.redirect('/');
+    }
+});
+
+router.post('/band/:bandID/removeMember', ensureLoggedIn, async (req, res) => {
+    try {
+        const { memberEmail } = req.body;
+        const band = await db.Band.findById(req.params.bandID);
+        
+        if (!band) {
+            req.flash("error", "Band not found");
+            return res.redirect('/band/' + req.params.bandID);
+        }
+
+        // Find the user to remove
+        const user = await db.User.findOne({ email: memberEmail });
+        if (!user) {
+            req.flash("error", "User not found");
+            return res.redirect('/band/' + req.params.bandID);
+        }
+
+        // Remove user from band's members
+        band.bandMembers = band.bandMembers.filter(memberId => memberId.toString() !== user._id.toString());
+        await band.save();
+
+        // Remove band from user's bands
+        user.bands = user.bands.filter(bandId => bandId.toString() !== band._id.toString());
+        await user.save();
+
+        req.flash("success", "Member removed from band");
+        res.redirect('/band/' + req.params.bandID);
+    } catch (error) {
+        console.error(error);
+        req.flash("error", "Server error");
+        res.redirect('/band/' + req.params.bandID);
     }
 });
 

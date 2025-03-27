@@ -46,8 +46,8 @@
                     <%console.log(band);%>
                     <% band.bandMembers.forEach(function(member) { %>
                         <div class="card mb-2">
-                            <a href="mailto:<%= member.email %>" class="text-decoration-none text-reset">
-                                <div class="card-body d-flex align-items-center">
+                            <div class="card-body d-flex align-items-center justify-content-between">
+                                <a href="mailto:<%= member.email %>" class="text-decoration-none text-reset flex-grow-1">
                                     <!-- Profile Picture -->
                                     <img src="<%= member.profilePicture %>" 
                                     alt="Profile Picture" 
@@ -61,33 +61,38 @@
                                         </h5>
                                         <p class="card-text mb-0"><%= member.email %></p>
                                     </div>
-                                </div>
-                            </a>
+                                </a>
+                                <!-- Delete Button -->
+                                <form action="/band/<%=band._id%>/removeMember" method="post" class="ms-3">
+                                    <input type="hidden" name="memberEmail" value="<%= member.email %>">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to remove this member?')">
+                                        Remove
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-                        
-                        <% }); %>
-                        <!-- Button to Open the Modal -->
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">
-                            Add Band Member
-                        </button>
+                    <% }); %>
+                    <!-- Button to Open the Modal -->
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+                        Add Band Member
+                    </button>
 
-                        <!-- The Modal -->
-                        <div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="addMemberModalLabel">Add Band Member</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form id="addMemberForm" action="/band/<%=band._id%>/addMember" method="post">
-                                            <div class="mb-3">
-                                                <label for="memberEmail" class="form-label">Email address:</label>
-                                                <input type="email" class="form-control" id="memberEmail" name="memberEmail" required>
-                                            </div>
-                                            <button type="submit" class="btn btn-success">Send Invite</button>
-                                        </form>
-                                    </div>
+                    <!-- The Modal -->
+                    <div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addMemberModalLabel">Add Band Member</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="addMemberForm" action="/band/<%=band._id%>/addMember" method="post">
+                                        <div class="mb-3">
+                                            <label for="memberEmail" class="form-label">Email address:</label>
+                                            <input type="email" class="form-control" id="memberEmail" name="memberEmail" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-success">Send Invite</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
