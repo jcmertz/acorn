@@ -13,9 +13,9 @@ var url = require("url");
 router.use(express.urlencoded({ extended: true }));
 
 router.get('/newEvent/:month/:day/:year', ensureLoggedIn, async (req, res) => {
-    var band = await getBandsFromUsername(req.user.username);
-    if (band === null) {
-        req.flash("error", "No Band Logged In or Tied to Your User Profile");
+    var bands = await getBandsFromUsername(req.user.username);
+    if (bands === undefined || bands.length == 0) {
+        req.flash("error", "No Band is Tied to Your User Profile");
         res.redirect("/");
         return;
     }
