@@ -162,3 +162,7 @@ a {
 .shake {
   animation: shake 0.5s;
 }
+.shake:focus-within,
+.shake:focus {
+  box-shadow: 0 0 0.25rem rgba(0, 123, 255, 0.5);
+}
