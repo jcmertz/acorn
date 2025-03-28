@@ -236,7 +236,7 @@
                     
                     if (term.length > 0 && !exactMatch) {
                         filtered.push({
-                            label: `'${term}'`,
+                            label: `+ Add new band "${term}"`,
                             value: term,
                             isNew: true
                         });
@@ -261,7 +261,26 @@
                 select: function (event, ui) {
                     const selectedBand = ui.item.value;
                     
-                    // Clear wrapper and rebuild as static card
+                    // Prevent empty values
+                    if (!selectedBand.trim()) return false;
+                    
+                    // Duplicate check
+                    const existingInput = Array.from(document.querySelectorAll('#bandsList input[type="hidden"][name="bands[]"]'))
+                    .find(input => input.value.toLowerCase() === selectedBand.toLowerCase());
+                    
+                    
+                    if (existingInput) {
+                        const card = existingInput.closest('.card');
+                        if (card) {
+                            card.classList.add('border-info', 'bg-light', 'shake');
+                            setTimeout(() => {
+                                card.classList.remove('border-info', 'bg-light', 'shake');
+                            }, 1000);
+                        }
+                        return false;
+                    }
+                    
+                    // Clear wrapper and rebuild as card
                     wrapper.innerHTML = '';
                     
                     const card = document.createElement('div');
@@ -287,14 +306,15 @@
                     
                     wrapper.appendChild(card);
                     
-                    return false; // prevent default autocomplete behavior
+                    return false; // Prevent jQuery UI from resetting the input
                 }
+                
             }).data("ui-autocomplete")._renderItem = function (ul, item) {
                 const $li = $("<li>");
                     
                     // Special style for "Add new band"
                     if (item.isNew) {
-                        $li.append(`<div class="text-primary fw-semibold">+ Add new band '${item.label}'</div>`);
+                        $li.append(`<div class="text-primary fw-semibold">${item.label}</div>`);
                     } else {
                         $li.append(`<div>${item.label}</div>`);
                     }
@@ -303,7 +323,6 @@
                 };
                 
             }
-            
             
             
         </script>
