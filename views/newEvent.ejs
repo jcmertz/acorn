@@ -190,44 +190,66 @@
         
         function addBandtoForm() {
             const wrapper = document.createElement('div');
-            wrapper.className = 'position-relative my-3';
+            wrapper.className = 'my-3';
             
-            // Custom helper text BEFORE the input
+            // Helper message (above input)
             const helper = document.createElement('div');
             helper.className = 'custom-band-helper mb-1 text-muted small';
             helper.innerText = 'Type to search for a band...';
             
+            // 🔊 Add ARIA attributes for screen readers
+            helper.setAttribute('role', 'status');
+            helper.setAttribute('aria-live', 'polite');
+            
+            // Input
             const input = document.createElement('input');
             input.type = 'text';
             input.name = 'bands[]';
             input.className = 'form-control band-input';
             input.placeholder = 'Enter band name';
             
+            // Remove button
             const removeBtn = document.createElement('button');
             removeBtn.className = 'btn btn-outline-danger mt-2';
             removeBtn.type = 'button';
             removeBtn.innerText = 'Remove';
             removeBtn.onclick = () => wrapper.remove();
             
-            // Append in new order: helper → input → remove button
+            // Add elements to wrapper
             wrapper.appendChild(helper);
             wrapper.appendChild(input);
             wrapper.appendChild(removeBtn);
             document.getElementById('bandsList').appendChild(wrapper);
             
-            // Autocomplete setup
+            // Enable autocomplete
             $(input).autocomplete({
-                source: function(request, response) {
-                    const filtered = knownBands.filter(band =>
-                    band.toLowerCase().includes(request.term.toLowerCase())
+                source: function (request, response) {
+                    const term = request.term.trim();
+                    let filtered = knownBands.filter(band =>
+                    band.toLowerCase().includes(term.toLowerCase())
                     );
                     
-                    if (request.term.length === 0) {
+                    // Add a "create new" option if not already in knownBands
+                    const exactMatch = knownBands.some(band =>
+                    band.toLowerCase() === term.toLowerCase()
+                    );
+                    
+                    if (term.length > 0 && !exactMatch) {
+                        filtered.push({
+                            label: `'${term}'`,
+                            value: term,
+                            isNew: true
+                        });
+                    }
+                    
+                    // 🔊 Update helper text
+                    if (term.length === 0) {
                         helper.innerText = 'Type to search for a band...';
-                    } else if (filtered.length === 0) {
+                    } else if (filtered.length === 0 || (filtered.length === 1 && filtered[0].isNew)) {
                         helper.innerText = 'No results found.';
                     } else {
-                        helper.innerText = `${filtered.length} result${filtered.length > 1 ? 's' : ''} found.`;
+                        const count = filtered.filter(item => !item.isNew).length;
+                        helper.innerText = `${count} result${count !== 1 ? 's' : ''} found.`;
                     }
                     
                     response(filtered);
@@ -235,12 +257,57 @@
                 minLength: 0,
                 open: function () {
                     $(".ui-autocomplete").css("width", $(input).outerWidth());
+                },
+                select: function (event, ui) {
+                    const selectedBand = ui.item.value;
+                    
+                    // Clear wrapper and rebuild as static card
+                    wrapper.innerHTML = '';
+                    
+                    const card = document.createElement('div');
+                    card.className = 'card p-2 d-flex flex-row align-items-center justify-content-between';
+                    
+                    const bandName = document.createElement('span');
+                    bandName.innerText = selectedBand;
+                    
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'bands[]';
+                    hiddenInput.value = selectedBand;
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'btn btn-sm btn-outline-danger ms-2';
+                    removeBtn.type = 'button';
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.onclick = () => wrapper.remove();
+                    
+                    card.appendChild(bandName);
+                    card.appendChild(hiddenInput);
+                    card.appendChild(removeBtn);
+                    
+                    wrapper.appendChild(card);
+                    
+                    return false; // prevent default autocomplete behavior
                 }
-            });
-        }
-        
-        
-    </script>
-</body>
-
-</html>
+            }).data("ui-autocomplete")._renderItem = function (ul, item) {
+                const $li = $("<li>");
+                    
+                    // Special style for "Add new band"
+                    if (item.isNew) {
+                        $li.append(`<div class="text-primary fw-semibold">+ Add new band '${item.label}'</div>`);
+                    } else {
+                        $li.append(`<div>${item.label}</div>`);
+                    }
+                    
+                    return $li.appendTo(ul);
+                };
+                
+            }
+            
+            
+            
+        </script>
+    </body>
+    
+    </html>
+    

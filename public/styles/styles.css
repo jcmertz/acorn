@@ -121,3 +121,27 @@ a {
   font-size: 0.85rem;
   color: #6c757d;
 }
+
+.ui-menu-item-wrapper:contains("+ Add new band") {
+  font-weight: bold;
+  color: #0d6efd;
+}
+
+.ui-autocomplete {
+  z-index: 1051;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.ui-menu-item-wrapper {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.ui-menu-item-wrapper:hover {
+  background-color: #e9ecef;
+}
