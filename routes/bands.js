@@ -72,26 +72,17 @@ router.post('/addEvent', ensureLoggedIn, async (req, res) => {
             if (band !== null) {
                 show.bands.push(band._id);
             } else {
-                if (data.bands[i].email !== null) {
+                if (data.bands[i] !== null) {
                     try {
-                        const newBandUser = await registerUser(data.bands[i].email, data.bands[i].name);
-                        const userObj = await db.User.findOne({ user: newBandUser.user });
-                        if (userObj) {
-                            sendMagicLink(userObj);
-                            const newBand = new db.Band({
-                                bandName: data.bands[i].name,
-                                bandMembers: [userObj._id]
-                            });
-                            await newBand.save();
-                            show.bands.push(newBand._id);
-                            userObj.bands.push(newBand._id);
-                            await userObj.save();
-                            console.log("NEW USER INVITE SENT TO: " + data.bands[i].email);
-                        } else {
-                            console.error("User object not found for new band user: " + newBandUser.user);
-                        }
+                        const newBand = new db.Band({
+                            bandName: data.bands[i].name,
+                            bandMembers: []
+                        });
+                        await newBand.save();
+                        show.bands.push(newBand._id);
+                        console.log("NEW Band Created: ", newBand);
                     } catch (err) {
-                        console.error("Error processing new band user: ", err);
+                        console.error("Error processing new band: ", err);
                     }
                 }
             }
@@ -323,22 +314,22 @@ router.post('/band/:bandID/removeMember', ensureLoggedIn, async (req, res) => {
             req.flash("error", "Band not found");
             return res.redirect('/band/' + req.params.bandID);
         }
-
+        
         // Find the user to remove
         const user = await db.User.findOne({ email: memberEmail });
         if (!user) {
             req.flash("error", "User not found");
             return res.redirect('/band/' + req.params.bandID);
         }
-
+        
         // Remove user from band's members
         band.bandMembers = band.bandMembers.filter(memberId => memberId.toString() !== user._id.toString());
         await band.save();
-
+        
         // Remove band from user's bands
         user.bands = user.bands.filter(bandId => bandId.toString() !== band._id.toString());
         await user.save();
-
+        
         req.flash("success", "Member removed from band");
         res.redirect('/band/' + req.params.bandID);
     } catch (error) {
