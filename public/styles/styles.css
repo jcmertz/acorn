@@ -189,3 +189,31 @@ a {
   z-index: 1;
   margin-bottom: 0;
 }
+
+/* Add custom styles for Step 8 */
+#step-confirmation .card-body {
+  padding: 1.25rem;
+}
+
+#step-confirmation .card-title {
+  font-weight: bold;
+  color: #333;
+}
+
+#step-confirmation .card-text {
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.card {
+  border-radius: 10px;
+}
+
+.card-body {
+  background-color: #f8f9fa;
+}
+
+#step-confirmation .btn {
+  font-size: 1.1rem;
+  padding: 0.75rem 1.5rem;
+}

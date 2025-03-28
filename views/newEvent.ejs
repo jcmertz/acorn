@@ -177,31 +177,87 @@
 
 <!-- Step 7: Venue Terms -->
 <div class="step d-none" id="step-terms">
-    <h2>Venue Terms</h2>
-    <p>Please agree to follow all venue rules.</p>
+    <h2>Venue Terms</h2>    
+    <!-- Embedded PDF -->
+    <div class="mb-3">
+        <iframe src="../../../terms.pdf" width="100%" height="400px" style="border: none;">
+            Your browser does not support embedded PDFs. Please download and review the terms and conditions instead.
+        </iframe>
+    </div>
+    
+    <!-- Download Button -->
+    <a href="../../../terms.pdf" download class="btn btn-outline-primary mb-3">
+        Download Terms and Conditions
+    </a>
+    <br>
     <label>
-        <input type="checkbox" id="agreeTerms" required> I agree to follow all venue rules.
+        <input type="checkbox" id="agreeTerms" required> I agree to follow all venue terms and conditions.
     </label>
+    <br>
     <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
     <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
 </div>
 
+
 <!-- Step 8: Confirmation -->
 <div class="step d-none" id="step-confirmation">
-    <h2>Confirm Your Submission</h2>
-    <p>Here’s what you’ve entered:</p>
-    <ul>
-        <li><strong>Date:</strong> <span id="confirmDate"></span></li>
-        <li><strong>Bands:</strong> <span id="confirmBands"></span></li>
-        <li><strong>Time:</strong> <span id="confirmTime"></span></li>
-        <li><strong>Cover Charge:</strong> <span id="confirmCover"></span></li>
-        <li><strong>Details:</strong> <span id="confirmDetails"></span></li>
-    </ul>
-    <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-    <button class="btn btn-success mt-3" onclick="submitForm()">Submit</button>
+    <h2 class="text-center mb-4">Confirm Your Submission</h2>
+    <p class="text-center mb-4">Please review the details of your event request before submitting.</p>
+    
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        <!-- Confirmation Cards -->
+        <div class="col">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Event Date</h5>
+                    <p class="card-text" id="confirmDate"></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Bands</h5>
+                    <p class="card-text" id="confirmBands"></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Event Time</h5>
+                    <p class="card-text" id="confirmTime"></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Cover Charge</h5>
+                    <p class="card-text" id="confirmCover"></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Additional Details</h5>
+                    <p class="card-text" id="confirmDetails"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-between mt-4">
+        <button class="btn btn-secondary" onclick="prevStep()">Previous</button>
+        <button class="btn btn-success" onclick="submitForm()">Submit</button>
+    </div>
 </div>
-</div>
-</div>
+
 
 <!-- Includes -->
 <%- include('partials/newBandsModule') %>
@@ -266,9 +322,20 @@
     }
     
     function submitForm() {
-        // Collect data from the form and submit it
+        // Get the selected date from Flatpickr
+        let selectedDate = document.querySelector('#datePicker')._flatpickr.selectedDates[0];
+        
+        // Check if the user hasn't selected a date (or the date is invalid)
+        if (!selectedDate) {
+            // If no date selected, use the default date
+            selectedDate = new Date(defaultDate); // Use the default date from the server-side code
+        }
+        
+        // Format the date into YYYY-MM-DD
+        const formattedDate = selectedDate.toISOString().split('T')[0];
+        
         const formData = {
-            showDate: document.querySelector('#datePicker')._flatpickr.selectedDates[0].toISOString().split('T')[0],
+            showDate: formattedDate,
             eventTime: document.getElementById('eventTime').value,
             coverCharge: document.getElementById('coverCharge').value,
             additionalDetails: document.getElementById('additionalDetails').value,
@@ -297,6 +364,7 @@
             alert('An error occurred while submitting the form. Please try again.');
         });
     }
+    
     
     function addBandtoForm() {
         const wrapper = document.createElement('div');
@@ -470,30 +538,68 @@
     <script>
         
         document.addEventListener('DOMContentLoaded', function () {
-            // Set up the date picker
             const dateInput = document.getElementById('datePicker');
             
-            const picker = flatpickr(dateInput, {
-                defaultDate: defaultDate,               // YYYY-MM-DD
-                minDate: "today",
-                disable: [
-                function(date) {
-                    // Return true to disable the date
-                    return date.getDay() === 1; // 1 = Monday
-                }
-                ],
-                dateFormat: "F j, Y",                   // Visible format
-                allowInput: false,
-                onChange: function(selectedDates, dateStr) {
-                    document.getElementById('confirmDate').innerText = dateStr;
-                }
-            });
+            // Ensure defaultDate is a valid string, and pad the month and day if necessary
+            let defaultDateString = defaultDate.trim();  // Trim any extra spaces
             
-            // Manually set initial visible value and confirmation text
-            const formatted = flatpickr.formatDate(new Date(defaultDate), "F j, Y");
-            dateInput.value = formatted;
-            document.getElementById('confirmDate').innerText = formatted;
+            // Split the defaultDate into year, month, and day
+            let [year, month, day] = defaultDateString.split('-');
             
+            // Zero-pad the month and day if needed
+            month = month.padStart(2, '0');
+            day = day.padStart(2, '0');
+            
+            // Rebuild the date string in the proper format
+            defaultDateString = `${year}-${month}-${day}`;
+            
+            // Validate the formatted defaultDate
+            const isValidDate = !isNaN(Date.parse(defaultDateString));
+            
+            if (!isValidDate) {
+                console.error("Invalid defaultDate format: ", defaultDateString);
+                return; // If the date is invalid, stop execution
+            }
+            console.log("Default date: ", defaultDateString);
+            // Ensure defaultDate is passed as a valid Date object
+            const formattedDefaultDate = new Date(defaultDateString+"T22:00"); // Ensure defaultDate is correctly parsed
+            console.log("Formatted date: ", formattedDefaultDate);
+            // Remove readonly temporarily for mobile and desktop compatibility
+            dateInput.removeAttribute('readonly');
+            
+            // Set the value directly for mobile browsers (iOS, Android)
+            if (/Mobi|Android/i.test(navigator.userAgent)) {
+                
+                // Format the date in the desired format for mobile (e.g., "April 2, 2025")
+                const formattedMobileDate = formattedDefaultDate.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                // Set the formatted date for mobile
+                dateInput.value = formattedMobileDate;
+                document.getElementById('confirmDate').innerText = formattedMobileDate;  // Update confirmation text
+            } else {
+                // Initialize flatpickr for non-mobile (desktop browsers)
+                const picker = flatpickr(dateInput, {
+                    defaultDate: formattedDefaultDate,          // Initialize Flatpickr with the correctly formatted Date object
+                    minDate: "today",                          // Prevent selecting past dates
+                    disable: [
+                    function(date) {
+                        return date.getDay() === 1; // Disable Mondays
+                    }
+                    ],
+                    dateFormat: "F j, Y",                      // Format displayed to user
+                    allowInput: false,                         // Disable manual input
+                    onChange: function(selectedDates, dateStr) {
+                        document.getElementById('confirmDate').innerText = dateStr;
+                    }
+                });
+            }
+            
+            // Reapply the readonly attribute after value is set
+            dateInput.setAttribute('readonly', 'readonly');
             
             const addBtn = document.getElementById('addBandBtn');
             const nextBtnWrapper = document.getElementById('step3NextWrapper');
