@@ -67,8 +67,6 @@
             <div class="position-relative">
                 <h2>Add Bands</h2>
                 <div id="bandsList" class="my-3"></div>
-                <!-- Place the helper container here -->
-                <div id="bandHelperText" class="autocomplete-helper-text position-absolute w-100"></div>
                 <button type="button" class="btn btn-outline-primary addBand w-100" onClick="addBandtoForm();">Add Band</button>
             </div>
             <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
@@ -385,6 +383,13 @@
             
             const picker = flatpickr(dateInput, {
                 defaultDate: defaultDate,               // YYYY-MM-DD
+                minDate: "today",
+                disable: [
+                function(date) {
+                    // Return true to disable the date
+                    return date.getDay() === 1; // 1 = Monday
+                }
+                ],
                 dateFormat: "F j, Y",                   // Visible format
                 allowInput: false,
                 onChange: function(selectedDates, dateStr) {
@@ -393,7 +398,7 @@
             });
             
             // Manually set initial visible value and confirmation text
-            const formatted = picker.formatDate(new Date(defaultDate), "F j, Y");
+            const formatted = flatpickr.formatDate(new Date(defaultDate), "F j, Y");
             dateInput.value = formatted;
             document.getElementById('confirmDate').innerText = formatted;
         });
