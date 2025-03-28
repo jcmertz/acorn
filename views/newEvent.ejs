@@ -18,6 +18,9 @@
     <div class="container my-5 d-flex justify-content-center">
         <div id="formContainer" class="d-flex flex-column">
             <!-- Step Progress Bar -->
+            <div id="stepLabel" class="text-center text-muted small mb-1">
+                Step 1 of 8
+            </div>
             <div class="progress mb-4" style="height: 1.5rem;">
                 <div id="progressBar" 
                 class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
@@ -347,7 +350,11 @@
             const bar = document.getElementById('progressBar');
             bar.style.width = `${progressPercent}%`;
             bar.setAttribute('aria-valuenow', progressPercent.toFixed(0));
+            
+            const label = document.getElementById('stepLabel');
+            label.textContent = `Step ${stepNumber} of ${totalSteps}`;
         }
+        
         
     </script>
 </body>
