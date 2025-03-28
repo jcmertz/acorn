@@ -10,6 +10,12 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.14.0/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="../../../styles/styles.css"/>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <!-- Flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+    
+    
 </head>
 
 <body class="bg-secondary">
@@ -42,10 +48,18 @@
         
         <!-- Step 2: Confirm Date -->
         <div class="step d-none" id="step-date">
-            <h2>Confirm Event Date</h2>
-            <p>You are scheduling for: <strong id="eventDate"><%= month %>/<%= day %>/<%= year %></strong></p>
+            <h2>Confirm Event Date</h2>            
+            <input 
+            id="datePicker" 
+            class="form-control w-auto mb-3" 
+            style="cursor:pointer;" 
+            readonly />
+            
+            <small class="text-muted">Click the date above to change it.</small>
+            <br>
             <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-            <button class="btn btn-primary mt-3" onclick="nextStep()">Confirm Date</button>
+            <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
+            
         </div>
         
         <!-- Step 3: Add Bands -->
@@ -129,7 +143,11 @@
 <%- include('partials/bandList') %>
 <script>
     const knownBands = <%- JSON.stringify(knownBandData) %>;
+    const defaultDate = '<%= year %>-<%= month %>-<%= day %>'; // Format: YYYY-MM-DD
+    
 </script>
+
+
 <script>
     let currentStep = 0;
     const steps = document.querySelectorAll('.step');
@@ -138,7 +156,8 @@
     function nextStep() {
         // Collect data from the current step
         if (currentStep === 1) {
-            document.getElementById('confirmDate').innerText = document.getElementById('eventDate').innerText;
+            const selectedDate = document.getElementById('datePicker').value;
+            document.getElementById('confirmDate').innerText = selectedDate;
         } else if (currentStep === 2) {
             const bands = [];
             document.querySelectorAll('#bandsList input[name^="bands"]').forEach(input => {
@@ -176,7 +195,7 @@
     function submitForm() {
         // Collect data from the form and submit it
         const formData = {
-            showDate: '<%= year %>-<%= month %>-<%= day %>',
+            showDate: document.querySelector('#datePicker')._flatpickr.selectedDates[0].toISOString().split('T')[0],
             eventTime: document.getElementById('eventTime').value,
             coverCharge: document.getElementById('coverCharge').value,
             additionalDetails: document.getElementById('additionalDetails').value,
@@ -354,6 +373,30 @@
             const label = document.getElementById('stepLabel');
             label.textContent = `Step ${stepNumber} of ${totalSteps}`;
         }
+        
+        
+    </script>
+    <!-- Flatpickr -->
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set up the date picker
+            const dateInput = document.getElementById('datePicker');
+            
+            const picker = flatpickr(dateInput, {
+                defaultDate: defaultDate,               // YYYY-MM-DD
+                dateFormat: "F j, Y",                   // Visible format
+                allowInput: false,
+                onChange: function(selectedDates, dateStr) {
+                    document.getElementById('confirmDate').innerText = dateStr;
+                }
+            });
+            
+            // Manually set initial visible value and confirmation text
+            const formatted = picker.formatDate(new Date(defaultDate), "F j, Y");
+            dateInput.value = formatted;
+            document.getElementById('confirmDate').innerText = formatted;
+        });
         
         
     </script>
