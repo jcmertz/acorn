@@ -81,8 +81,6 @@
         </span>
     </div>
     
-    
-    <!-- Step 4: Event Time -->
     <!-- Step 4: Event Time -->
     <div class="step d-none" id="step-time">
         <h2>Event Time</h2>
@@ -128,12 +126,46 @@
 <!-- Step 5: Cover Charge -->
 <div class="step d-none" id="step-cover">
     <h2>Cover Charge</h2>
-    <p>Our typical cover charge is $8–$15. You can propose a cover charge, or leave it blank for now.</p>
-    <label for="coverCharge" class="form-label">Proposed Cover Charge:</label>
-    <input type="number" id="coverCharge" name="coverCharge" class="form-control" placeholder="Enter cover charge">
+    <p>Our typical cover charge is <strong>$8–$15</strong>. Use the slider below to propose a cover charge.</p>
+    
+    <label for="coverChargeRange" class="form-label">
+        Proposed Cover Charge:
+        <span id="coverChargeLabel" class="fw-bold" role="textbox" contenteditable="true" style="cursor: text;" aria-label="Editable cover charge">$10</span>
+    </label>
+    
+    <div class="position-relative">
+        <!-- Highlighted range -->
+        <div class="range-highlight bg-success"></div>
+        
+        <!-- The range input -->
+        <input
+        type="range"
+        class="form-range"
+        min="5"
+        max="25"
+        step="1"
+        value="10"
+        id="coverChargeRange"
+        />
+    </div>
+    
+    <!-- Key -->
+    <div class="d-flex justify-content-between small text-muted mt-2" style="font-size: 0.75rem;">
+        <span>$5</span>
+        <span>$10</span>
+        <span>$15</span>
+        <span>$20</span>
+        <span>$25</span>
+    </div>
+    <br>
+    <small> Normal Payout is 70% to the Bands / 30% to the House </small>
+    <br>
+    <input type="hidden" id="coverCharge" name="coverCharge" value="10" />
     <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
     <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
+    
 </div>
+
 
 <!-- Step 6: Additional Details -->
 <div class="step d-none" id="step-details">
@@ -526,6 +558,60 @@
             
             // Initialize relative times
             updateRelativeTimesFromValue(hiddenInput.value);
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const range = document.getElementById('coverChargeRange');
+            const label = document.getElementById('coverChargeLabel');
+            const hidden = document.getElementById('coverCharge');
+            
+            range.addEventListener('input', () => {
+                label.textContent = `$${range.value}`;
+                hidden.value = range.value;
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const range = document.getElementById('coverChargeRange');
+            const label = document.getElementById('coverChargeLabel');
+            const hidden = document.getElementById('coverCharge');
+            
+            const MIN = parseInt(range.min);
+            const MAX = parseInt(range.max);
+            
+            // Update label and hidden field when slider changes
+            range.addEventListener('input', () => {
+                label.textContent = `$${range.value}`;
+                hidden.value = range.value;
+            });
+            
+            // Update slider when user edits the label
+            label.addEventListener('blur', () => {
+                let val = label.textContent.replace(/[^\d]/g, ''); // Strip non-numeric
+                if (!val) return; // empty? bail
+                val = parseInt(val);
+                
+                label.textContent = `$${val}`;
+                hidden.value = val;
+                
+                if (val < MIN) {
+                    range.value = MIN;
+                } else if (val > MAX) {
+                    range.value = MAX;
+                } else {
+                    range.value = val;
+                }
+            });
+            
+            // Optional: Pressing Enter while editing label also commits change
+            label.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    label.blur(); // triggers blur handler above
+                }
+            });
         });
     </script>
     
