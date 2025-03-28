@@ -17,316 +17,339 @@
     <%- include('partials/nav') %> <!-- Include the navigation bar -->  
     <div class="container my-5 d-flex justify-content-center">
         <div id="formContainer" class="d-flex flex-column">
-            <!-- Step 1: Introduction -->
-            <div class="step" id="step-intro">
-                <h2>Welcome to the Event Request Form!</h2>
-                <br>
-                <p>We’ll guide you step by step to make your event submission easy and clear.</p>
-                <p> Click "Start" to begin.</p>
-                <button class="btn btn-primary" onclick="nextStep()">Start</button>
-            </div>
-            
-            <!-- Step 2: Confirm Date -->
-            <div class="step d-none" id="step-date">
-                <h2>Confirm Event Date</h2>
-                <p>You are scheduling for: <strong id="eventDate"><%= month %>/<%= day %>/<%= year %></strong></p>
-                <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-                <button class="btn btn-primary mt-3" onclick="nextStep()">Confirm Date</button>
-            </div>
-            
-            <!-- Step 3: Add Bands -->
-            <div class="step d-none" id="step-bands">
-                <div class="position-relative">
-                    <h2>Add Bands</h2>
-                    <div id="bandsList" class="my-3"></div>
-                    <!-- Place the helper container here -->
-                    <div id="bandHelperText" class="autocomplete-helper-text position-absolute w-100"></div>
-                    <button type="button" class="btn btn-outline-primary addBand w-100" onClick="addBandtoForm();">Add Band</button>
-                </div>
-                <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-                <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
-            </div>
-            
-            
-            <!-- Step 4: Event Time -->
-            <div class="step d-none" id="step-time">
-                <h2>Event Time</h2>
-                <p>Our usual schedule is:
-                    <ul>
-                        <li>5:00 PM Load-in</li>
-                        <li>7:00 PM Doors</li>
-                        <li>8:00 PM Show</li>
-                    </ul>
-                </p>
-                <label for="eventTime" class="form-label">Event Start Time:</label>
-                <input type="time" id="eventTime" name="eventTime" class="form-control" value="20:00">
-                <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-                <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
-            </div>
-            
-            <!-- Step 5: Cover Charge -->
-            <div class="step d-none" id="step-cover">
-                <h2>Cover Charge</h2>
-                <p>Our typical cover charge is $8–$15. You can propose a cover charge, or leave it blank for now.</p>
-                <label for="coverCharge" class="form-label">Proposed Cover Charge:</label>
-                <input type="number" id="coverCharge" name="coverCharge" class="form-control" placeholder="Enter cover charge">
-                <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-                <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
-            </div>
-            
-            <!-- Step 6: Additional Details -->
-            <div class="step d-none" id="step-details">
-                <h2>Additional Details</h2>
-                <textarea id="additionalDetails" name="additionalDetails" rows="5" class="form-control" placeholder="Tell us anything else about your event!"></textarea>
-                <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-                <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
-            </div>
-            
-            <!-- Step 7: Venue Terms -->
-            <div class="step d-none" id="step-terms">
-                <h2>Venue Terms</h2>
-                <p>Please agree to follow all venue rules.</p>
-                <label>
-                    <input type="checkbox" id="agreeTerms" required> I agree to follow all venue rules.
-                </label>
-                <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-                <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
-            </div>
-            
-            <!-- Step 8: Confirmation -->
-            <div class="step d-none" id="step-confirmation">
-                <h2>Confirm Your Submission</h2>
-                <p>Here’s what you’ve entered:</p>
-                <ul>
-                    <li><strong>Date:</strong> <span id="confirmDate"></span></li>
-                    <li><strong>Bands:</strong> <span id="confirmBands"></span></li>
-                    <li><strong>Time:</strong> <span id="confirmTime"></span></li>
-                    <li><strong>Cover Charge:</strong> <span id="confirmCover"></span></li>
-                    <li><strong>Details:</strong> <span id="confirmDetails"></span></li>
-                </ul>
-                <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-                <button class="btn btn-success mt-3" onclick="submitForm()">Submit</button>
+            <!-- Step Progress Bar -->
+            <div class="progress mb-4" style="height: 1.5rem;">
+                <div id="progressBar" 
+                class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                role="progressbar" 
+                style="width: 0%;" 
+                aria-valuenow="0" 
+                aria-valuemin="0" 
+                aria-valuemax="100">
             </div>
         </div>
-    </div>
-    
-    <!-- Includes -->
-    <%- include('partials/newBandsModule') %>
-    <%- include('partials/bandList') %>
-    <script>
-        const knownBands = <%- JSON.stringify(knownBandData) %>;
-    </script>
-    <script>
-        let currentStep = 0;
-        const steps = document.querySelectorAll('.step');
+        <!-- Step 1: Introduction -->
+        <div class="step" id="step-intro">
+            <h2>Welcome to the Event Request Form!</h2>
+            <br>
+            <p>We’ll guide you step by step to make your event submission easy and clear.</p>
+            <p> Click "Start" to begin.</p>
+            <button class="btn btn-primary" onclick="nextStep()">Start</button>
+        </div>
         
-        function nextStep() {
-            // Collect data from the current step
-            if (currentStep === 1) {
-                document.getElementById('confirmDate').innerText = document.getElementById('eventDate').innerText;
-            } else if (currentStep === 2) {
-                const bands = [];
-                document.querySelectorAll('#bandsList input[name^="bands"]').forEach(input => {
-                    bands.push(input.value);
-                });
-                document.getElementById('confirmBands').innerText = bands.join(', ');
-            } else if (currentStep === 3) {
-                document.getElementById('confirmTime').innerText = document.getElementById('eventTime').value;
-            } else if (currentStep === 4) {
-                document.getElementById('confirmCover').innerText = document.getElementById('coverCharge').value;
-            } else if (currentStep === 5) {
-                document.getElementById('confirmDetails').innerText = document.getElementById('additionalDetails').value;
+        <!-- Step 2: Confirm Date -->
+        <div class="step d-none" id="step-date">
+            <h2>Confirm Event Date</h2>
+            <p>You are scheduling for: <strong id="eventDate"><%= month %>/<%= day %>/<%= year %></strong></p>
+            <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
+            <button class="btn btn-primary mt-3" onclick="nextStep()">Confirm Date</button>
+        </div>
+        
+        <!-- Step 3: Add Bands -->
+        <div class="step d-none" id="step-bands">
+            <div class="position-relative">
+                <h2>Add Bands</h2>
+                <div id="bandsList" class="my-3"></div>
+                <!-- Place the helper container here -->
+                <div id="bandHelperText" class="autocomplete-helper-text position-absolute w-100"></div>
+                <button type="button" class="btn btn-outline-primary addBand w-100" onClick="addBandtoForm();">Add Band</button>
+            </div>
+            <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
+            <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
+        </div>
+        
+        
+        <!-- Step 4: Event Time -->
+        <div class="step d-none" id="step-time">
+            <h2>Event Time</h2>
+            <p>Our usual schedule is:
+                <ul>
+                    <li>5:00 PM Load-in</li>
+                    <li>7:00 PM Doors</li>
+                    <li>8:00 PM Show</li>
+                </ul>
+            </p>
+            <label for="eventTime" class="form-label">Event Start Time:</label>
+            <input type="time" id="eventTime" name="eventTime" class="form-control" value="20:00">
+            <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
+            <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
+        </div>
+        
+        <!-- Step 5: Cover Charge -->
+        <div class="step d-none" id="step-cover">
+            <h2>Cover Charge</h2>
+            <p>Our typical cover charge is $8–$15. You can propose a cover charge, or leave it blank for now.</p>
+            <label for="coverCharge" class="form-label">Proposed Cover Charge:</label>
+            <input type="number" id="coverCharge" name="coverCharge" class="form-control" placeholder="Enter cover charge">
+            <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
+            <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
+        </div>
+        
+        <!-- Step 6: Additional Details -->
+        <div class="step d-none" id="step-details">
+            <h2>Additional Details</h2>
+            <textarea id="additionalDetails" name="additionalDetails" rows="5" class="form-control" placeholder="Tell us anything else about your event!"></textarea>
+            <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
+            <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
+        </div>
+        
+        <!-- Step 7: Venue Terms -->
+        <div class="step d-none" id="step-terms">
+            <h2>Venue Terms</h2>
+            <p>Please agree to follow all venue rules.</p>
+            <label>
+                <input type="checkbox" id="agreeTerms" required> I agree to follow all venue rules.
+            </label>
+            <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
+            <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
+        </div>
+        
+        <!-- Step 8: Confirmation -->
+        <div class="step d-none" id="step-confirmation">
+            <h2>Confirm Your Submission</h2>
+            <p>Here’s what you’ve entered:</p>
+            <ul>
+                <li><strong>Date:</strong> <span id="confirmDate"></span></li>
+                <li><strong>Bands:</strong> <span id="confirmBands"></span></li>
+                <li><strong>Time:</strong> <span id="confirmTime"></span></li>
+                <li><strong>Cover Charge:</strong> <span id="confirmCover"></span></li>
+                <li><strong>Details:</strong> <span id="confirmDetails"></span></li>
+            </ul>
+            <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
+            <button class="btn btn-success mt-3" onclick="submitForm()">Submit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Includes -->
+<%- include('partials/newBandsModule') %>
+<%- include('partials/bandList') %>
+<script>
+    const knownBands = <%- JSON.stringify(knownBandData) %>;
+</script>
+<script>
+    let currentStep = 0;
+    const steps = document.querySelectorAll('.step');
+    updateProgressBar();
+    
+    function nextStep() {
+        // Collect data from the current step
+        if (currentStep === 1) {
+            document.getElementById('confirmDate').innerText = document.getElementById('eventDate').innerText;
+        } else if (currentStep === 2) {
+            const bands = [];
+            document.querySelectorAll('#bandsList input[name^="bands"]').forEach(input => {
+                bands.push(input.value);
+            });
+            document.getElementById('confirmBands').innerText = bands.join(', ');
+        } else if (currentStep === 3) {
+            document.getElementById('confirmTime').innerText = document.getElementById('eventTime').value;
+        } else if (currentStep === 4) {
+            document.getElementById('confirmCover').innerText = document.getElementById('coverCharge').value;
+        } else if (currentStep === 5) {
+            document.getElementById('confirmDetails').innerText = document.getElementById('additionalDetails').value;
+        }
+        else if (currentStep === 6 && !document.getElementById('agreeTerms').checked) {
+            alert('You must agree to the venue rules before continuing.');
+            return;
+        }
+        
+        // Move to the next step
+        steps[currentStep].classList.add('d-none');
+        currentStep++;
+        steps[currentStep].classList.remove('d-none');
+        updateProgressBar(); // 👈 Add this
+    }
+    
+    function prevStep() {
+        // Move to the previous step
+        steps[currentStep].classList.add('d-none');
+        currentStep--;
+        steps[currentStep].classList.remove('d-none');
+        updateProgressBar(); // 👈 Add this
+        
+    }
+    
+    function submitForm() {
+        // Collect data from the form and submit it
+        const formData = {
+            showDate: '<%= year %>-<%= month %>-<%= day %>',
+            eventTime: document.getElementById('eventTime').value,
+            coverCharge: document.getElementById('coverCharge').value,
+            additionalDetails: document.getElementById('additionalDetails').value,
+            bands: []
+        };
+        
+        const bandInputs = document.querySelectorAll('#bandsList input[name^="bands"]');
+        bandInputs.forEach(input => {
+            const bandName = input.value;
+            const bandEmail = input.dataset.email || null;
+            formData.bands.push({ name: bandName, email: bandEmail });
+        });
+        
+        // Send the form data to the server
+        $.post('/addEvent', formData, function(response) {
+            // Handle the response from the server
+            console.log(response); // Debugging line
+            if (response.success) {
+                window.location.href = '/';
+            } else {
+                alert('Error: ' + response.message);
             }
-            else if (currentStep === 6 && !document.getElementById('agreeTerms').checked) {
-                alert('You must agree to the venue rules before continuing.');
-                return;
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            // Handle errors
+            console.error('Error:', textStatus, errorThrown);
+            alert('An error occurred while submitting the form. Please try again.');
+        });
+    }
+    
+    function addBandtoForm() {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'my-3';
+        
+        // Helper message (above input)
+        const helper = document.createElement('div');
+        helper.className = 'custom-band-helper mb-1 text-muted small';
+        helper.innerText = 'Type to search for a band...';
+        
+        // 🔊 Add ARIA attributes for screen readers
+        helper.setAttribute('role', 'status');
+        helper.setAttribute('aria-live', 'polite');
+        
+        // Input
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'bands[]';
+        input.className = 'form-control band-input';
+        input.placeholder = 'Enter band name';
+        
+        // Remove button
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn btn-outline-danger mt-2';
+        removeBtn.type = 'button';
+        removeBtn.innerText = 'Remove';
+        removeBtn.onclick = () => wrapper.remove();
+        
+        // Add elements to wrapper
+        wrapper.appendChild(helper);
+        wrapper.appendChild(input);
+        wrapper.appendChild(removeBtn);
+        document.getElementById('bandsList').appendChild(wrapper);
+        
+        // Enable autocomplete
+        $(input).autocomplete({
+            source: function (request, response) {
+                const term = request.term.trim();
+                let filtered = knownBands.filter(band =>
+                band.toLowerCase().includes(term.toLowerCase())
+                );
+                
+                // Add a "create new" option if not already in knownBands
+                const exactMatch = knownBands.some(band =>
+                band.toLowerCase() === term.toLowerCase()
+                );
+                
+                if (term.length > 0 && !exactMatch) {
+                    filtered.push({
+                        label: `+ Add new band "${term}"`,
+                        value: term,
+                        isNew: true
+                    });
+                }
+                
+                // 🔊 Update helper text
+                if (term.length === 0) {
+                    helper.innerText = 'Type to search for a band...';
+                } else if (filtered.length === 0 || (filtered.length === 1 && filtered[0].isNew)) {
+                    helper.innerText = 'No results found.';
+                } else {
+                    const count = filtered.filter(item => !item.isNew).length;
+                    helper.innerText = `${count} result${count !== 1 ? 's' : ''} found.`;
+                }
+                
+                response(filtered);
+            },
+            minLength: 0,
+            open: function () {
+                $(".ui-autocomplete").css("width", $(input).outerWidth());
+            },
+            select: function (event, ui) {
+                const selectedBand = ui.item.value;
+                
+                // Prevent empty values
+                if (!selectedBand.trim()) return false;
+                
+                // Duplicate check
+                const existingInput = Array.from(document.querySelectorAll('#bandsList input[type="hidden"][name="bands[]"]'))
+                .find(input => input.value.toLowerCase() === selectedBand.toLowerCase());
+                
+                
+                if (existingInput) {
+                    const card = existingInput.closest('.card');
+                    if (card) {
+                        card.classList.add('border-info', 'bg-light', 'shake');
+                        setTimeout(() => {
+                            card.classList.remove('border-info', 'bg-light', 'shake');
+                        }, 1000);
+                    }
+                    return false;
+                }
+                
+                // Clear wrapper and rebuild as card
+                wrapper.innerHTML = '';
+                
+                const card = document.createElement('div');
+                card.className = 'card p-2 d-flex flex-row align-items-center justify-content-between';
+                
+                const bandName = document.createElement('span');
+                bandName.innerText = selectedBand;
+                
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'bands[]';
+                hiddenInput.value = selectedBand;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-sm btn-outline-danger ms-2';
+                removeBtn.type = 'button';
+                removeBtn.innerHTML = '&times;';
+                removeBtn.onclick = () => wrapper.remove();
+                
+                card.appendChild(bandName);
+                card.appendChild(hiddenInput);
+                card.appendChild(removeBtn);
+                
+                wrapper.appendChild(card);
+                
+                return false; // Prevent jQuery UI from resetting the input
             }
             
-            // Move to the next step
-            steps[currentStep].classList.add('d-none');
-            currentStep++;
-            steps[currentStep].classList.remove('d-none');
-        }
-        
-        function prevStep() {
-            // Move to the previous step
-            steps[currentStep].classList.add('d-none');
-            currentStep--;
-            steps[currentStep].classList.remove('d-none');
-        }
-        
-        function submitForm() {
-            // Collect data from the form and submit it
-            const formData = {
-                showDate: '<%= year %>-<%= month %>-<%= day %>',
-                eventTime: document.getElementById('eventTime').value,
-                coverCharge: document.getElementById('coverCharge').value,
-                additionalDetails: document.getElementById('additionalDetails').value,
-                bands: []
+        }).data("ui-autocomplete")._renderItem = function (ul, item) {
+            const $li = $("<li>");
+                
+                // Special style for "Add new band"
+                if (item.isNew) {
+                    $li.append(`<div class="text-primary fw-semibold">${item.label}</div>`);
+                } else {
+                    $li.append(`<div>${item.label}</div>`);
+                }
+                
+                return $li.appendTo(ul);
             };
             
-            const bandInputs = document.querySelectorAll('#bandsList input[name^="bands"]');
-            bandInputs.forEach(input => {
-                const bandName = input.value;
-                const bandEmail = input.dataset.email || null;
-                formData.bands.push({ name: bandName, email: bandEmail });
-            });
-            
-            // Send the form data to the server
-            $.post('/addEvent', formData, function(response) {
-                // Handle the response from the server
-                console.log(response); // Debugging line
-                if (response.success) {
-                    window.location.href = '/';
-                } else {
-                    alert('Error: ' + response.message);
-                }
-            }).fail(function(jqXHR, textStatus, errorThrown) {
-                // Handle errors
-                console.error('Error:', textStatus, errorThrown);
-                alert('An error occurred while submitting the form. Please try again.');
-            });
         }
         
-        function addBandtoForm() {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'my-3';
+        function updateProgressBar() {
+            const stepNumber = currentStep + 1;
+            const totalSteps = steps.length;
+            const progressPercent = (stepNumber / totalSteps) * 100;
             
-            // Helper message (above input)
-            const helper = document.createElement('div');
-            helper.className = 'custom-band-helper mb-1 text-muted small';
-            helper.innerText = 'Type to search for a band...';
-            
-            // 🔊 Add ARIA attributes for screen readers
-            helper.setAttribute('role', 'status');
-            helper.setAttribute('aria-live', 'polite');
-            
-            // Input
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.name = 'bands[]';
-            input.className = 'form-control band-input';
-            input.placeholder = 'Enter band name';
-            
-            // Remove button
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'btn btn-outline-danger mt-2';
-            removeBtn.type = 'button';
-            removeBtn.innerText = 'Remove';
-            removeBtn.onclick = () => wrapper.remove();
-            
-            // Add elements to wrapper
-            wrapper.appendChild(helper);
-            wrapper.appendChild(input);
-            wrapper.appendChild(removeBtn);
-            document.getElementById('bandsList').appendChild(wrapper);
-            
-            // Enable autocomplete
-            $(input).autocomplete({
-                source: function (request, response) {
-                    const term = request.term.trim();
-                    let filtered = knownBands.filter(band =>
-                    band.toLowerCase().includes(term.toLowerCase())
-                    );
-                    
-                    // Add a "create new" option if not already in knownBands
-                    const exactMatch = knownBands.some(band =>
-                    band.toLowerCase() === term.toLowerCase()
-                    );
-                    
-                    if (term.length > 0 && !exactMatch) {
-                        filtered.push({
-                            label: `+ Add new band "${term}"`,
-                            value: term,
-                            isNew: true
-                        });
-                    }
-                    
-                    // 🔊 Update helper text
-                    if (term.length === 0) {
-                        helper.innerText = 'Type to search for a band...';
-                    } else if (filtered.length === 0 || (filtered.length === 1 && filtered[0].isNew)) {
-                        helper.innerText = 'No results found.';
-                    } else {
-                        const count = filtered.filter(item => !item.isNew).length;
-                        helper.innerText = `${count} result${count !== 1 ? 's' : ''} found.`;
-                    }
-                    
-                    response(filtered);
-                },
-                minLength: 0,
-                open: function () {
-                    $(".ui-autocomplete").css("width", $(input).outerWidth());
-                },
-                select: function (event, ui) {
-                    const selectedBand = ui.item.value;
-                    
-                    // Prevent empty values
-                    if (!selectedBand.trim()) return false;
-                    
-                    // Duplicate check
-                    const existingInput = Array.from(document.querySelectorAll('#bandsList input[type="hidden"][name="bands[]"]'))
-                    .find(input => input.value.toLowerCase() === selectedBand.toLowerCase());
-                    
-                    
-                    if (existingInput) {
-                        const card = existingInput.closest('.card');
-                        if (card) {
-                            card.classList.add('border-info', 'bg-light', 'shake');
-                            setTimeout(() => {
-                                card.classList.remove('border-info', 'bg-light', 'shake');
-                            }, 1000);
-                        }
-                        return false;
-                    }
-                    
-                    // Clear wrapper and rebuild as card
-                    wrapper.innerHTML = '';
-                    
-                    const card = document.createElement('div');
-                    card.className = 'card p-2 d-flex flex-row align-items-center justify-content-between';
-                    
-                    const bandName = document.createElement('span');
-                    bandName.innerText = selectedBand;
-                    
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = 'bands[]';
-                    hiddenInput.value = selectedBand;
-                    
-                    const removeBtn = document.createElement('button');
-                    removeBtn.className = 'btn btn-sm btn-outline-danger ms-2';
-                    removeBtn.type = 'button';
-                    removeBtn.innerHTML = '&times;';
-                    removeBtn.onclick = () => wrapper.remove();
-                    
-                    card.appendChild(bandName);
-                    card.appendChild(hiddenInput);
-                    card.appendChild(removeBtn);
-                    
-                    wrapper.appendChild(card);
-                    
-                    return false; // Prevent jQuery UI from resetting the input
-                }
-                
-            }).data("ui-autocomplete")._renderItem = function (ul, item) {
-                const $li = $("<li>");
-                    
-                    // Special style for "Add new band"
-                    if (item.isNew) {
-                        $li.append(`<div class="text-primary fw-semibold">${item.label}</div>`);
-                    } else {
-                        $li.append(`<div>${item.label}</div>`);
-                    }
-                    
-                    return $li.appendTo(ul);
-                };
-                
-            }
-            
-            
-        </script>
-    </body>
-    
-    </html>
-    
+            const bar = document.getElementById('progressBar');
+            bar.style.width = `${progressPercent}%`;
+            bar.setAttribute('aria-valuenow', progressPercent.toFixed(0));
+        }
+        
+    </script>
+</body>
+
+</html>
