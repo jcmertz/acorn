@@ -70,7 +70,7 @@
                 <button type="button" id="addBandBtn" class="btn btn-outline-primary addBand w-100" onClick="addBandtoForm();">Add Band</button>
             </div>
             <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-            <span data-bs-toggle="tooltip" id="step3NextWrapper" data-bs-placement="bottom" data-bs-boundary="viewport" title="Add at least one band to continue.">
+            <span id="step3NextWrapper">
                 <button 
                 id="step3NextBtn"
                 class="btn btn-primary mt-3"
@@ -83,64 +83,91 @@
     
     
     <!-- Step 4: Event Time -->
+    <!-- Step 4: Event Time -->
     <div class="step d-none" id="step-time">
         <h2>Event Time</h2>
-        <p>Our usual schedule is:
-            <ul>
-                <li>5:00 PM Load-in</li>
-                <li>7:00 PM Doors</li>
-                <li>8:00 PM Show</li>
-            </ul>
-        </p>
-        <label for="eventTime" class="form-label">Event Start Time:</label>
-        <input type="time" id="eventTime" name="eventTime" class="form-control" value="20:00">
-        <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-        <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
-    </div>
+        <p>Our regular show schedule is shown below, but feel free to request a different time!</p>
+        
+        <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <label for="showTimeDropdown" class="form-label fw-semibold mb-0">Show Time:</label>
+                <div class="dropdown">
+                    <button
+                    class="btn btn-outline-primary dropdown-toggle"
+                    type="button"
+                    id="showTimeDropdown"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    >
+                    8:00 PM
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="showTimeDropdown" id="timeDropdownMenu"></ul>
+            </div>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>Doors</span>
+            <span id="doorsTime">7:00 PM</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>Sound Check</span>
+            <span id="soundCheckTime">6:00 PM</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>Load-in</span>
+            <span id="loadInTime">5:00 PM</span>
+        </li>
+    </ul>
     
-    <!-- Step 5: Cover Charge -->
-    <div class="step d-none" id="step-cover">
-        <h2>Cover Charge</h2>
-        <p>Our typical cover charge is $8–$15. You can propose a cover charge, or leave it blank for now.</p>
-        <label for="coverCharge" class="form-label">Proposed Cover Charge:</label>
-        <input type="number" id="coverCharge" name="coverCharge" class="form-control" placeholder="Enter cover charge">
-        <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-        <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
-    </div>
+    <input type="hidden" id="eventTime" value="20:00"> <!-- Store selected time as HH:MM -->
     
-    <!-- Step 6: Additional Details -->
-    <div class="step d-none" id="step-details">
-        <h2>Additional Details</h2>
-        <textarea id="additionalDetails" name="additionalDetails" rows="5" class="form-control" placeholder="Tell us anything else about your event!"></textarea>
-        <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-        <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
-    </div>
-    
-    <!-- Step 7: Venue Terms -->
-    <div class="step d-none" id="step-terms">
-        <h2>Venue Terms</h2>
-        <p>Please agree to follow all venue rules.</p>
-        <label>
-            <input type="checkbox" id="agreeTerms" required> I agree to follow all venue rules.
-        </label>
-        <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-        <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
-    </div>
-    
-    <!-- Step 8: Confirmation -->
-    <div class="step d-none" id="step-confirmation">
-        <h2>Confirm Your Submission</h2>
-        <p>Here’s what you’ve entered:</p>
-        <ul>
-            <li><strong>Date:</strong> <span id="confirmDate"></span></li>
-            <li><strong>Bands:</strong> <span id="confirmBands"></span></li>
-            <li><strong>Time:</strong> <span id="confirmTime"></span></li>
-            <li><strong>Cover Charge:</strong> <span id="confirmCover"></span></li>
-            <li><strong>Details:</strong> <span id="confirmDetails"></span></li>
-        </ul>
-        <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
-        <button class="btn btn-success mt-3" onclick="submitForm()">Submit</button>
-    </div>
+    <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
+    <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
+</div>
+
+
+<!-- Step 5: Cover Charge -->
+<div class="step d-none" id="step-cover">
+    <h2>Cover Charge</h2>
+    <p>Our typical cover charge is $8–$15. You can propose a cover charge, or leave it blank for now.</p>
+    <label for="coverCharge" class="form-label">Proposed Cover Charge:</label>
+    <input type="number" id="coverCharge" name="coverCharge" class="form-control" placeholder="Enter cover charge">
+    <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
+    <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
+</div>
+
+<!-- Step 6: Additional Details -->
+<div class="step d-none" id="step-details">
+    <h2>Additional Details</h2>
+    <textarea id="additionalDetails" name="additionalDetails" rows="5" class="form-control" placeholder="Tell us anything else about your event!"></textarea>
+    <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
+    <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
+</div>
+
+<!-- Step 7: Venue Terms -->
+<div class="step d-none" id="step-terms">
+    <h2>Venue Terms</h2>
+    <p>Please agree to follow all venue rules.</p>
+    <label>
+        <input type="checkbox" id="agreeTerms" required> I agree to follow all venue rules.
+    </label>
+    <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
+    <button class="btn btn-primary mt-3" onclick="nextStep()">Next</button>
+</div>
+
+<!-- Step 8: Confirmation -->
+<div class="step d-none" id="step-confirmation">
+    <h2>Confirm Your Submission</h2>
+    <p>Here’s what you’ve entered:</p>
+    <ul>
+        <li><strong>Date:</strong> <span id="confirmDate"></span></li>
+        <li><strong>Bands:</strong> <span id="confirmBands"></span></li>
+        <li><strong>Time:</strong> <span id="confirmTime"></span></li>
+        <li><strong>Cover Charge:</strong> <span id="confirmCover"></span></li>
+        <li><strong>Details:</strong> <span id="confirmDetails"></span></li>
+    </ul>
+    <button class="btn btn-secondary mt-3" onclick="prevStep()">Previous</button>
+    <button class="btn btn-success mt-3" onclick="submitForm()">Submit</button>
+</div>
 </div>
 </div>
 
@@ -271,7 +298,6 @@
             const nextBtn = document.getElementById('step3NextBtn');
             if (bandCount === 0) {
                 nextBtn.disabled = true;
-                bootstrap.Tooltip.getOrCreateInstance(nextBtn).show();
             }
         };        
         // Add elements to wrapper
@@ -373,7 +399,6 @@
                 
                 if (selectedCount > 0) {
                     nextBtn.disabled = false;
-                    bootstrap.Tooltip.getInstance(wrapperEl)?.hide();
                 }
                 
                 return false; // Prevent jQuery UI from resetting the input
@@ -437,20 +462,11 @@
             dateInput.value = formatted;
             document.getElementById('confirmDate').innerText = formatted;
             
-            // Enable all Bootstrap tooltips
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.forEach(el => {
-                new bootstrap.Tooltip(el, {
-                    delay: { show: 2000, hide: 500 } // ← 2s delay before showing, 300ms to hide
-                });
-            });
-            
             
             const addBtn = document.getElementById('addBandBtn');
             const nextBtnWrapper = document.getElementById('step3NextWrapper');
             const nextBtn = document.getElementById('step3NextBtn');
             
-            console.log(nextBtnWrapper);
             // Shake Add Band button on click of disabled Next
             nextBtnWrapper.addEventListener('mouseenter', () => {
                 if (nextBtn.disabled) {
@@ -466,6 +482,54 @@
         
         
     </script>
+    <script>
+        function formatTimeString(hours, minutes) {
+            const date = new Date();
+            date.setHours(hours, minutes);
+            return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        }
+        
+        function updateRelativeTimesFromValue(timeValue) {
+            const [hour, minute] = timeValue.split(':').map(Number);
+            const getRelativeTime = offset => formatTimeString(hour - offset, minute);
+            
+            document.getElementById('doorsTime').innerText = getRelativeTime(1);
+            document.getElementById('soundCheckTime').innerText = getRelativeTime(2);
+            document.getElementById('loadInTime').innerText = getRelativeTime(3);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropdown = document.getElementById('timeDropdownMenu');
+            const displayBtn = document.getElementById('showTimeDropdown');
+            const hiddenInput = document.getElementById('eventTime');
+            
+            // Create 30-min increment options from 3:00 PM to 10:00 PM
+            for (let hour = 15; hour <= 22; hour++) {
+                for (let min of [0, 30]) {
+                    if (hour === 22 && min > 0) continue; // Skip 10:30 PM
+                    const value = `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+                    const label = formatTimeString(hour, min);
+                    const item = document.createElement('li');
+                    item.innerHTML = `<a class="dropdown-item" href="#" data-time="${value}">${label}</a>`;
+                    dropdown.appendChild(item);
+                }
+            }
+            
+            dropdown.addEventListener('click', (e) => {
+                const time = e.target.getAttribute('data-time');
+                if (!time) return;
+                
+                hiddenInput.value = time;
+                displayBtn.innerText = e.target.innerText;
+                updateRelativeTimesFromValue(time);
+            });
+            
+            // Initialize relative times
+            updateRelativeTimesFromValue(hiddenInput.value);
+        });
+    </script>
+    
+    
 </body>
 
 </html>
