@@ -209,7 +209,7 @@ a {
   border-radius: 10px;
 }
 
-.card-body {
+.card-body .newEvent {
   background-color: #f8f9fa;
 }
 

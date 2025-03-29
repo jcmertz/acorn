@@ -94,7 +94,9 @@ app.use(passport.initialize());
 app.use(passport.authenticate('session'));
 
 app.use(function(req, res, next) {
-  res.locals.userRoles = req.user.roles;
+  if(req.user){
+    res.locals.userRoles = req.user.roles;
+  }
   next();
 });
 
