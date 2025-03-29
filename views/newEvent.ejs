@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.14.0/jquery-ui.min.js"></script>
-    <link rel="stylesheet" href="../../../styles/styles.css"/>
+    <link rel="stylesheet" href="../../../styles/styles.css"/> 
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <!-- Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -23,6 +23,29 @@
     <%- include('partials/nav') %> <!-- Include the navigation bar -->  
     <div class="container my-5 d-flex justify-content-center">
         <div id="formContainer" class="d-flex flex-column">
+            
+            <button id="closeButton" class="btn-close position-relative"></button>
+            
+            <!-- Confirmation Modal -->
+            <div class="modal fade" id="closeConfirmationModal" tabindex="-1" aria-labelledby="closeConfirmationModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="closeConfirmationModalLabel">Confirm Close</h5>
+                            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to abandon all progress and close the form?</p>
+                            <p>This action cannot be undone.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <a href="/" class="btn btn-danger">Yes, Close</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Step Progress Bar -->
             <div id="stepLabel" class="text-center text-muted small mb-1">
                 Step 1 of 8
@@ -37,6 +60,7 @@
                 aria-valuemax="100">
             </div>
         </div>
+        
         <!-- Step 1: Introduction -->
         <div class="step" id="step-intro">
             <h2>Welcome to the Event Request Form!</h2>
@@ -720,8 +744,29 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle the close button click event
+            document.getElementById('closeButton').addEventListener('click', function() {
+                if (currentStep > 0) {
+                    // Show confirmation modal if the user is past Step 1
+                    new bootstrap.Modal(document.getElementById('closeConfirmationModal')).show();
+                } else {
+                    // If they're still on Step 1, just redirect to the home page
+                    window.location.href = '/';
+                }
+            });
+            
+            // Listen for the ESC key press
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') { // If ESC key is pressed
+                    // Trigger the close button click event
+                    document.getElementById('closeButton').click();
+                }
+            });        });
+        </script>
+        
+    </body>
     
+    </html>
     
-</body>
-
-</html>
