@@ -69,8 +69,6 @@ module.exports = function(io) {
                 users: users,
                 userName: req.user.username,
                 isLoggedIn: req.isAuthenticated(),
-                userRole: req.user.role,
-                userRoles: req.user.roles || [req.user.role || 'user'],
                 errorMessages: res.locals.errorMessages,
                 successMessages: res.locals.successMessages,
                 pagination: {

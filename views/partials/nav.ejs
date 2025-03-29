@@ -6,7 +6,7 @@
     
     <div class="row mb-4">
         <div class="col d-flex justify-content-start">
-            <a class="btn btn-primary" href="javascript:history.back()"><h4>BACK</h4></a>
+            <a id="backButton" class="btn btn-primary" href="javascript:history.back()"><h4>BACK</h4></a>
         </div>
         <div class="col d-flex justify-content-center">
             <a href="/"><img src="../../../AcornAppLogo.svg" style="height: 100%;" class="mb-3"></a>
@@ -18,48 +18,56 @@
                 </button>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="profileDropdown">
                     <a class="dropdown-item" href="/profile">My Profile</a>
-                    <% if (typeof userRole !== 'undefined' && (userRole === 'admin' || userRole === 'staff')) { %>
+                    <% if (typeof userRoles !== 'undefined' && (userRoles.includes('admin') || userRoles.includes('staff'))) { %>
                         <a class="dropdown-item" href="/bands/manage">Manage Bands</a>
-                        <% if (userRole === 'admin') { %>
+                        <% if (userRoles.includes('admin')) { %>
                             <a class="dropdown-item" href="/admin/users">Manage Users</a>
-                        <% } %>
-                    <% } %>
-                    <a class="dropdown-item" href="/logout">Logout</a>
+                            <% } %>
+                            <% } %>
+                            <a class="dropdown-item" href="/logout">Logout</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <% } %>
-    
-    <% if (!isLoggedIn) { %>
-        <div class="row mb-4">
-            <div class="col d-flex justify-content-left">
-                <a href="/"><img src="../../AcornAppLogo.svg" style="height: 100%;" class="mb-3"></a>
-            </div>
+            <% } %>
             
-            <div class="col d-flex justify-content-end">
-                <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="profileDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Login
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="profileDropdown">
-                        <form action="/login/password" method="post" class="px-4 py-3">
-                            <div class="mb-3">
-                                <label for="dropdownUsername" class="form-label">Username</label>
-                                <input type="text" class="form-control" id="dropdownUsername" name="username" placeholder="Username" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="dropdownPassword" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="dropdownPassword" name="password" placeholder="Password" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Sign in</button>
-                        </form>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="/register">Register</a>
-                        <a class="dropdown-item" href="/login/email">Forgot Password?</a>
+            <% if (!isLoggedIn) { %>
+                <div class="row mb-4">
+                    <div class="col d-flex justify-content-left">
+                        <a href="/"><img src="../../AcornAppLogo.svg" style="height: 100%;" class="mb-3"></a>
                     </div>
+                    
+                    <div class="col d-flex justify-content-end">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="profileDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Login
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="profileDropdown">
+                                <form action="/login/password" method="post" class="px-4 py-3">
+                                    <div class="mb-3">
+                                        <label for="dropdownUsername" class="form-label">Username</label>
+                                        <input type="text" class="form-control" id="dropdownUsername" name="username" placeholder="Username" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="dropdownPassword" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="dropdownPassword" name="password" placeholder="Password" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Sign in</button>
+                                </form>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="/register">Register</a>
+                                <a class="dropdown-item" href="/login/email">Forgot Password?</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <% } %>
+            <% } %>
+            <script>
+                window.addEventListener('DOMContentLoaded', (event) => {
+                    if (window.location.pathname === "/") {
+                        // This will hide the specific portion of the header on the homepage
+                        document.getElementById("backButton").style.display = "none";
+                    }
+                });
+            </script>

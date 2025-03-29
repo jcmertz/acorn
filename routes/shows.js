@@ -13,7 +13,7 @@ module.exports = function(io) {
         const show = await db.Show.findOne({_id:req.params.id}).populate('messages').populate('bands').populate('contact');
         var isAdmin = false;
         if(req.isAuthenticated()){
-            if(req.user.role == 'admin' || req.user.role == 'staff'){
+            if(req.user.roles.includes('admin') || req.user.roles.includes('staff')){
                 isAdmin = true;
             }
         }

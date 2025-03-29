@@ -93,6 +93,10 @@ app.use(function(req, res, next) {
 app.use(passport.initialize());
 app.use(passport.authenticate('session'));
 
+app.use(function(req, res, next) {
+  res.locals.userRoles = req.user.roles;
+  next();
+});
 
 app.use(express.static('public'));
 var authRouter = require('./routes/auth');
@@ -110,8 +114,6 @@ app.use('/', bandRouter.router);
 app.use('/events/', calendarRouter);
 app.use('/admin/', util.checkUserRole(['staff', 'admin']), adminRouter);
 app.use('/shows/', showsRouter);
-
-
 
 io.on('connection', (socket) => {
   console.log('a user connected');

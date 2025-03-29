@@ -15,7 +15,6 @@ router.get('/', async (req, res) => {
   //console.log(req.isAuthenticated());
   var isAdmin = false;
   var userName = "";
-  var userRole = "";
   if(req.isAuthenticated()){
     // Check if user has admin or staff role
     if(req.user.roles && Array.isArray(req.user.roles)) {
@@ -23,13 +22,6 @@ router.get('/', async (req, res) => {
       if(req.user.roles.includes('admin') || req.user.roles.includes('staff')) {
         isAdmin = true;
       }
-      userRole = req.user.roles.join(', '); // Join all roles for display
-    } else if(req.user.role) {
-      // Old schema with single role
-      if(req.user.role == 'admin' || req.user.role == 'staff'){
-        isAdmin = true;
-      }
-      userRole = req.user.role;
     }
     userName = req.user.username;
   }
@@ -37,7 +29,6 @@ router.get('/', async (req, res) => {
     isLoggedIn:req.isAuthenticated(),
     userName:userName,
     isAdmin:isAdmin,
-    userRole:userRole,
     errorMessages:res.locals.errorMessages,
     successMessages:res.locals.successMessages
   });
@@ -55,7 +46,6 @@ router.get('/profile', ensureLoggedIn, async (req, res) => {
     user: user,
     userName: req.user.username,
     isLoggedIn: req.isAuthenticated(),
-    userRole: req.user.role,
     errorMessages:res.locals.errorMessages,
     successMessages:res.locals.successMessages
   });

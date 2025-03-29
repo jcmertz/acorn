@@ -412,7 +412,6 @@ router.get('/bands/manage', util.checkUserRole(['staff', 'admin']), async (req, 
         res.render('manageBands', {
             userName: req.user.username,
             isLoggedIn: req.isAuthenticated(),
-            userRole: req.user.role,
             bands: bands,
             search: search,
             currentPage: page,
